@@ -9,7 +9,7 @@ License
 -------
 This is a service to provide Data Provenance, and Collaborative Sharing of Research Data
 Copyright (c) 2006-2013, Duke University
-All rights reserved.  Mark R. DeLong, Darrin Mann, Darin London
+All rights reserved.  Mark R. DeLong, Darrin Mann, Darin London, David Daniel
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
