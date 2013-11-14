@@ -1,0 +1,29 @@
+<h1>Listing user role descriptions</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @user_role_descriptions.each do |user_role_description| %>
+      <tr>
+        <td><%= user_role_description.name %></td>
+        <td><%= user_role_description.description %></td>
+        <td><%= show_link user_role_description %></td>
+        <td><%= edit_link user_role_description %></td>
+        <td><%= destroy_link user_role_description %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= create_link UserRoleDescription %>

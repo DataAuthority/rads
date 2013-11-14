@@ -1,0 +1,57 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+dm:
+  name: Darrin Mann
+  type: RepositoryUser
+  email: darrin.mann@duke.edu
+  netid: dfm4
+  is_enabled: true
+  is_administrator: false
+
+dl:
+  name: Darin London
+  type: RepositoryUser
+  email: darin.london@duke.edu
+  netid: londo003
+  is_enabled: true
+  is_administrator: false
+
+enabled:
+  name: Enabled User
+  type:
+  email:
+  is_enabled: true
+  is_administrator: false
+
+disabled:
+  name: Disabled User
+  type:
+  email:
+  is_enabled: false
+  is_administrator: false
+
+admin:
+  name: admin
+  type: RepositoryUser
+  email: admin.user@duke.edu
+  netid: admin1234
+  is_enabled: true
+  is_administrator: true
+
+non_admin:
+  name: non admin
+  type: RepositoryUser
+  email: non.admin.user@duke.edu
+  netid: nonadmin1234
+  is_enabled: true
+  is_administrator: false
+
+non_repo_user:
+  name: non repo user
+  is_enabled: true
+  is_administrator: false
+
+non_repo_admin:
+  name: non repo admin
+  is_administrator: true
+  is_enabled: true

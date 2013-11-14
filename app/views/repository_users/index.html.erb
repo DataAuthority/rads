@@ -1,0 +1,24 @@
+<h1>Listing repository users</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @repository_users.each do |repository_user| %>
+      <tr>
+        <td><%= repository_user.name %></td>
+        <td><%= repository_user.email %></td>
+        <%= render partial: 'users/user_administration_panel', locals: {user: repository_user} %>
+      </tr>
+<% end %>
+  </tbody>
+</table>

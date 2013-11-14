@@ -1,0 +1,41 @@
+body.switched_user {
+  background-color: #fec;
+  #authentication {
+    background-color: #fca;
+  }
+}
+
+#authentication {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  padding: 5px;
+
+  p {
+    padding: 0;
+    margin: 0;
+  }
+}
+
+table {
+  border-collapse: collapse;
+  overflow: hidden;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  tr * {
+    border: 0;
+    padding: 3px 5px;
+    margin: 0;
+  }
+  tr:nth-child(even) {
+    background-color: #ddd;
+  }
+  tr:nth-child(odd) {
+    background-color: #fff;
+  }
+  th {
+    background-color: #acf;
+  }
+}

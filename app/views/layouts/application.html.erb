@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rads</title>
+  <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
+  <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+  <%= csrf_meta_tags %>
+</head>
+<%= content_tag 'body', :class => (puppet ? 'switched_user' : nil) do %>
+
+<% if shib_user %>
+<%= render '/layouts/navigation' %>
+<% end %>
+<%= render 'layouts/authentication' %>
+<p id="alert"><%= alert %></p>
+<p id="notice"><%= notice %></p>
+<%= yield %>
+
+<% end %>
+</html>

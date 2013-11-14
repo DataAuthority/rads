@@ -1,0 +1,13 @@
+<h1>Welcome to Rads</h1>
+<p>Basic splash page information will go here<p>
+<div>
+  <%= 
+    form_tag(records_path, method: :get) do
+      label_tag(:md5, 'find a record with an md5') +
+      text_field_tag(:md5) +
+      submit_tag('find record')
+    end 
+  %>
+</div>
+
+

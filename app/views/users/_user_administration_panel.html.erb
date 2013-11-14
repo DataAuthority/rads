@@ -1,0 +1,10 @@
+<td><%= show_link user %></td>
+<td><%= edit_link user %></td>
+<td>
+  <% if can? :destroy, user %>
+  <%= user.is_enabled? ?
+        destroy_link(user, 'Disable') :
+        link_to('Enable', user_path(user, user: {is_enabled: "true"}), :method => :patch, :data => { :confirm => "Are you sure?" }) %>
+  <% end %>
+</td>
+

@@ -1,0 +1,26 @@
+<div id="authentication">
+<% if current_user %>
+  <p>
+    Authenticated as <b><%= shib_user.name %></b>.
+    <%= link_to 'Logout', sessions_destroy_url( target: url_for(params.merge(only_path: false) ) ) %>
+  </p>
+  <% if puppet %>
+    <p>
+      Acting as <b><%= puppet.name %></b>.
+      <%= link_to 'Switch back', switch_back_url(target: url_for(params.merge(only_path: false)))  %>
+    </p>
+  <% else %>
+    <% if can? :switch_to, User %>
+    <div>
+      <%= render 'layouts/switch_user_form' %>
+    </div>
+    <% end %>
+  <% end %>
+<% else %>
+  <% if @redirect_target.nil? %>
+  <%= link_to 'login', Rails.application.config.shibboleth_login_url, target: url_for(params.merge(only_path: false)) %>
+  <% else %>
+  <%= link_to 'login', Rails.application.config.shibboleth_login_url+'?target='+@redirect_target %>
+  <% end %>
+<% end %>
+</div>

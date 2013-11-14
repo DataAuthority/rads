@@ -1,0 +1,5 @@
+<%= render @user %>
+
+<% if can? :index, User %>
+<%= link_to 'Back', users_path %>
+<% end %>

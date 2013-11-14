@@ -1,0 +1,40 @@
+<% if @user.nil? %>
+<h1>Listing All Existing Roles</h1>
+<% else %>
+<h1>Roles for <%= @user.name %></h1>
+<% end %>
+<div>
+<%= form_tag(user_roles_path, method: :get) do %>
+  <%= select_tag(:user_id, options_from_collection_for_select(User.all, :id, :name, @user.nil? ? nil :@user.id)) %>
+  <%= submit_tag('only') %>
+<% end %>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>name</th>
+      <th>role</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @user_roles.each do |user_role| %>
+      <tr>
+        <td><%= destroy_link user_role, '[x]' %><%= link_to('add', new_user_role_path(user_id: user_role.user.id)) %></td>
+        <td><%= user_role.user.name %></td>
+        <td><%= user_role.user_role_description.name %></td>
+        <td><%= show_link user_role %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<% unless @user.nil? %>
+<%= link_to('new role for this user', new_user_role_path(user_id: @user.id)) %>
+<%= link_to('all users', user_roles_path) %>
+<% end %>

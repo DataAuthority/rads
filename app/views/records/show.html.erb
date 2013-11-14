@@ -1,0 +1,32 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>File Name:</strong>
+  <%= @record.content_file_name %>
+</p>
+
+<p>
+  <strong>Created:</strong>
+  <%= @record.created_at.httpdate %>
+</p>
+
+<p>
+  <strong>md5 Hash</strong>
+  <%= @record.content_fingerprint %>
+<p>
+
+<p>
+  <strong>Creator:</strong>
+  <%= @record.creator.name %>
+</p>
+
+<% if @record.is_destroyed? %>
+<p>
+  <strong>Record Deleted:</strong>
+  <%= @record.updated_at.httpdate %>
+</p>
+<% else %>
+<%= download_link(@record) %>
+<%= link_to 'Destroy', @record, method: :delete, data: { confirm: 'Are you sure?' } if can?(:destroy, @record) && !@record.is_destroyed? %>
+<% end %>
+<%= link_to 'Back', records_path %>

@@ -1,0 +1,39 @@
+<h1>Listing records</h1>
+
+<table>
+  <thead>
+    <tr>
+<% if current_user %>
+      <th>File Name</th>
+      <th>Creator</th>
+      <th>Content Available</th>
+<% end %>
+      <th>md5 Hash</th>
+      <th>created</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @records.each do |record| %>
+      <tr>
+<% if current_user %>
+        <td><%= record.content_file_name %></td>
+        <td><%= record.creator.name %></td>
+        <td><%= !record.is_destroyed %></td>
+<% end %>
+        <td><%= record.content_fingerprint %></td>
+        <td><%= record.created_at.httpdate %></td>
+        <td><%= download_link(record) unless current_user && record.is_destroyed? %></td>
+        <td><%= link_to 'Show', record if can? :show, record %></td>
+        <td><%= link_to 'Destroy', record, method: :delete, data: { confirm: 'Are you sure?' } if can?(:destroy, record) && !record.is_destroyed? %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Record', new_record_path if can? :new, Record %>

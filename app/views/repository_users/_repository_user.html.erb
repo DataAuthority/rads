@@ -1,0 +1,14 @@
+<p>
+<%= repository_user.name %>
+<% unless repository_user.email.nil? %>
+ (<%= repository_user.email %>)
+<% end %>
+</p>
+<% if current_user.is_administrator? %>
+<%   if repository_user.is_enabled? %>
+<p><%= destroy_link repository_user, 'Disable' %></p>
+<%   else %>
+<p><%= link_to('Enable', repository_user_path(repository_user, repository_user: { is_enabled: "true" }), method: :patch, data: { confirm: "Are you sure?" }) %></p>
+<%   end %>
+<% end %>
+<%= edit_link repository_user %>

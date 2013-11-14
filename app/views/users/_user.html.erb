@@ -1,0 +1,11 @@
+<p>
+<%= user.name %>
+</p>
+<% if current_user.is_administrator? %>
+<%   if user.is_enabled? %>
+<p><%= destroy_link user, 'Disable' %></p>
+<%   else %>
+<p><%= link_to('Enable', user_path(user, user: { is_enabled: "true" }), method: :patch, data: { confirm: "Are you sure?" }) %></p>
+<%   end %>
+<% end %>
+<%= edit_link user %>
