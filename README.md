@@ -2,5 +2,5 @@ rads
 ====
 
 Repository and Delivery Service
-something to it
-something again
+
+This is a service to provide Data Provenance, and Collaborative Sharing of Research Data
