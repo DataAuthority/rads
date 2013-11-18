@@ -12,11 +12,19 @@ class Ability
       can :read, Record
       can :manage, Record, :creator_id => user.id
       cannot :destroy, User, :id => user.id
+      can :read, Core
+      if user.type == 'RepositoryUser'
+        can [:new, :create], Core
+      end
     else
       can :read, User, :type => nil
       can :read, RepositoryUser
       can :manage, Record, :creator_id => user.id
       can [:edit, :update, :destroy], RepositoryUser, :id => user.id
+      can :read, Core
+      if user.type == 'RepositoryUser'
+        can [:new, :create], Core
+      end
     end
   end
 end

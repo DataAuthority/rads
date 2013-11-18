@@ -1,4 +1,6 @@
 Rads::Application.routes.draw do
+  resources :cores
+
   resources :records, only: [:index, :show, :new, :create, :destroy]
   resources :repository_users
 
