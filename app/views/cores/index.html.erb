@@ -1,0 +1,31 @@
+<h1>Listing cores</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Creator</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @cores.each do |core| %>
+      <tr>
+        <td><%= core.name %></td>
+        <td><%= core.description %></td>
+        <td><%= core.creator_id %></td>
+        <td><%= link_to 'Show', core %></td>
+        <td><%= link_to 'Edit', edit_core_path(core) %></td>
+        <td><%= link_to 'Destroy', core, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Core', new_core_path %>
