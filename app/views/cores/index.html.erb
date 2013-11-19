@@ -7,8 +7,6 @@
       <th>Description</th>
       <th>Creator</th>
       <th></th>
-      <th></th>
-      <th></th>
     </tr>
   </thead>
 
@@ -19,8 +17,6 @@
         <td><%= core.description %></td>
         <td><%= core.creator_id %></td>
         <td><%= link_to 'Show', core %></td>
-        <td><%= link_to 'Edit', edit_core_path(core) %></td>
-        <td><%= link_to 'Destroy', core, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
   </tbody>
