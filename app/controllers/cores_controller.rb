@@ -15,6 +15,7 @@ class CoresController < ApplicationController
 
   def create
     @core.creator_id = current_user.id
+    @core.core_memberships.build( repository_user_id: current_user.id )
     respond_to do |format|
       if @core.save
         format.html { redirect_to @core, notice: 'Core was successfully created.' }

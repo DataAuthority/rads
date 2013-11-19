@@ -1,5 +1,7 @@
 Rads::Application.routes.draw do
-  resources :cores, except: [:edit, :update, :destroy]
+  resources :cores, except: [:edit, :update, :destroy] do
+    resources :core_memberships, except: [:edit, :update]
+  end
 
   resources :records, only: [:index, :show, :new, :create, :destroy]
   resources :repository_users

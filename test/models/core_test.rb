@@ -4,6 +4,7 @@ class CoreTest < ActiveSupport::TestCase
   should belong_to :creator
   should validate_presence_of :name
   should validate_presence_of :creator_id
+  should have_many :core_memberships
 
   setup do
     @core = cores(:one)

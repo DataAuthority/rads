@@ -1,0 +1,25 @@
+<%= form_for [@core, @core_membership] do |f| %>
+  <% if @core_membership.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@core_membership.errors.count, "error") %> prohibited this core_membership from being saved:</h2>
+
+      <ul>
+      <% @core_membership.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :core_id %><br>
+    <%= @core.id %>
+  </div>
+  <div class="field">
+    <%= f.label :repository_user_id %><br>
+    <%= f.number_field :repository_user_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

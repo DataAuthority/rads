@@ -1,0 +1,13 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Core:</strong>
+  <%= @core_membership.core_id %>
+</p>
+
+<p>
+  <strong>Repository User:</strong>
+  <%= @core_membership.repository_user_id %>
+</p>
+
+<%= link_to 'Back', core_core_memberships_path(@core) %>

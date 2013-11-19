@@ -17,7 +17,9 @@ class CoresControllerTest < ActionController::TestCase
 
     should "not create core" do
       assert_no_difference('Core.count') do
-        post :create, @create_params
+        assert_no_difference('CoreMembership.count') do
+          post :create, @create_params
+        end
       end
       assert_redirected_to sessions_new_url(:target => cores_url(@create_params))
     end
@@ -53,12 +55,13 @@ class CoresControllerTest < ActionController::TestCase
       
     should "not create core" do
       assert_no_difference('Core.count') do
-        post :create, @create_params
+        assert_no_difference('CoreMembership.count') do
+          post :create, @create_params
+        end
       end
       assert_equal @puppet.id, @controller.current_user.id
       assert_response 403
     end
-
   end #Non-RepositoryUser
 
   context 'RepositoryUser' do
@@ -89,11 +92,14 @@ class CoresControllerTest < ActionController::TestCase
     should "create a core, and be listed as the creator" do
       assert_difference('Core.count') do
         post :create, @create_params
+        assert_not_nil assigns(:core)
+        assert assigns(:core).valid?, "#{ assigns(:core).errors.messages.inspect }"
       end
       assert_not_nil assigns(:core)
       assert_redirected_to core_path(assigns(:core))
       @t_core = Core.find(assigns(:core).id)
       assert_equal @user.id, @t_core.creator_id
+      assert @t_core.core_memberships.where(repository_user_id: @user.id).exists?, 'creator should have a new core_membership for the core'
     end
   end #RepositoryUser
 end

@@ -1,0 +1,28 @@
+<h1>Listing core_memberships</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Core</th>
+      <th>Repository User</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @core_memberships.each do |core_membership| %>
+      <tr>
+        <td><%= core_membership.core_id %></td>
+        <td><%= core_membership.repository_user_id %></td>
+        <td><%= link_to 'Show', [@core, core_membership] %></td>
+        <td><%= link_to 'Destroy', [@core, core_membership], method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Core membership', new_core_core_membership_path(@core) %>

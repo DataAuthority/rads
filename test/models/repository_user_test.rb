@@ -1,7 +1,8 @@
 require 'test_helper'
 
 class RepositoryUserTest < ActiveSupport::TestCase
-
+  should have_many :core_memberships
+  should have_many(:cores).through(:core_memberships)
   should validate_presence_of :netid
 
   should 'be a User' do

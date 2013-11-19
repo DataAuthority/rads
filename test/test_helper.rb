@@ -69,10 +69,10 @@ class ActiveSupport::TestCase
   end    
 
   # Common controller actions
-  def self.should_not_get(action, path_override = {})
+  def self.should_not_get(action, path_override = {}, action_params = {})
     redirect_path = {controller: :sessions, action: :new}.merge(path_override)
     should "not get #{action}" do
-      get action
+      get action, action_params
       assert_redirected_to redirect_path.merge({:target => @request.original_url})
     end
   end
