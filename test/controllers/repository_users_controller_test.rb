@@ -11,8 +11,8 @@ class RepositoryUsersControllerTest < ActionController::TestCase
   end
 
   context 'Not Authenticated' do
-    should_not_get_index
-    should_not_get_new
+    should_not_get :index
+    should_not_get :new
 
     should "not create user" do
       post :create, @create_params
@@ -45,7 +45,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
       authenticate_existing_user(@user)
     end
 
-    should_not_get_index action: :create
+    should_not_get :index, action: :create
 
     should "not show user" do
       get :show, id: @enabled_user
@@ -87,7 +87,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
       authenticate_new_user(@new_user)
     end
 
-    should_not_get_index action: :create
+    should_not_get :index, action: :create
 
     should "not show user" do
       get :show, id: @enabled_user

@@ -6,9 +6,8 @@ class UsersControllerTest < ActionController::TestCase
   end
 
   context 'Not Authenticated' do
-    should_not_get_index
-
-    should_not_get_new
+    should_not_get :index
+    should_not_get :new
 
     should "not create user" do
       post :create, user: { name: @existing_user.name }
@@ -41,8 +40,8 @@ class UsersControllerTest < ActionController::TestCase
       authenticate_existing_user(@existing_user)
     end
 
-    should_not_get_index action: :create
-    should_not_get_new action: :create
+    should_not_get :index, action: :create
+    should_not_get :new, action: :create
 
     should "not create user" do
       post :create, user: { name: @existing_user.name }
