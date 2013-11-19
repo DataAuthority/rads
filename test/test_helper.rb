@@ -76,4 +76,12 @@ class ActiveSupport::TestCase
       assert_redirected_to redirect_path.merge({:target => @request.original_url})
     end
   end
+
+  def self.should_not_get_new(path_override = {})
+    redirect_path = {controller: :sessions, action: :new}.merge(path_override)
+    should "not get new" do
+      get :new
+      assert_redirected_to redirect_path.merge({:target => @request.original_url})
+    end
+  end
 end

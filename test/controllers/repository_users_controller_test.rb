@@ -12,11 +12,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
 
   context 'Not Authenticated' do
     should_not_get_index
-
-    should "not get new" do
-      get :new
-      assert_redirected_to sessions_new_url(:target => new_repository_user_url)
-    end
+    should_not_get_new
 
     should "not create user" do
       post :create, @create_params

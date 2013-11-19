@@ -8,10 +8,7 @@ class UsersControllerTest < ActionController::TestCase
   context 'Not Authenticated' do
     should_not_get_index
 
-    should "not get new" do
-      get :new
-      assert_redirected_to sessions_new_url(:target => new_user_url)
-    end
+    should_not_get_new
 
     should "not create user" do
       post :create, user: { name: @existing_user.name }
@@ -45,11 +42,7 @@ class UsersControllerTest < ActionController::TestCase
     end
 
     should_not_get_index action: :create
-
-    should "not get new" do
-      get :new
-      assert_redirected_to sessions_create_url(:target => new_user_url)
-    end
+    should_not_get_new action: :create
 
     should "not create user" do
       post :create, user: { name: @existing_user.name }
