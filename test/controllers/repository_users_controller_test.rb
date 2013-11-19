@@ -11,10 +11,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
   end
 
   context 'Not Authenticated' do
-    should "not get index" do
-      get :index
-      assert_redirected_to sessions_new_url(:target => repository_users_url)
-    end
+    should_not_get_index
 
     should "not get new" do
       get :new
@@ -52,10 +49,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
       authenticate_existing_user(@user)
     end
 
-    should "not get index" do
-      get :index
-      assert_redirected_to sessions_create_url(:target => repository_users_url)
-    end
+    should_not_get_index action: :create
 
     should "not show user" do
       get :show, id: @enabled_user
@@ -97,10 +91,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
       authenticate_new_user(@new_user)
     end
 
-    should "not get index" do
-      get :index
-      assert_redirected_to sessions_create_url(:target => repository_users_url)
-    end
+    should_not_get_index action: :create
 
     should "not show user" do
       get :show, id: @enabled_user
