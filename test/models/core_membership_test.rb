@@ -3,6 +3,7 @@ require 'test_helper'
 class CoreMembershipTest < ActiveSupport::TestCase
   should belong_to :repository_user
   should belong_to :core
+  should validate_presence_of :core
   should validate_presence_of :repository_user_id
 
   # Abilities
