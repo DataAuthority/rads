@@ -1,31 +1,20 @@
 class CoresController < ApplicationController
-  before_action :set_core, only: [:show, :edit, :update, :destroy]
+  load_and_authorize_resource
 
-  # GET /cores
-  # GET /cores.json
   def index
-    @cores = Core.all
   end
 
-  # GET /cores/1
-  # GET /cores/1.json
   def show
   end
 
-  # GET /cores/new
   def new
-    @core = Core.new
   end
 
-  # GET /cores/1/edit
   def edit
   end
 
-  # POST /cores
-  # POST /cores.json
   def create
-    @core = Core.new(core_params)
-
+    @core.creator_id = current_user.id
     respond_to do |format|
       if @core.save
         format.html { redirect_to @core, notice: 'Core was successfully created.' }
@@ -37,8 +26,6 @@ class CoresController < ApplicationController
     end
   end
 
-  # PATCH/PUT /cores/1
-  # PATCH/PUT /cores/1.json
   def update
     respond_to do |format|
       if @core.update(core_params)
@@ -51,24 +38,9 @@ class CoresController < ApplicationController
     end
   end
 
-  # DELETE /cores/1
-  # DELETE /cores/1.json
-  def destroy
-    @core.destroy
-    respond_to do |format|
-      format.html { redirect_to cores_url }
-      format.json { head :no_content }
-    end
-  end
-
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_core
-      @core = Core.find(params[:id])
-    end
-
     # Never trust parameters from the scary internet, only allow the white list through.
     def core_params
-      params.require(:core).permit(:name, :description, :creator_id)
+      params.require(:core).permit(:name, :description)
     end
 end
