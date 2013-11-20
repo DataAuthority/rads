@@ -25,11 +25,12 @@ class CoresControllerTest < ActionController::TestCase
     end
   end #Not Authenticated
 
-  context 'Non-RepositoryUser' do
+  context 'CoreUser' do
     setup do
-      @user = users(:admin)
+      @user = users(:non_admin)
+      @other_core = cores(:two)
       authenticate_existing_user(@user, true)
-      @puppet = users(:non_repo_user)
+      @puppet = users(:core_user)
       session[:switch_to_user_id] = @puppet.id
     end
 
@@ -51,15 +52,22 @@ class CoresControllerTest < ActionController::TestCase
       assert_not_nil assigns(:cores)
     end
 
-    should "get show" do
+    should "get show on its own core" do
+      assert_equal @core.id, @puppet.core_id
       get :show, id: @core
       assert_equal @puppet.id, @controller.current_user.id
       assert_response :success
       assert_not_nil assigns(:core)
       assert_equal @core.id, assigns(:core).id
     end
+
+    should "not get show on another core" do
+      assert @other_core.id != @puppet.core_id
+      get :show, id: @other_core
+      assert_response 403
+    end
       
-    should "not create core" do
+    should "not create a core" do
       assert_no_difference('Core.count') do
         assert_no_difference('CoreMembership.count') do
           post :create, @create_params

@@ -19,13 +19,15 @@ class CoreMembershipTest < ActiveSupport::TestCase
   context 'non core member' do
     setup do
       @user = users(:admin)
+      @core = cores(:one)
+      @core_membership = core_memberships(:one)
     end
 
     should 'pass ability profile' do
-      assert !CoreMembership.where(repository_user_id: @user.id).exists?, 'there should be at least one CoreMembership for this user'
-      denied_abilities(@user, cores(:one).core_memberships, [:index] )
-      denied_abilities(@user, core_memberships(:one), [:show, :destroy])
-      denied_abilities(@user, cores(:one).core_memberships.build, [:new, :create])
+      assert !@core.core_memberships.where(repository_user_id: @user.id).exists?, 'there should not be a CoreMembership for this user'
+      denied_abilities(@user, @core.core_memberships, [:index] )
+      denied_abilities(@user, @core_membership, [:show, :destroy])
+      denied_abilities(@user, @core.core_memberships.build, [:new, :create])
     end
   end #non core member
 

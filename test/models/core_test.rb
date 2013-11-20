@@ -5,6 +5,7 @@ class CoreTest < ActiveSupport::TestCase
   should validate_presence_of :name
   should validate_presence_of :creator_id
   should have_many :core_memberships
+  should have_one :core_user
 
   setup do
     @core = cores(:one)
@@ -19,17 +20,21 @@ class CoreTest < ActiveSupport::TestCase
     end
   end #nil user
 
-  context 'Non RepositoryUser' do
+  context 'CoreUser' do
     setup do
-      @user = users(:non_repo_user)
+      @core_user = @core.core_user
+      @other_core = cores(:two)
     end
+
     should 'pass ability profile' do
-      allowed_abilities(@user, Core, [:index] )
-      allowed_abilities(@user, @core, [:show] )
-      denied_abilities(@user, @core, [:edit, :update])
-      denied_abilities(@user, Core.new, [:new, :create])
+      allowed_abilities(@core_user, @core, [:index, :show])
+      denied_abilities(@core_user, @other_core, [:index, :show])
+      Core.all.each do |core|
+        denied_abilities(@core_user, core, [:edit, :update])
+      end
+      denied_abilities(@core_user, Core.new, [:new, :create])
     end
-  end
+  end #CoreUser
 
   context 'any RepositoryUser' do
     should 'pass ability profile' do

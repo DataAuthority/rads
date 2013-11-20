@@ -39,11 +39,11 @@ class CoreMembershipsControllerTest < ActionController::TestCase
     end
   end #Not Authenticated
 
-  context 'Non-RepositoryUser' do
+  context 'CoreUser' do
     setup do
       @user = users(:non_admin)
       authenticate_existing_user(@user, true)
-      @puppet = users(:non_repo_user)
+      @puppet = users(:core_user)
       session[:switch_to_user_id] = @puppet.id
     end
 

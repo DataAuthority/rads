@@ -37,6 +37,20 @@ class RepositoryUserTest < ActiveSupport::TestCase
 
   end #non_admin user
 
+  context 'core_user' do
+    setup do
+      @self = users(:core_user)
+      @other = users(:dm)
+    end
+
+    should 'pass ability profile' do
+      denied_abilities(@self, @other, [:edit, :update, :destroy, :switch_to])
+      allowed_abilities(@self, @other, [:index, :show])
+      denied_abilities(@self, RepositoryUser.new, [:new, :create])
+    end
+
+  end #core_user
+
   context 'admin user' do
     setup do
       @self = users(:admin)

@@ -46,12 +46,14 @@ non_admin:
   is_enabled: true
   is_administrator: false
 
-non_repo_user:
-  name: non repo user
+core_user:
+  name: one_core_user
+  type: CoreUser
+  core: :one
   is_enabled: true
-  is_administrator: false
 
-non_repo_admin:
-  name: non repo admin
-  is_administrator: true
+core_user_two:
+  name: one_core_user_two
+  type: CoreUser
+  core: :two
   is_enabled: true

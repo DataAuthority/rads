@@ -4,4 +4,7 @@ user:
   creator: :non_admin
 
 admin:
-  creator: admin
+  creator: :admin
+
+core_user:
+  creator: :core_user

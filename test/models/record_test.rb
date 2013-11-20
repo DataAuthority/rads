@@ -18,6 +18,9 @@ class RecordTest < ActiveSupport::TestCase
 
     @admin = users(:admin)
     @admin_record = records(:admin)
+
+    @core_user = users(:core_user)
+    @core_user_record = records(:core_user)
   end
 
   teardown do
@@ -25,6 +28,8 @@ class RecordTest < ActiveSupport::TestCase
     @user_record.destroy
     @admin_record.content.destroy
     @admin_record.destroy
+    @core_user_record.content.destroy
+    @core_user_record.destroy
   end
 
   should 'support find_by_md5 method' do
@@ -56,6 +61,15 @@ class RecordTest < ActiveSupport::TestCase
       allowed_abilities(@user, @user.records.build, [:new, :create])
     end
   end #non_admin
+
+  context 'core_user' do
+    should 'pass ability profile' do
+      allowed_abilities(@core_user, Record, [:index])
+      allowed_abilities(@core_user, @core_user_record, [:index, :show, :destroy])
+      denied_abilities(@core_user, @admin_record, [:index, :show, :destroy])
+      allowed_abilities(@core_user, @core_user.records.build, [:new, :create])
+    end
+  end #core_user
 
   context 'admin' do
     should 'pass ability profile' do      
