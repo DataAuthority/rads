@@ -38,40 +38,4 @@ class UserTest < ActiveSupport::TestCase
     assert !@non_admin_user.is_administrator?, "#{ @non_admin_user } should not be an administrator"
   end
 
-  # Ability testing
-  context 'nil user' do
-    should 'pass ability profile' do
-      denied_abilities(nil, User.new, [:new, :create])
-      denied_abilities(nil, User.new, [:index])
-      denied_abilities(nil, users(:non_repo_user), [:index, :show, :edit, :update, :destroy, :switch_to])
-    end
-  end # 'nil user'
-
-  context 'non_admin user' do
-    setup do
-      @user = users(:non_admin)
-    end
-
-    should 'pass ability profile' do
-      denied_abilities(@user, User.new, [:new, :create])
-      denied_abilities(@user, users(:non_repo_user), [:edit, :update, :destroy, :switch_to])
-      allowed_abilities(@user, User.new, [:index])
-      allowed_abilities(@user, users(:non_repo_user), [:index, :show])
-    end
-  end # 'nil user'
-
-  context 'admin user' do
-    setup do
-      @user = users(:non_repo_admin)
-    end
-
-    should 'pass ability profile' do
-      allowed_abilities(@user, User.new, [:new, :create])
-      allowed_abilities(@user, users(:non_repo_user), [:edit, :update, :destroy, :switch_to])
-      allowed_abilities(@user, User, [:index])
-      allowed_abilities(@user, users(:non_repo_user), [:index, :show])
-      denied_abilities(@user, @user, [:destroy])
-    end
-  end
-
 end

@@ -15,7 +15,6 @@ Rads::Application.routes.draw do
   get "sessions/create"
   get "sessions/destroy"
   get "sessions/check"
-  resources :users
   root 'sessions#new'
 
   # The priority is based upon order of creation: first created -> highest priority.

@@ -36,18 +36,6 @@ class CoreTest < ActiveSupport::TestCase
     end
   end #CoreUser
 
-  context 'Non RepositoryUser' do
-    setup do
-      @user = users(:non_repo_user)
-    end
-    should 'pass ability profile' do
-      allowed_abilities(@user, Core, [:index] )
-      allowed_abilities(@user, @core, [:show] )
-      denied_abilities(@user, @core, [:edit, :update])
-      denied_abilities(@user, Core.new, [:new, :create])
-    end
-  end
-
   context 'any RepositoryUser' do
     should 'pass ability profile' do
       RepositoryUser.where(is_enabled: true).each do |user|

@@ -47,13 +47,12 @@ class CoreUserTest < ActiveSupport::TestCase
       @core_user = users(:core_user)
       @other_core_user = users(:core_user_two)
       @repo_user = users(:non_admin)
-      @user = users(:non_repo_user)
     end
 
     should 'pass ability profile' do
       denied_abilities(@core_user, @core_user, [:index, :destroy])
       denied_abilities(@core_user, @other_core_user, [:index, :destroy])
-      [@core_user, @repo_user, @user].each do |user|
+      [@core_user, @repo_user].each do |user|
         denied_abilities(@core_user, user, [:switch_to])
       end
     end
