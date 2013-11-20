@@ -7,3 +7,7 @@ one:
 two:
   core: :one
   repository_user: :dl
+
+three:
+  core: :two
+  repository_user: :admin

@@ -1,4 +1,6 @@
 Rads::Application.routes.draw do
+  resources :core_users
+
   resources :cores, except: [:edit, :update, :destroy] do
     resources :core_memberships, except: [:edit, :update]
   end

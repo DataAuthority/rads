@@ -2,7 +2,7 @@ require 'test_helper'
 
 class UsersControllerTest < ActionController::TestCase
   setup do
-    @existing_user = users('non_repo_user')
+    @existing_user = users('dl')
   end
 
   context 'Not Authenticated' do

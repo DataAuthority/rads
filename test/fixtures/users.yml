@@ -55,3 +55,15 @@ non_repo_admin:
   name: non repo admin
   is_administrator: true
   is_enabled: true
+
+core_user:
+  name: one_core_user
+  type: CoreUser
+  core: :one
+  is_enabled: true
+
+core_user_two:
+  name: one_core_user_two
+  type: CoreUser
+  core: :two
+  is_enabled: true
