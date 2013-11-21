@@ -5,15 +5,12 @@
     <tr>
       <th></th>
       <th></th>
-      <th></th>
     </tr>
   </thead>
 
   <tbody>
     <% @core_users.each do |core_user| %>
       <tr>
-        <td><%= link_to 'Show', core_user %></td>
-        <td><%= link_to 'Edit', edit_core_user_path(core_user) %></td>
         <td><%= link_to 'Destroy', core_user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
@@ -21,5 +18,3 @@
 </table>
 
 <br>
-
-<%= link_to 'New Core user', new_core_user_path %>

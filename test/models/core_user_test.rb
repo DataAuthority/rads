@@ -11,7 +11,7 @@ class CoreUserTest < ActiveSupport::TestCase
     end
 
     should 'pass ability profile' do
-      denied_abilities(nil, @core_user, [:index, :destroy, :switch_to])
+      denied_abilities(nil, @core_user, [:index, :show, :update, :destroy, :switch_to])
     end
   end #nil user
 
@@ -22,7 +22,7 @@ class CoreUserTest < ActiveSupport::TestCase
     end
 
     should 'pass ability profile' do
-      allowed_abilities(@user, @core_user, [:index, :destroy, :switch_to])
+      allowed_abilities(@user, @core_user, [:index, :show, :update, :destroy, :switch_to])
     end
   end #admin user
 
@@ -40,6 +40,10 @@ class CoreUserTest < ActiveSupport::TestCase
     should 'not be able to switch to a core_user if they are not a member of the core of the core_user' do
       denied_abilities(@user_not_in_core, @core_user, [:switch_to])
     end
+
+    should 'pass general ability profile' do
+      denied_abilities(@user, @core_user, [:show, :update, :destroy])
+    end
   end #repository user
 
   context 'core user' do
@@ -50,8 +54,8 @@ class CoreUserTest < ActiveSupport::TestCase
     end
 
     should 'pass ability profile' do
-      denied_abilities(@core_user, @core_user, [:index, :destroy])
-      denied_abilities(@core_user, @other_core_user, [:index, :destroy])
+      denied_abilities(@core_user, @core_user, [:show, :update, :destroy])
+      denied_abilities(@core_user, @other_core_user, [:show, :update, :destroy])
       [@core_user, @repo_user].each do |user|
         denied_abilities(@core_user, user, [:switch_to])
       end

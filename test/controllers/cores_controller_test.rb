@@ -34,12 +34,6 @@ class CoresControllerTest < ActionController::TestCase
       session[:switch_to_user_id] = @puppet.id
     end
 
-    should "show me the methods" do
-      assert false, "instance_variable_get: #{instance_variable_get(:@user).inspect}"
-      assert false, "instance_variable_names: #{instance_variable_names.sort.join ', '}"
-      assert false, "methods: #{methods.sort.join ', '}"
-    end
-
     should "not get :new" do
       get :new
       assert_response 403

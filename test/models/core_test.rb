@@ -11,6 +11,13 @@ class CoreTest < ActiveSupport::TestCase
     @core = cores(:one)
   end
 
+  should 'support is_member? method to find out if a user is a member of the core' do
+    assert_respond_to @core, 'is_member?'
+    assert @core.core_memberships.count > 0, 'there should be core_memberships for the core'
+    assert @core.is_member?(@core.core_memberships.first.repository_user), 'first core_membership repository_user should be a member of the core'
+    assert !@core.is_member?(users(:admin)), 'admin should not be a member of the core'
+  end
+
   # ability testing
   context 'nil user' do
     should 'pass ability profile' do

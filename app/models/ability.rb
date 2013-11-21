@@ -12,7 +12,7 @@ class Ability
         can [:read, :edit, :update, :destroy, :switch_to], RepositoryUser
         can :read, Record
         can :manage, Record, :creator_id => user.id
-        can [:index, :destroy, :switch_to], CoreUser
+        can [:index, :show, :update, :destroy, :switch_to], CoreUser
         cannot :destroy, User, :id => user.id
       else
         can :read, User, :type => nil

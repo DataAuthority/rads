@@ -1,10 +1,9 @@
 class CoreUsersController < ApplicationController
-  before_action :set_core_user, only: [:show, :edit, :update, :destroy]
+  load_and_authorize_resource
 
   # GET /core_users
   # GET /core_users.json
   def index
-    @core_users = CoreUser.all
   end
 
   # GET /core_users/1
@@ -14,7 +13,6 @@ class CoreUsersController < ApplicationController
 
   # GET /core_users/new
   def new
-    @core_user = CoreUser.new
   end
 
   # GET /core_users/1/edit
@@ -24,8 +22,6 @@ class CoreUsersController < ApplicationController
   # POST /core_users
   # POST /core_users.json
   def create
-    @core_user = CoreUser.new(core_user_params)
-
     respond_to do |format|
       if @core_user.save
         format.html { redirect_to @core_user, notice: 'Core user was successfully created.' }
@@ -37,8 +33,6 @@ class CoreUsersController < ApplicationController
     end
   end
 
-  # PATCH/PUT /core_users/1
-  # PATCH/PUT /core_users/1.json
   def update
     respond_to do |format|
       if @core_user.update(core_user_params)
@@ -51,10 +45,9 @@ class CoreUsersController < ApplicationController
     end
   end
 
-  # DELETE /core_users/1
-  # DELETE /core_users/1.json
   def destroy
-    @core_user.destroy
+    @core_user.is_enabled = false
+    @core_user.save
     respond_to do |format|
       format.html { redirect_to core_users_url }
       format.json { head :no_content }
@@ -62,13 +55,10 @@ class CoreUsersController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_core_user
-      @core_user = CoreUser.find(params[:id])
-    end
-
     # Never trust parameters from the scary internet, only allow the white list through.
     def core_user_params
-      params[:core_user]
+      if current_user.is_administrator?
+        params.require(:core_user).permit(:is_enabled)
+      end
     end
 end

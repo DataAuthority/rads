@@ -5,4 +5,8 @@ class Core < ActiveRecord::Base
 
   validates_presence_of :name
   validates_presence_of :creator_id
+
+  def is_member?(repository_user)
+    core_memberships.where(repository_user_id: repository_user.id).exists?
+  end
 end
