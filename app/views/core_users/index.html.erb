@@ -1,5 +1,8 @@
-<h1>Listing core_users</h1>
+<h1>Listing core users</h1>
 
+<% if @core_users.empty? %>
+<p>There are no core users to display.</p>
+<% else %>
 <table>
   <thead>
     <tr>
@@ -11,10 +14,10 @@
   <tbody>
     <% @core_users.each do |core_user| %>
       <tr>
+        <td><%= core_user.name %></td>
         <td><%= link_to 'Destroy', core_user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
-
-<br>
+<% end %>
