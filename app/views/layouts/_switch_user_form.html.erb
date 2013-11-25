@@ -1,7 +1,7 @@
 <%= 
 form_tag(switch_to_path, method: :get) do
   hidden_field_tag(:target, url_for(params.merge(only_path: false))) +
-  select_tag(:id, options_from_collection_for_select(User.where.not(id: current_user.id), :id, :name, @user.nil? ? nil :@user.id)) +
+  select_tag(:id, options_from_collection_for_select(switch_to_users, :id, :name, @user.nil? ? nil :@user.id)) +
   submit_tag('switch user')
-end 
+end
 %>
