@@ -130,6 +130,10 @@ class CoreMembershipsControllerTest < ActionController::TestCase
       assert_response :success
       assert_not_nil assigns(:core_membership)
       assert_equal @core.id, assigns(:core_membership).core_id
+      assert @core.core_memberships.count > 0, 'there should be at least one core_membership'
+      assert_not_nil assigns(:non_members)
+      assert assigns(:non_members).include?(users(:admin)), 'admin should be in the list of non_members'
+      assert !assigns(:non_members).include?(users(:non_admin)), 'non_admin should not be in the list of non_members'
     end
 
     should "show core_membership" do

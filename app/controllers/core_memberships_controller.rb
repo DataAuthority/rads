@@ -9,9 +9,11 @@ class CoreMembershipsController < ApplicationController
   end
 
   def new
+    @non_members = RepositoryUser.all.reject {|u| @core.is_member? u}
   end
 
   def create
+    @non_members = RepositoryUser.all.reject {|u| @core.is_member? u}
     respond_to do |format|
       if @core_membership.save
         format.html { redirect_to [@core, @core_membership], notice: 'Core membership was successfully created.' }

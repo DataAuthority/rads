@@ -1,32 +1,5 @@
 <h1>Listing core memberships</h1>
 
-<% if @core_memberships.empty? %>
-<p>There are no core memberships to display.</p>
-<% else %>
-<table>
-  <thead>
-    <tr>
-      <th>Core</th>
-      <th>Repository User</th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @core_memberships.each do |core_membership| %>
-      <tr>
-        <td><%= core_membership.core_id %></td>
-        <td><%= core_membership.repository_user_id %></td>
-        <td><%= link_to 'Show', [@core, core_membership] %></td>
-        <td><%= link_to 'Destroy', [@core, core_membership], method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<br>
-<% end %>
+<%= render partial: 'core_memberships', locals: { core_memberships: @core_memberships } %>
 
 <%= link_to 'New Core membership', new_core_core_membership_path(@core) %>

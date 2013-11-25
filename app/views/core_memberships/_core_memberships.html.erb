@@ -1,0 +1,28 @@
+<% if core_memberships.empty? %>
+<p>There are no core memberships to display.</p>
+<% else %>
+<table>
+  <thead>
+    <tr>
+      <th>Core</th>
+      <th>Repository User</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% core_memberships.each do |core_membership| %>
+      <tr>
+        <td><%= core_membership.core %></td>
+        <td><%= core_membership.repository_user %></td>
+        <td><%= link_to 'Show', [core_membership.core, core_membership] if can? :show, core_membership %></td>
+        <td><%= link_to 'Destroy', [core_membership.core, core_membership], method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, core_membership %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+<% end %>

@@ -10,6 +10,7 @@
       <th>Description</th>
       <th>Creator</th>
       <th></th>
+      <th></th>
     </tr>
   </thead>
 
@@ -19,6 +20,7 @@
         <td><%= core.name %></td>
         <td><%= core.description %></td>
         <td><%= core.creator %></td>
+        <td><%= link_to 'Manage Memberships', core_core_memberships_path(core) %></td>
         <td><%= link_to 'Show', core %></td>
       </tr>
     <% end %>

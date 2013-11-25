@@ -1,3 +1,6 @@
+<% if @non_members.empty? %>
+<p>There are no potential members to add to this core</p>
+<% else %>
 <%= form_for [@core, @core_membership] do |f| %>
   <% if @core_membership.errors.any? %>
     <div id="error_explanation">
@@ -12,14 +15,15 @@
   <% end %>
 
   <div class="field">
-    <%= f.label :core_id %><br>
-    <%= @core.id %>
+    <%= f.label :core %><br>
+    <%= @core %>
   </div>
   <div class="field">
     <%= f.label :repository_user_id %><br>
-    <%= f.number_field :repository_user_id %>
+    <%= f.collection_select(:repository_user_id, @non_members, :id, :to_s) %>
   </div>
   <div class="actions">
     <%= f.submit %>
   </div>
+<% end %>
 <% end %>
