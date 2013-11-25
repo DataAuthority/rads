@@ -1,5 +1,6 @@
 <div id="navigation">
   <%= link_to 'home', root_url %>
+  <%= link_to 'cores', cores_url if can? :index, Core %>
   <%= link_to 'core users', core_users_url if can? :index, CoreUser %>
   <%= link_to 'users', repository_users_url if can? :index, RepositoryUser %>
   <%= link_to 'records', records_url if can? :index, Record %>

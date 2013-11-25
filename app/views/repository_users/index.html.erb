@@ -5,6 +5,7 @@
     <tr>
       <th>Name</th>
       <th>Email</th>
+      <th>Is Administrator?</th>
       <th></th>
       <th></th>
       <th></th>
@@ -17,6 +18,7 @@
       <tr>
         <td><%= repository_user.name %></td>
         <td><%= repository_user.email %></td>
+        <td><%= repository_user.is_administrator? %></td>
         <%= render partial: 'user_administration_panel', locals: {user: repository_user} %>
       </tr>
 <% end %>
