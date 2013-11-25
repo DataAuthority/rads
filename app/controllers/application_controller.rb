@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
 
-  helper_method :current_user, :shib_user, :puppet
+  helper_method :current_user, :shib_user, :puppet, :switch_to_users
 
   before_action :check_session
   before_action :redirect_disabled_users
@@ -20,6 +20,11 @@ class ApplicationController < ActionController::Base
 
   def current_user
     puppet || shib_user
+  end
+
+  def switch_to_users
+    switch_to_users = RepositoryUser.accessible_by(current_ability, :switch_to).where.not(id: current_user.id)
+    switch_to_users = switch_to_users + CoreUser.accessible_by(current_ability, :switch_to)
   end
 
 private

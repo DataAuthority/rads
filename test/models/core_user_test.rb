@@ -2,7 +2,7 @@ require 'test_helper'
 
 class CoreUserTest < ActiveSupport::TestCase
    should belong_to :core
-   should validate_presence_of :core_id
+   should validate_presence_of :core
 
   # ability test
   context 'nil user' do

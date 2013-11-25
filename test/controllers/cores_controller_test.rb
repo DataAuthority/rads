@@ -99,9 +99,11 @@ class CoresControllerTest < ActionController::TestCase
 
     should "create a core, and be listed as the creator" do
       assert_difference('Core.count') do
-        post :create, @create_params
-        assert_not_nil assigns(:core)
-        assert assigns(:core).valid?, "#{ assigns(:core).errors.messages.inspect }"
+        assert_difference('CoreUser.count') do
+          post :create, @create_params
+          assert_not_nil assigns(:core)
+          assert assigns(:core).valid?, "#{ assigns(:core).errors.messages.inspect }"
+        end
       end
       assert_not_nil assigns(:core)
       assert_redirected_to core_path(assigns(:core))
