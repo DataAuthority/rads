@@ -1,5 +1,8 @@
-<h1>Listing core_memberships</h1>
+<h1>Listing core memberships</h1>
 
+<% if @core_memberships.empty? %>
+<p>There are no core memberships to display.</p>
+<% else %>
 <table>
   <thead>
     <tr>
@@ -24,5 +27,6 @@
 </table>
 
 <br>
+<% end %>
 
 <%= link_to 'New Core membership', new_core_core_membership_path(@core) %>

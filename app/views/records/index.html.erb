@@ -1,5 +1,8 @@
 <h1>Listing records</h1>
 
+<% if @records.empty? %>
+<p>There are no records to display.</p>
+<% else %>
 <table>
   <thead>
     <tr>
@@ -35,5 +38,6 @@
 </table>
 
 <br>
+<% end %>
 
 <%= link_to 'New Record', new_record_path if can? :new, Record %>

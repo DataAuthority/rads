@@ -1,5 +1,8 @@
 <h1>Listing repository users</h1>
 
+<% if @repository_users.empty? %>
+<p>There are no repository users to display.</p>
+<% else %>
 <table>
   <thead>
     <tr>
@@ -23,3 +26,4 @@
 <% end %>
   </tbody>
 </table>
+<% end %>
