@@ -1,5 +1,8 @@
 <h1>Listing cores</h1>
 
+<% if @cores.empty? %>
+<p>There are no cores to display.</p>
+<% else %>
 <table>
   <thead>
     <tr>
@@ -23,5 +26,6 @@
 </table>
 
 <br>
+<% end %>
 
 <%= link_to 'New Core', new_core_path %>
