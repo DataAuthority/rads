@@ -36,7 +36,7 @@ class CoreUsersController < ApplicationController
   def update
     respond_to do |format|
       if @core_user.update(core_user_params)
-        format.html { redirect_to @core_user, notice: 'Core user was successfully updated.' }
+        format.html { redirect_to core_users_path, notice: 'Core user was successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
