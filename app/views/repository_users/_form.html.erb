@@ -22,7 +22,7 @@
     <%= f.text_field :email %>
   </div>
 <% end %>
-<% if current_user && current_user.is_administrator? %>
+<% if current_user && current_user.is_administrator? && !(current_user.id == @repository_user.id) %>
   <h2><%= @repository_user.name %></h2>
   <div class="field">
     <%= f.label 'Enabled?' %>
