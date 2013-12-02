@@ -23,7 +23,7 @@ class CoreTest < ActiveSupport::TestCase
     should 'pass ability profile' do
       denied_abilities(nil, Core, [:index] )
       denied_abilities(nil, @core, [:show, :edit, :update])
-      denied_abilities(nil, Record.new, [:new, :create])
+      denied_abilities(nil, Core.new, [:new, :create])
     end
   end #nil user
 
