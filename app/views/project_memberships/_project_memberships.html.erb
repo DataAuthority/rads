@@ -1,0 +1,28 @@
+<% if project_memberships.empty? %>
+<p>There are no project memberships to display.</p>
+<% else %>
+<table>
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>User</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% project_memberships.each do |project_membership| %>
+      <tr>
+        <td><%= project_membership.project %></td>
+        <td><%= project_membership.user %></td>
+        <td><%= link_to 'Show', [project_membership.project, project_membership] if can? :show, project_membership %></td>
+        <td><%= link_to 'Destroy', [project_membership.project, project_membership], method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, project_membership %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+<% end %>

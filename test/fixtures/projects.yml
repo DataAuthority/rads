@@ -5,4 +5,9 @@ one:
   description: This is the first project
   creator: :non_admin
 
+two:
+  name: Project2
+  description: This is the second
+  creator: :admin
+
 

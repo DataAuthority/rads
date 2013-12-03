@@ -4,9 +4,17 @@ class ProjectTest < ActiveSupport::TestCase
   should belong_to :creator
   should validate_presence_of :name
   should validate_presence_of :creator_id
+  should have_many :project_memberships
 
   setup do
     @project = projects(:one)
+  end
+
+  should 'support is_member? method to find out if a user is a member of the project' do
+    assert_respond_to @project, 'is_member?'
+    assert @project.project_memberships.count > 0, 'there should be project_memberships for the project'
+    assert @project.is_member?(@project.project_memberships.first.user), 'first project_membership user should be a member of the project'
+    assert !@project.is_member?(users(:admin)), 'admin should not be a member of the project'
   end
 
   # ability testing

@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  project: :one
+  user: :non_admin
+
+two:
+  project: :one
+  user: :dl
+
+three:
+  project: :two
+  user: :admin
+
+four:
+  project: :two
+  user: :core_user

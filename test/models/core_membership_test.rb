@@ -34,17 +34,24 @@ class CoreMembershipTest < ActiveSupport::TestCase
   context 'core member' do
     setup do
       @user = users(:non_admin)
+      @core = cores(:one)
       @self_membership = core_memberships(:one)
       @other_membership = core_memberships(:two)
     end
 
     should 'pass ability profile' do
-      assert CoreMembership.where(repository_user_id: @user.id).exists?, 'there should be at least one CoreMembership for this user'
-      allowed_abilities(@user, CoreMembership, [:index] )
+      assert @core.core_memberships.where(repository_user_id: @user.id).exists?, 'there should be at least one CoreMembership for this user in the core'
+      CoreMembership.all.each do |cm|
+        if cm.core.is_member? @user
+          allowed_abilities(@user, cm, [:index] )
+        else
+          denied_abilities(@user, cm, [:index] )
+        end
+      end
       allowed_abilities(@user, @other_membership, [:show, :destroy])
       allowed_abilities(@user, @self_membership, [:show])
-      allowed_abilities(@user, cores(:one).core_memberships.build, [:new, :create])
-      denied_abilities(@user, core_memberships(:one), [:destroy])
+      allowed_abilities(@user, @core.core_memberships.build, [:new, :create])
+      denied_abilities(@user, @self_membership, [:destroy])
     end
   end #core member
 

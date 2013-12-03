@@ -1,7 +1,9 @@
 require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
-  should have_many(:records)
+  should have_many :records
+  should have_many :project_memberships
+  should have_many(:projects).through(:project_memberships)
 
   should 'have a name' do
     assert_respond_to User.new, 'name'

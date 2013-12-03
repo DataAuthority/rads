@@ -1,0 +1,12 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Project:</strong>
+  <%= @project_membership.project %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @project_membership.user %>
+</p>
+<%= link_to 'Back', project_project_memberships_path(@project) %>

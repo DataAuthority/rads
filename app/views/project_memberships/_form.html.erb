@@ -1,0 +1,29 @@
+<% if @non_members.empty? %>
+<p>There are no potential members to add to this project</p>
+<% else %>
+<%= form_for [@project, @project_membership] do |f| %>
+  <% if @project_membership.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@project_membership.errors.count, "error") %> prohibited this project_membership from being saved:</h2>
+
+      <ul>
+      <% @project_membership.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :project %><br>
+    <%= @project %>
+  </div>
+  <div class="field">
+    <%= f.label :user_id %><br>
+    <%= f.collection_select(:user_id, @non_members, :id, :to_s) %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+<% end %>
