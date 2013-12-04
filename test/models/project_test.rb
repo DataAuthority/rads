@@ -5,6 +5,7 @@ class ProjectTest < ActiveSupport::TestCase
   should validate_presence_of :name
   should validate_presence_of :creator_id
   should have_many :project_memberships
+  should have_one :project_user
 
   setup do
     @project = projects(:one)
@@ -42,6 +43,23 @@ class ProjectTest < ActiveSupport::TestCase
       end
     end
   end #CoreUser
+
+  context 'ProjectUser' do
+    should 'pass ability profile' do
+      ProjectUser.all.each do |project_user|
+        if project_user.is_enabled?
+          allowed_abilities(project_user, Project, [:index] )
+          allowed_abilities(project_user, @project, [:show] )
+          denied_abilities(project_user, @project, [:edit, :update])
+          denied_abilities(project_user, Project.new, [:new, :create])
+        else
+          denied_abilities(project_user, Project, [:index] )
+          denied_abilities(project_user, @project, [:show, :edit, :update])
+          denied_abilities(project_user, Project.new, [:new, :create])
+        end
+      end
+    end
+  end #ProjectUser
 
   context 'any RepositoryUser' do
     should 'pass ability profile' do

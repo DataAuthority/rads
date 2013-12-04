@@ -12,9 +12,8 @@ class Ability
       can :read, ProjectMembership, :project_id => user.projects.collect{|m| m.id}
       if user.is_administrator?
         can :manage, User, :type => nil
-        can [:read, :edit, :update, :destroy, :switch_to], RepositoryUser
+        can [:read, :edit, :update, :destroy, :switch_to], [RepositoryUser, CoreUser, ProjectUser]
         can :read, Record
-        can [:index, :show, :update, :destroy, :switch_to], CoreUser
         cannot :destroy, User, :id => user.id
       else
         can :read, User, :type => nil
@@ -26,6 +25,7 @@ class Ability
         can :read, Core
         can [:new, :create], [Core, Project]
         can :switch_to, CoreUser, :core_id => user.cores.collect{|m| m.id}
+        can :switch_to, ProjectUser, :project_id => user.projects.collect{|m| m.id}
         can :manage, CoreMembership, :core_id => user.cores.collect{|m| m.id}
         can [:new, :create, :destroy], ProjectMembership, :project_id => user.projects.collect{|m| m.id}
         cannot :destroy, CoreMembership, :repository_user_id => user.id

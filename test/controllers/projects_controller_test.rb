@@ -87,14 +87,17 @@ class ProjectsControllerTest < ActionController::TestCase
 
     should "create a project, and be listed as the creator" do
       assert_difference('Project.count') do
-        post :create, @create_params
-        assert_not_nil assigns(:project)
-        assert assigns(:project).valid?, "#{ assigns(:project).errors.messages.inspect }"
+        assert_difference('ProjectUser.count') do
+          post :create, @create_params
+          assert_not_nil assigns(:project)
+          assert assigns(:project).valid?, "#{ assigns(:project).errors.messages.inspect }"
+        end
       end
       assert_not_nil assigns(:project)
       assert_redirected_to project_path(assigns(:project))
       @t_project = Project.find(assigns(:project).id)
       assert_equal @user.id, @t_project.creator_id
+      assert @t_project.project_memberships.where(user_id: @user.id).exists?, 'creator should have a new project_membership for the project'
     end
   end #RepositoryUser
 end

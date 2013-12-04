@@ -15,6 +15,8 @@ class ProjectsController < ApplicationController
 
   def create
     @project.creator_id = current_user.id
+    @project.project_memberships.build( user_id: current_user.id )
+    @project.build_project_user(name: "Project #{ @project.name } User", is_enabled: true)
     respond_to do |format|
       if @project.save
         format.html { redirect_to @project, notice: 'Project was successfully created.' }

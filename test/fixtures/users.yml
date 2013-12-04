@@ -57,3 +57,15 @@ core_user_two:
   type: CoreUser
   core: :two
   is_enabled: true
+
+project_user:
+  name: one_project_user
+  type: ProjectUser
+  project: :one
+  is_enabled: true
+
+project_user_two:
+  name: one_project_user_two
+  type: ProjectUser
+  project: :two
+  is_enabled: true

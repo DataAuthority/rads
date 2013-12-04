@@ -15,10 +15,12 @@
     <% @core_users.each do |core_user| %>
       <tr>
         <td><%= core_user.name %></td>
-<%   if core_user.is_enabled? %>
+<%   if can? :update, core_user %>
+<%     if core_user.is_enabled? %>
         <td><%= link_to 'Disable', core_user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-<%   else %>
+<%     else %>
         <td><%= link_to 'Enable', core_user_path(core_user, core_user: {is_enabled: true}), method: :patch, data: { confirm: 'Are you sure?' } %></td>
+<%     end %>
 <%   end %>
       </tr>
     <% end %>

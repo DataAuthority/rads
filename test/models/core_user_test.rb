@@ -42,7 +42,8 @@ class CoreUserTest < ActiveSupport::TestCase
     end
 
     should 'pass general ability profile' do
-      denied_abilities(@user, @core_user, [:show, :update, :destroy])
+      denied_abilities(@user_in_core, @core_user, [:index, :show, :update, :destroy])
+      denied_abilities(@user_not_in_core, @core_user, [:index, :show, :update, :destroy])
     end
   end #repository user
 

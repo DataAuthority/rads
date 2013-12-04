@@ -1,0 +1,29 @@
+<h1>Listing project users</h1>
+
+<% if @project_users.empty? %>
+<p>There are no project users to display.</p>
+<% else %>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @project_users.each do |project_user| %>
+      <tr>
+        <td><%= project_user.name %></td>
+<%   if can? :update, project_user %>
+<%     if project_user.is_enabled? %>
+        <td><%= link_to 'Disable', project_user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+<%     else %>
+        <td><%= link_to 'Enable', project_user_path(project_user, project_user: {is_enabled: true}), method: :patch, data: { confirm: 'Are you sure?' } %></td>
+<%     end %>
+<%   end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<% end %>
