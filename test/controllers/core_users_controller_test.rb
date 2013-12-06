@@ -41,11 +41,9 @@ class CoreUsersControllerTest < ActionController::TestCase
       session[:switch_to_user_id] = @core_user.id
     end
 
-    should 'get index with empty core_users' do
+    should 'not get index' do
       get :index
-      assert_response :success
-      assert_not_nil assigns(:core_users)
-      assert assigns(:core_users).empty?, 'core_users should be empty'
+      assert_response 403
     end
 
     should 'not update CoreUser' do
@@ -71,17 +69,51 @@ class CoreUsersControllerTest < ActionController::TestCase
     end
   end #CoreUser
 
+  context 'ProjectUser' do
+    setup do
+      @user = users(:non_admin)
+      authenticate_existing_user(@user, true)
+      @puppet = users(:project_user)
+      session[:switch_to_user_id] = @puppet.id
+    end
+
+    should 'not get index' do
+      get :index
+      assert_response 403
+    end
+
+    should 'not update CoreUser' do
+      @other_core_user.is_enabled = false
+      @other_core_user.save
+      assert !@other_core_user.is_enabled?, 'core_user should not be enabled'
+      patch :update, id: @other_core_user, core_user: {is_enabled: true}
+      assert_response 403
+      t_u = CoreUser.find(@other_core_user.id)
+      assert !t_u.is_enabled?, 'core_user should still not be enabled'
+    end
+
+    should 'not destroy any CoreUser' do
+      CoreUser.all.each do |cu|
+        assert cu.is_enabled?, "#{ cu.name } should be enabled"
+        assert_no_difference('CoreUser.count') do
+          delete :destroy, id: cu
+          assert_response 403
+        end
+        t_u = CoreUser.find(cu.id)
+        assert t_u.is_enabled?, "#{ t_u.name } should still be enabled"
+      end
+    end
+  end #ProjectUser
+
   context 'NonAdmin' do
     setup do
       @user = users(:non_admin)
       authenticate_existing_user(@user, true)
     end
 
-    should 'get index with empty core_users' do
+    should 'not get index' do
       get :index
-      assert_response :success
-      assert_not_nil assigns(:core_users)
-      assert assigns(:core_users).empty?, 'there should be no core_users'
+      assert_response 403
     end
 
     should 'not update CoreUser' do

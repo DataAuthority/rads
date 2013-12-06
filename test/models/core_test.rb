@@ -45,13 +45,28 @@ class CoreTest < ActiveSupport::TestCase
 
   context 'any RepositoryUser' do
     should 'pass ability profile' do
-      RepositoryUser.where(is_enabled: true).each do |user|
-        allowed_abilities(user, Core, [:index] )
-        allowed_abilities(user, @core, [:show] )
-        allowed_abilities(user, Core.new, [:new, :create] )
-        denied_abilities(user, @core, [:edit, :update])
+      RepositoryUser.all.each do |user|
+        if user.is_enabled?
+          allowed_abilities(user, Core, [:index] )
+          allowed_abilities(user, @core, [:show] )
+          allowed_abilities(user, Core.new, [:new, :create] )
+          denied_abilities(user, @core, [:edit, :update])
+        else
+          denied_abilities(user, Core, [:index] )
+          denied_abilities(user, @core, [:show, :edit, :update])
+          denied_abilities(user, Core.new, [:new, :create])
+        end
       end
     end
-  end #admin user
+  end #RepositoryUser
 
+  context 'ProjectUser' do
+    should 'pass ability profile' do
+      ProjectUser.all.each do |user|
+        denied_abilities(user, Core, [:index] )
+        denied_abilities(user, @core, [:show, :edit, :update])
+        denied_abilities(user, Core.new, [:new, :create])
+      end
+    end
+  end #ProjectUser
 end

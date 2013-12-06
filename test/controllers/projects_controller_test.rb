@@ -58,6 +58,52 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_equal @puppet.id, @controller.current_user.id
       assert_response 403
     end
+  end #CoreUser
+
+  context 'ProjectUser' do
+    setup do
+      @user = users(:non_admin)
+      authenticate_existing_user(@user, true)
+      @puppet = users(:project_user)
+      session[:switch_to_user_id] = @puppet.id
+      @other_project = projects(:two)
+    end
+
+    should "not get :new" do
+      get :new
+      assert_response 403
+    end
+
+    should "get index" do
+      get :index
+      assert_equal @puppet.id, @controller.current_user.id
+      assert_response :success
+      assert_not_nil assigns(:projects)
+    end
+
+    should "get show on its own project" do
+      get :show, id: @project
+      assert_equal @puppet.id, @controller.current_user.id
+      assert_response :success
+      assert_not_nil assigns(:project)
+      assert_equal @project.id, assigns(:project).id
+    end
+
+    should "get show on other project" do
+      get :show, id: @other_project
+      assert_equal @puppet.id, @controller.current_user.id
+      assert_response :success
+      assert_not_nil assigns(:project)
+      assert_equal @other_project.id, assigns(:project).id
+    end
+
+    should "not create a project" do
+      assert_no_difference('Project.count') do
+        post :create, @create_params
+      end
+      assert_equal @puppet.id, @controller.current_user.id
+      assert_response 403
+    end
   end #ProjectUser
 
   context 'RepositoryUser' do

@@ -129,6 +129,83 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
     end
   end #CoreUser
 
+  context 'ProjectUser' do
+    setup do
+      @user = users(:non_admin)
+      authenticate_existing_user(@user, true)
+      @puppet = users(:project_user)
+      session[:switch_to_user_id] = @puppet.id
+      @other_project = projects(:two)
+    end
+
+    should "get :index to other project with empty project_memberships" do
+      get :index, project_id: @other_project
+      assert_response :success
+      assert assigns(:project_memberships).empty?, 'project_memberships should be empty'
+    end
+
+    should "get :index to its own project" do
+      get :index, project_id: @puppet.project_id
+      assert_response :success
+    end
+
+    should "not get :new for other project" do
+      get :new, project_id: @other_project
+      assert_response 403
+    end
+
+    should "not get :new for its own project" do
+      get :new, project_id: @puppet.project_id
+      assert_response 403
+    end
+
+    should "not show project_membership for other project" do
+      get :show, project_id: @other_project, id: @other_project.project_memberships.first
+      assert_response 403
+    end
+
+    should "not show project_membership for its own project" do
+      get :show, project_id: @puppet.project_id, id: @puppet.project.project_memberships.first
+      assert_response 403
+    end
+
+    should "not create project_membership for other project" do
+      assert !@other_project.project_memberships.where(user_id: users(:non_admin).id).exists?, 'non_admin should not have a membership in other project'
+      assert_no_difference('ProjectMembership.count') do
+        post :create, project_id: @other_project, project_membership: { user_id: users(:non_admin).id }
+      end
+      assert_response 403
+      assert !@other_project.project_memberships.where(user_id: users(:non_admin).id).exists?, 'non_admin should not have a membership in other_project'
+    end
+
+    should "not create project_membership for its own project" do
+      assert !@puppet.project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should not have a membership in puppet.project'
+      assert_no_difference('ProjectMembership.count') do
+        post :create, project_id: @puppet.project_id, project_membership: { user_id: users(:admin).id }
+      end
+      assert_response 403
+      assert !@puppet.project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should not have a membership in puppet.project'
+    end
+
+    should "not destroy project_membership for other project" do
+      assert @other_project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should have a membership in other_project'
+      assert_no_difference('ProjectMembership.count') do
+        delete :destroy, project_id: @other_project, id: @other_project.project_memberships.where(user_id: users(:admin).id).first.id
+      end
+      assert_response 403
+      assert @other_project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should have a membership in other_project'
+    end
+
+    should "not destroy project_membership for its own project" do
+      assert @puppet.project.project_memberships.where(user_id: users(:non_admin).id).exists?, 'non_admin should have a membership in puppet.project'
+      assert_no_difference('ProjectMembership.count') do
+        delete :destroy, project_id: @puppet.project_id, id: @puppet.project.project_memberships.where(user_id: users(:non_admin).id).first.id
+      end
+      assert_response 403
+      assert @puppet.project.project_memberships.where(user_id: users(:non_admin).id).exists?, 'non_admin should have a membership in puppet.project'
+    end
+  end #ProjectUser
+
   context 'Repositoryuser Non Project Member' do
     setup do
       @user = users(:admin)

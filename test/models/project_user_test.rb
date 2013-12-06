@@ -47,19 +47,33 @@ class ProjectUserTest < ActiveSupport::TestCase
     end
   end #repository user
 
-  context 'project user' do
+  context 'ProjectUser' do
     setup do
       @project_user = users(:project_user)
       @other_project_user = users(:project_user_two)
-      @repo_user = users(:non_admin)
     end
 
     should 'pass ability profile' do
       denied_abilities(@project_user, @project_user, [:show, :update, :destroy])
       denied_abilities(@project_user, @other_project_user, [:show, :update, :destroy])
-      [@project_user, @repo_user].each do |user|
+      User.all.each do |user|
         denied_abilities(@project_user, user, [:switch_to])
       end
     end
-  end #project user
+  end #ProjectUser
+
+  context 'CoreUser' do
+    setup do
+      @core_user = users(:core_user)
+      @other_core_user = users(:core_user_two)
+    end
+
+    should 'pass ability profile' do
+      denied_abilities(@core_user, @core_user, [:show, :update, :destroy])
+      denied_abilities(@core_user, @other_core_user, [:show, :update, :destroy])
+      User.all.each do |user|
+        denied_abilities(@core_user, user, [:switch_to])
+      end
+    end
+  end #CoreUser
 end

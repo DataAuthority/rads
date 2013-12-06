@@ -55,4 +55,31 @@ class ProjectMembershipTest < ActiveSupport::TestCase
     end
   end #project member
 
+  context 'ProjectUser' do
+    setup do
+      @user = users(:project_user)
+    end
+
+    should 'pass ability profile' do
+      Project.all.each do |project|
+        denied_abilities(@user, project.project_memberships, [:index] )
+        denied_abilities(@user, project.project_memberships.build, [:new, :create])
+      end
+      denied_abilities(@user, @project_membership, [:show, :destroy])
+    end
+  end #ProjectUser
+
+  context 'CoreUser' do
+    setup do
+      @user = users(:core_user)
+    end
+
+    should 'pass ability profile' do
+      Core.all.each do |core|
+        denied_abilities(@user, core.core_memberships, [:index] )
+        denied_abilities(@user, core.core_memberships.build, [:new, :create])
+      end
+      denied_abilities(@user, @core_membership, [:show, :destroy])
+    end
+  end #CoreUser
 end

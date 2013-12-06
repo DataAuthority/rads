@@ -132,6 +132,32 @@ class SwitchUserControllerTest < ActionController::TestCase
       session[:switch_back_user_id] = nil
     end
 
+    should 'not get switch_user ProjectUser for a Project that the user is not a member' do
+      other_project = projects(:two)
+      other_project_user = other_project.project_user
+      assert !other_project.project_memberships.where(user_id: @user.id).exists?, 'user should not be a member of the project'
+      get :switch_to, id: other_project_user.id, target: @controller.url_for(other_project_user)
+      assert_response 403
+      assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
+      assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
+    end
+
+    should 'get switch_user ProjectUser for a Project that the user is a member' do
+      project = projects(:one)
+      project_user = project.project_user
+      assert project.project_memberships.where(user_id: @user.id).exists?, 'user should be a member of the project'
+      get :switch_to, id: project_user.id, target: @controller.url_for(project_user)
+      assert_redirected_to @controller.url_for(project_user)
+      assert_not_nil session[:switch_to_user_id]
+      assert_not_nil session[:switch_back_user_id]
+      assert_equal project_user.id, session[:switch_to_user_id]
+      assert_equal project_user.name, @controller.current_user.name
+      assert_equal project_user.id, @controller.current_user.id
+      assert_equal @user.id, session[:switch_back_user_id]
+      session[:switch_to_user_id] = nil
+      session[:switch_back_user_id] = nil
+    end
+
     should 'get destroy' do
       get :destroy, target: repository_users_url
       assert_redirected_to repository_users_url
@@ -163,6 +189,21 @@ class SwitchUserControllerTest < ActionController::TestCase
 
     should 'get switch_user for a CoreUser' do
       CoreUser.all.each do |ouser|
+        get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
+        assert_redirected_to @controller.url_for(ouser)
+        assert_not_nil session[:switch_to_user_id]
+        assert_not_nil session[:switch_back_user_id]
+        assert_equal ouser.id, session[:switch_to_user_id]
+        assert_equal ouser.name, @controller.current_user.name
+        assert_equal ouser.id, @controller.current_user.id
+        assert_equal @user.id, session[:switch_back_user_id]
+        session[:switch_to_user_id] = nil
+        session[:switch_back_user_id] = nil
+      end
+    end
+
+    should 'get switch_user for a ProjectUser' do
+      ProjectUser.all.each do |ouser|
         get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
         assert_redirected_to @controller.url_for(ouser)
         assert_not_nil session[:switch_to_user_id]

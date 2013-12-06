@@ -217,4 +217,3 @@ class RecordsControllerTest < ActionController::TestCase
   end #NonAdmin
 
 end
-

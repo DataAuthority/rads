@@ -21,6 +21,9 @@ class RecordTest < ActiveSupport::TestCase
 
     @core_user = users(:core_user)
     @core_user_record = records(:core_user)
+
+    @project_user = users(:project_user)
+    @project_user_record = records(:project_user)
   end
 
   teardown do
@@ -62,14 +65,23 @@ class RecordTest < ActiveSupport::TestCase
     end
   end #non_admin
 
-  context 'core_user' do
+  context 'CoreUser' do
     should 'pass ability profile' do
       allowed_abilities(@core_user, Record, [:index])
       allowed_abilities(@core_user, @core_user_record, [:index, :show, :destroy])
       denied_abilities(@core_user, @admin_record, [:index, :show, :destroy])
       allowed_abilities(@core_user, @core_user.records.build, [:new, :create])
     end
-  end #core_user
+  end #CoreUser
+
+  context 'ProjectUser' do
+    should 'pass ability profile' do
+      allowed_abilities(@project_user, Record, [:index])
+      allowed_abilities(@project_user, @project_user_record, [:index, :show, :destroy])
+      denied_abilities(@project_user, @admin_record, [:index, :show, :destroy])
+      allowed_abilities(@project_user, @project_user.records.build, [:new, :create])
+    end
+  end #ProjectUser
 
   context 'admin' do
     should 'pass ability profile' do      

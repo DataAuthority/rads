@@ -41,11 +41,9 @@ class ProjectUsersControllerTest < ActionController::TestCase
       session[:switch_to_user_id] = @project_user.id
     end
 
-    should 'get index with empty project_users' do
+    should 'not get index' do
       get :index
-      assert_response :success
-      assert_not_nil assigns(:project_users)
-      assert assigns(:project_users).empty?, 'project_users should be empty'
+      assert_response 403
     end
 
     should 'not update ProjectUser' do
@@ -77,11 +75,9 @@ class ProjectUsersControllerTest < ActionController::TestCase
       authenticate_existing_user(@user, true)
     end
 
-    should 'get index with empty project_users' do
+    should 'not get index' do
       get :index
-      assert_response :success
-      assert_not_nil assigns(:project_users)
-      assert assigns(:project_users).empty?, 'there should be no project_users'
+      assert_response 403
     end
 
     should 'not update ProjectUser' do

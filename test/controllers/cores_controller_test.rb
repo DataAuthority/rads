@@ -70,7 +70,44 @@ class CoresControllerTest < ActionController::TestCase
       assert_equal @puppet.id, @controller.current_user.id
       assert_response 403
     end
-  end #Non-RepositoryUser
+  end #CoreUser
+
+  context 'ProjectUser' do
+    setup do
+      @user = users(:non_admin)
+      @other_core = cores(:two)
+      authenticate_existing_user(@user, true)
+      @puppet = users(:project_user)
+      session[:switch_to_user_id] = @puppet.id
+    end
+
+    should "not get :new" do
+      get :new
+      assert_response 403
+    end
+
+    should "not get index" do
+      get :index
+      assert_equal @puppet.id, @controller.current_user.id
+      assert_response 403
+    end
+
+    should "not get show" do
+      get :show, id: @core
+      assert_equal @puppet.id, @controller.current_user.id
+      assert_response 403
+    end
+
+    should "not create a core" do
+      assert_no_difference('Core.count') do
+        assert_no_difference('CoreMembership.count') do
+          post :create, @create_params
+        end
+      end
+      assert_equal @puppet.id, @controller.current_user.id
+      assert_response 403
+    end
+  end #ProjectUser
 
   context 'RepositoryUser' do
     setup do

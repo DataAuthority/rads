@@ -75,7 +75,45 @@ class CoreMembershipsControllerTest < ActionController::TestCase
       end
       assert_response 403
     end
-  end #Non-RepositoryUser
+  end #CoreUser
+
+  context 'ProjectUser' do
+    setup do
+      @user = users(:non_admin)
+      authenticate_existing_user(@user, true)
+      @puppet = users(:project_user)
+      session[:switch_to_user_id] = @puppet.id
+    end
+
+    should "not get :index" do
+      get :index, core_id: @core
+      assert_response 403
+    end
+
+    should "not get :new" do
+      get :new, core_id: @core
+      assert_response 403
+    end
+
+    should "not show core_membership" do
+      get :show, core_id: @core, id: @core_membership
+      assert_response 403
+    end
+
+    should "not create core_membership" do
+      assert_no_difference('CoreMembership.count') do
+        post :create, @create_params
+      end
+      assert_response 403
+    end
+
+    should "not destroy core_membership" do
+      assert_no_difference('CoreMembership.count') do
+        delete :destroy, core_id: @core, id: @core_membership
+      end
+      assert_response 403
+    end
+  end #ProjectUser
 
   context 'Non Core Member' do
     setup do

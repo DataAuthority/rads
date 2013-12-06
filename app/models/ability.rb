@@ -16,7 +16,6 @@ class Ability
         can :read, Record
         cannot :destroy, User, :id => user.id
       else
-        can :read, User, :type => nil
         can :read, RepositoryUser
         can [:edit, :update, :destroy], RepositoryUser, :id => user.id
       end
@@ -33,7 +32,7 @@ class Ability
       end
       if user.type == 'CoreUser'
         can :read, Core, id: user.core_id
-      end
+      end      
     end
   end
 end
