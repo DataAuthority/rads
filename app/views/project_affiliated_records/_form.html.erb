@@ -1,0 +1,25 @@
+<%= form_for [@project, @project_affiliated_record] do |f| %>
+  <% if @project_affiliated_record.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@project_affiliated_record.errors.count, "error") %> prohibited this project_affiliated_record from being saved:</h2>
+
+      <ul>
+      <% @project_affiliated_record.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :project_id %><br>
+    <%= f.number_field :project_id %>
+  </div>
+  <div class="field">
+    <%= f.label :record_id %><br>
+    <%= f.number_field :record_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

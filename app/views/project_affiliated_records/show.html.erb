@@ -1,0 +1,13 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Project:</strong>
+  <%= @project_affiliated_record.project_id %>
+</p>
+
+<p>
+  <strong>Record:</strong>
+  <%= @project_affiliated_record.record_id %>
+</p>
+
+<%= link_to 'Back', project_project_affiliated_records_path(@project) %>

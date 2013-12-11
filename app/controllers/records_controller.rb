@@ -30,6 +30,9 @@ class RecordsController < ApplicationController
 
   def create
     @record.creator_id = current_user.id
+    if current_user.type == 'ProjectUser'
+      @record.project_affiliated_records.build(project_id: current_user.project_id)
+    end
     respond_to do |format|
       if @record.save
         format.html { redirect_to @record, notice: 'Record was successfully created.' }

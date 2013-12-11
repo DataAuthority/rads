@@ -6,6 +6,8 @@ class ProjectTest < ActiveSupport::TestCase
   should validate_presence_of :creator_id
   should have_many :project_memberships
   should have_one :project_user
+  should have_many :project_affiliated_records
+  should have_many(:records).through(:project_affiliated_records)
 
   setup do
     @project = projects(:one)

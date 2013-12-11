@@ -4,6 +4,7 @@ class RecordTest < ActiveSupport::TestCase
 
   should belong_to :creator
   should have_attached_file(:content)
+  should have_many :project_affiliated_records
 
   setup do
     @test_content_path = Rails.root.to_s + '/test/fixtures/attachments/content.txt'
@@ -92,4 +93,20 @@ class RecordTest < ActiveSupport::TestCase
     end
   end #non_admin
 
+  context 'ProjectAffiliatedRecord' do
+    setup do
+      @user = users(:non_admin)
+      @project_with_membership = projects(:one)
+      @project_without_membership = projects(:two)
+    end
+
+    should 'pass ability profile' do
+      @project_with_membership.records.each do |mr|
+        allowed_abilities(@user, mr, [:index, :show])
+      end
+      @project_without_membership.records.each do |nmr|
+        denied_abilities(@user, nmr, [:index, :show])
+      end
+    end
+  end #ProjectAffiliatedRecord
 end

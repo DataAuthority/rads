@@ -1,9 +1,9 @@
 Rads::Application.routes.draw do
-
   resources :project_users, except: [:new, :create, :edit]
 
   resources :projects, except: [:destroy] do
     resources :project_memberships, except: [:edit, :update]
+    resources :project_affiliated_records, except: [:edit, :update]
   end
 
   resources :core_users, except: [:new, :create, :edit]

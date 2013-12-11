@@ -1,0 +1,27 @@
+<h1>Listing project_affiliated_records</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>Record</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @project_affiliated_records.each do |project_affiliated_record| %>
+      <tr>
+        <td><%= project_affiliated_record.project_id %></td>
+        <td><%= project_affiliated_record.record_id %></td>
+        <td><%= link_to 'Show', [project_affiliated_record.project, project_affiliated_record] %></td>
+        <td><%= link_to 'Destroy', [project_affiliated_record.project, project_affiliated_record], method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Project affiliated record', new_project_project_affiliated_record_path(@project) %>
