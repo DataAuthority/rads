@@ -1,5 +1,28 @@
 <h1>Listing records</h1>
 
+<script>
+$(function(){
+  $(".dropzone").dropzone( {
+<% if protect_against_forgery? %>
+    params: {
+      <%= request_forgery_protection_token %>: '<%= form_authenticity_token %>'
+    },
+<% end %>
+    url: '<%= records_path %>',
+    method: 'POST',
+    paramName: 'record[content]',
+    forceFallback: false,
+    uploadMultiple: false
+  });
+});
+</script>
+<%= 
+  content_tag :div, class: 'dropzone' do
+    content_tag :div, class: 'fallback' do
+      link_to 'New Record', new_record_path
+    end
+  end if can? :new, Record 
+%>
 <% if @records.empty? %>
 <p>There are no records to display.</p>
 <% else %>
@@ -39,5 +62,3 @@
 
 <br>
 <% end %>
-
-<%= link_to 'New Record', new_record_path if can? :new, Record %>
