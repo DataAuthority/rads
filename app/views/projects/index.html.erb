@@ -9,6 +9,8 @@
       <th></th>
       <th></th>
       <th></th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
 
@@ -17,10 +19,12 @@
       <tr>
         <td><%= project.name %></td>
         <td><%= project.description %></td>
-        <td><%= project.creator_id %></td>
-        <td><%= link_to 'Show', project %></td>
-        <td><%= link_to 'Edit', edit_project_path(project) %></td>
-        <td><%= link_to 'Destroy', project, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= project.creator %></td>
+        <td><%= link_to 'Show', project if can? :show, project %></td>
+        <td><%= link_to 'Edit', edit_project_path(project) if can? :edit, project %></td>
+        <td><%= link_to 'Members', project_project_memberships_path(project) if can? :index, project.project_memberships.build() %>
+        <td><%= link_to 'Affiliated Records', project_project_affiliated_records_path(project) if can? :index, project.project_affiliated_records.build() %>
+        <td><%= link_to 'Affiliate Records', new_project_project_affiliated_record_path(project) if can? :new, project.project_affiliated_records.build() %>
       </tr>
     <% end %>
   </tbody>
@@ -28,4 +32,4 @@
 
 <br>
 
-<%= link_to 'New Project', new_project_path %>
+<%= link_to 'New Project', new_project_path if can? :new, Project %>
