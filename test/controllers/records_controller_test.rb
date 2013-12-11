@@ -216,4 +216,59 @@ class RecordsControllerTest < ActionController::TestCase
 
   end #NonAdmin
 
+  context 'ProjectAffilatedRecord' do
+    setup do
+      @project_member = @user
+      @non_member = users(:dm)
+      @project = projects(:one)
+      @project_affiliated_record = project_affiliated_records(:one).affiliated_record
+    end
+
+    should 'be indexable by project_member' do
+      authenticate_existing_user(@project_member, true)
+      get :index
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).include? @project_affiliated_record
+    end
+
+    should 'not be indexable by non_member' do
+      assert !@project.is_member?(@non_member), 'non_member should not be a member of the project'
+      authenticate_existing_user(@non_member, true)
+      get :index
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert !assigns(:records).include?(@project_affiliated_record)
+    end
+
+    should 'be showable by project_member' do
+      authenticate_existing_user(@project_member, true)
+      get :show, id: @project_affiliated_record
+      assert_response :success
+      assert_not_nil assigns(:record)
+      assert_equal @project_affiliated_record.id, assigns(:record).id
+    end
+
+    should 'not be showable by project_member' do
+      authenticate_existing_user(@non_member, true)
+      get :show, id: @project_affiliated_record
+      assert_response 403
+    end
+
+    should 'be created automatically for any record created by a ProjectUser' do
+      authenticate_existing_user(@project_member, true)
+      @puppet = users(:project_user)
+      session[:switch_to_user_id] = @puppet.id
+      assert_equal 'ProjectUser', @controller.current_user.type
+      assert_difference('Record.count') do
+        assert_difference('ProjectAffiliatedRecord.count') do
+          post :create, record: {
+            content: fixture_file_upload('attachments/content.txt', 'text/plain')
+          }
+          assert_not_nil assigns(:record)
+        end
+      end
+      assert ProjectAffiliatedRecord.where(record_id: assigns(:record).id, project_id: @puppet.project_id).exists?, 'ProjectAffiliatedRecord should have been created for project_user.project and newly created record'
+    end
+  end #ProjectAffiliatedRecord
 end

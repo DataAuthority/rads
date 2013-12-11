@@ -25,6 +25,7 @@ class ApplicationController < ActionController::Base
   def switch_to_users
     switch_to_users = RepositoryUser.accessible_by(current_ability, :switch_to).where.not(id: current_user.id)
     switch_to_users = switch_to_users + CoreUser.accessible_by(current_ability, :switch_to)
+    switch_to_users = switch_to_users + ProjectUser.accessible_by(current_ability, :switch_to)
   end
 
 private

@@ -1,6 +1,8 @@
 class Record < ActiveRecord::Base
 
   belongs_to :creator, class_name: 'User'
+  has_many :project_affiliated_records, inverse_of: :affiliated_record
+
   has_attached_file :content, path: ":interpolated_path"
 
   scope :find_by_md5, ->(md5) {where(content_fingerprint: md5)}

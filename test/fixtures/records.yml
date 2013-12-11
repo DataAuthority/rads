@@ -12,3 +12,8 @@ core_user:
 project_user:
   creator: :project_user
 
+project_affiliated_one:
+  creator: :non_admin
+
+project_affiliated_two:
+  creator: :project_user_two
