@@ -146,4 +146,47 @@ class ProjectsControllerTest < ActionController::TestCase
       assert @t_project.project_memberships.where(user_id: @user.id).exists?, 'creator should have a new project_membership for the project'
     end
   end #RepositoryUser
+
+  context 'ProjectMember' do
+    setup do
+      @user = users(:non_admin)
+      authenticate_existing_user(@user, true)      
+    end
+
+    should 'be able to edit the project' do
+      assert @project.is_member?(@user), 'user should be a member of the project'
+      get :edit, id: @project
+      assert_response :success
+    end
+
+    should 'be able to update the project' do
+      new_description = "NEW DESCRIPTION"
+      patch :update, id: @project, project: {description: new_description }
+      assert_redirected_to project_path(@project)
+      t_p = Project.find(@project.id)
+      assert_equal new_description, t_p.description
+    end
+  end #ProjectMember
+
+  context 'NonMember' do
+    setup do
+      @user = users(:dm)
+      authenticate_existing_user(@user, true)      
+    end
+
+    should 'not be able to edit the project' do
+      assert !@project.is_member?(@user), 'user should not be a member of the project'
+      get :edit, id: @project
+      assert_response 403
+    end
+
+    should 'not be able to update the project' do
+      new_description = "NEW DESCRIPTION"
+      old_description = @project.description
+      patch :update, id: @project, project: {description: new_description }
+      assert_response 403
+      t_p = Project.find(@project.id)
+      assert_equal old_description, @project.description
+    end
+  end
 end

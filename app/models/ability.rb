@@ -27,6 +27,7 @@ class Ability
       if user.type == 'RepositoryUser'
         can :read, Core
         can [:new, :create], [Core, Project]
+        can [:edit, :update], Project, :id => user.projects.collect{|m| m.id}
         can :switch_to, CoreUser, :core_id => user.cores.collect{|m| m.id}
         can :switch_to, ProjectUser, :project_id => user.projects.collect{|m| m.id}
         can :manage, CoreMembership, :core_id => user.cores.collect{|m| m.id}

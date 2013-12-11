@@ -63,13 +63,18 @@ class ProjectTest < ActiveSupport::TestCase
     end
   end #ProjectUser
 
-  context 'any RepositoryUser' do
+  context 'RepositoryUser' do
     should 'pass ability profile' do
       RepositoryUser.all.each do |user|
         if user.is_enabled?
           allowed_abilities(user, Project, [:index] )
           allowed_abilities(user, @project, [:show] )
           allowed_abilities(user, Project.new, [:new, :create] )
+          if @project.is_member?(user)
+            allowed_abilities(user, @project, [:edit, :update])
+          else
+            denied_abilities(user, @project, [:edit, :update])
+          end
         else
           denied_abilities(user, Project, [:index] )
           denied_abilities(user, @project, [:show, :edit, :update])
