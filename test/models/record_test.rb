@@ -93,7 +93,7 @@ class RecordTest < ActiveSupport::TestCase
     end
   end #non_admin
 
-  context 'ProjectAffiliatedRecord' do
+  context 'ProjectMembership' do
     setup do
       @user = users(:non_admin)
       @project_with_membership = projects(:one)
@@ -108,5 +108,5 @@ class RecordTest < ActiveSupport::TestCase
         denied_abilities(@user, nmr, [:index, :show])
       end
     end
-  end #ProjectAffiliatedRecord
+  end #ProjectMembership
 end

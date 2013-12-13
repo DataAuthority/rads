@@ -20,6 +20,15 @@ class ProjectTest < ActiveSupport::TestCase
     assert !@project.is_member?(users(:admin)), 'admin should not be a member of the project'
   end
 
+  should 'support is_affiliated_record? method to find out if a record is a affiliated with the project' do
+    assert_respond_to @project, 'is_affiliated_record?'
+    assert @project.project_affiliated_records.count > 0, 'there should be project_affiliated_records for the project'
+    affiliated_record = @project.project_affiliated_records.first.affiliated_record
+    assert @project.project_affiliated_records.where(record_id: affiliated_record.id).exists?, 'the record should exist'
+    assert @project.is_affiliated_record?(affiliated_record), 'first project_affiliation should be affiliated with the project'
+    assert !@project.is_affiliated_record?(records(:admin)), 'admin should not be a member of the project'
+  end
+
   # ability testing
   context 'nil user' do
     should 'pass ability profile' do

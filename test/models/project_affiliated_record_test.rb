@@ -3,7 +3,7 @@ require 'test_helper'
 class ProjectAffiliatedRecordTest < ActiveSupport::TestCase
   should belong_to :project
   should belong_to :affiliated_record
-  should validate_presence_of :project_id
+  should validate_presence_of :project
   should validate_presence_of :affiliated_record
 
   context 'nil user' do

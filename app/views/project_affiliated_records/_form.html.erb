@@ -12,12 +12,8 @@
   <% end %>
 
   <div class="field">
-    <%= f.label :project_id %><br>
-    <%= f.number_field :project_id %>
-  </div>
-  <div class="field">
     <%= f.label :record_id %><br>
-    <%= f.number_field :record_id %>
+    <%= f.collection_select(:record_id, @unaffiliated_records, :id, :to_s) %>
   </div>
   <div class="actions">
     <%= f.submit %>

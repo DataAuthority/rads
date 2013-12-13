@@ -4,7 +4,7 @@ class Project < ActiveRecord::Base
   validates_presence_of :creator_id
   has_many :project_memberships, inverse_of: :project
   has_one :project_user, inverse_of: :project
-  has_many :project_affiliated_records, inverse_of: :affiliated_record
+  has_many :project_affiliated_records, inverse_of: :project
   has_many :records, through: :project_affiliated_records, source: :affiliated_record
 
   def to_s
@@ -15,7 +15,7 @@ class Project < ActiveRecord::Base
     project_memberships.where(user_id: user.id).exists?
   end
 
-  def is_affiliated_record(record)
+  def is_affiliated_record?(record)
     project_affiliated_records.where(record_id: record.id).exists?
   end
 end

@@ -9,12 +9,14 @@ class ProjectAffiliatedRecordsController < ApplicationController
   end
 
   def new
+    @unaffiliated_records = current_user.records.reject {|r| @project.is_affiliated_record? r}
   end
 
   def edit
   end
 
   def create
+    @unaffiliated_records = current_user.records.reject {|r| @project.is_affiliated_record? r}
     respond_to do |format|
       if @project_affiliated_record.save
         format.html { redirect_to [@project, @project_affiliated_record], notice: 'Project affiliated record was successfully created.' }
