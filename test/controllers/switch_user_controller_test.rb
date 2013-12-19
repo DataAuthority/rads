@@ -100,7 +100,7 @@ class SwitchUserControllerTest < ActionController::TestCase
     should 'not get switch_user RepositoryUser' do
       RepositoryUser.where.not(id: @user.id).each do |ouser|
         get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
-        assert_response 403
+        assert_redirected_to root_path()
         assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
         assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
       end
@@ -111,7 +111,7 @@ class SwitchUserControllerTest < ActionController::TestCase
       other_core_user = other_core.core_user
       assert !other_core.core_memberships.where(repository_user_id: @user.id).exists?, 'user should not be a member of the core'
       get :switch_to, id: other_core_user.id, target: @controller.url_for(other_core_user)
-      assert_response 403
+      assert_redirected_to root_path()
       assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
       assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
     end
@@ -137,7 +137,7 @@ class SwitchUserControllerTest < ActionController::TestCase
       other_project_user = other_project.project_user
       assert !other_project.project_memberships.where(user_id: @user.id).exists?, 'user should not be a member of the project'
       get :switch_to, id: other_project_user.id, target: @controller.url_for(other_project_user)
-      assert_response 403
+      assert_redirected_to root_path()
       assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
       assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
     end

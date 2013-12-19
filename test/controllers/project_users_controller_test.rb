@@ -43,7 +43,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
 
     should 'not get index' do
       get :index
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'not update ProjectUser' do
@@ -51,7 +51,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
       @other_project_user.save
       assert !@other_project_user.is_enabled?, 'project_user should not be enabled'
       patch :update, id: @other_project_user, project_user: {is_enabled: true}
-      assert_response 403
+      assert_redirected_to root_path()
       t_u = ProjectUser.find(@other_project_user.id)
       assert !t_u.is_enabled?, 'project_user should still not be enabled'
     end
@@ -61,7 +61,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
         assert cu.is_enabled?, "#{ cu.name } should be enabled"
         assert_no_difference('ProjectUser.count') do
           delete :destroy, id: cu
-          assert_response 403
+          assert_redirected_to root_path()
         end
         t_u = ProjectUser.find(cu.id)
         assert t_u.is_enabled?, "#{ t_u.name } should still be enabled"
@@ -77,7 +77,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
 
     should 'not get index' do
       get :index
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'not update ProjectUser' do
@@ -85,7 +85,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
       @project_user.save
       assert !@project_user.is_enabled?, 'project_user should be enabled'
       patch :update, id: @project_user, project_user: {is_enabled: true}
-      assert_response 403
+      assert_redirected_to root_path()
       t_u = ProjectUser.find(@project_user.id)
       assert !t_u.is_enabled?, 'project_user should still not be enabled'
     end
@@ -95,7 +95,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
         assert cu.is_enabled?, "#{ cu.name } should be enabled"
         assert_no_difference('ProjectUser.count') do
           delete :destroy, id: cu
-          assert_response 403
+          assert_redirected_to root_path()
         end
         t_u = ProjectUser.find(cu.id)
         assert t_u.is_enabled?, "#{ t_u.name } should still be enabled"

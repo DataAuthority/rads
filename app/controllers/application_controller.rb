@@ -15,7 +15,7 @@ class ApplicationController < ActionController::Base
   end
 
   rescue_from ActiveRecord::RecordNotFound, :with => :missing_record
-  rescue_from CanCan::AccessDenied, :with => :access_denied
+  rescue_from CanCan::AccessDenied, :with => :action_denied
   rescue_from ActionController::ParameterMissing, with: :access_denied
 
   def current_user
@@ -104,6 +104,11 @@ private
 
   def session_empty?
     session[:shib_session_id].nil? || session[:shib_session_id].empty?
+  end
+
+  def action_denied
+    flash[:alert] = 'You do not have access to the page you requested!.'
+    redirect_to root_path()
   end
 
   def access_denied

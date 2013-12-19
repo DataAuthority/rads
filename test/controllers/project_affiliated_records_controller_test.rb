@@ -104,26 +104,26 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
 
     should "not get :new" do
       get :new, project_id: @project
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not show project_affiliated_record" do
       get :show, project_id: @project, id: @project_affiliated_record
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not create project_affiliated_record" do
       assert_no_difference('ProjectAffiliatedRecord.count') do
         post :create, @create_params
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not destroy project_affiliated_record" do
       assert_no_difference('ProjectAffiliatedRecord.count') do
         delete :destroy, project_id: @project, id: @project_affiliated_record
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #Non ProjectMember
 end

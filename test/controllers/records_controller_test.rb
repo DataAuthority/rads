@@ -121,7 +121,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert_no_difference('Record.count') do
         delete :destroy, id: @user_record
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert_not_nil assigns(:record)
       @tr = Record.find(assigns(:record).id)
       assert !@tr.is_destroyed?, 'content should not be destroyed'
@@ -173,7 +173,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should "not show someone elses record" do
       get :show, id: @admin_record
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'download the content with download_content=true parameter to show' do
@@ -207,7 +207,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert_no_difference('Record.count') do
         delete :destroy, id: @admin_record
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert_not_nil assigns(:record)
       @tr = Record.find(assigns(:record).id)
       assert !@tr.is_destroyed?, 'content should not be destroyed'
@@ -252,7 +252,7 @@ class RecordsControllerTest < ActionController::TestCase
     should 'not be showable by project_member' do
       authenticate_existing_user(@non_member, true)
       get :show, id: @project_affiliated_record
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'be created automatically for any record created by a ProjectUser' do
@@ -271,4 +271,16 @@ class RecordsControllerTest < ActionController::TestCase
       assert ProjectAffiliatedRecord.where(record_id: assigns(:record).id, project_id: @puppet.project_id).exists?, 'ProjectAffiliatedRecord should have been created for project_user.project and newly created record'
     end
   end #ProjectAffiliatedRecord
+
+  context 'index' do
+    setup do
+    end
+
+    should 'show current_user.records by default' do
+    end
+
+    should 'accept affiliated_with_project=project_id parameter and show records affiliated with the project' do
+    end
+
+  end #index
 end

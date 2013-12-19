@@ -36,7 +36,7 @@ class CoresControllerTest < ActionController::TestCase
 
     should "not get :new" do
       get :new
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "get index" do
@@ -58,7 +58,7 @@ class CoresControllerTest < ActionController::TestCase
     should "not get show on another core" do
       assert @other_core.id != @puppet.core_id
       get :show, id: @other_core
-      assert_response 403
+      assert_redirected_to root_path()
     end
       
     should "not create a core" do
@@ -68,7 +68,7 @@ class CoresControllerTest < ActionController::TestCase
         end
       end
       assert_equal @puppet.id, @controller.current_user.id
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #CoreUser
 
@@ -83,19 +83,19 @@ class CoresControllerTest < ActionController::TestCase
 
     should "not get :new" do
       get :new
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not get index" do
       get :index
       assert_equal @puppet.id, @controller.current_user.id
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not get show" do
       get :show, id: @core
       assert_equal @puppet.id, @controller.current_user.id
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not create a core" do
@@ -105,7 +105,7 @@ class CoresControllerTest < ActionController::TestCase
         end
       end
       assert_equal @puppet.id, @controller.current_user.id
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #ProjectUser
 

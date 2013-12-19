@@ -49,31 +49,31 @@ class CoreMembershipsControllerTest < ActionController::TestCase
 
     should "not get :index" do
       get :index, core_id: @core
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not get :new" do
       get :new, core_id: @core
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not show core_membership" do
       get :show, core_id: @core, id: @core_membership
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not create core_membership" do
       assert_no_difference('CoreMembership.count') do
         post :create, @create_params
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not destroy core_membership" do
       assert_no_difference('CoreMembership.count') do
         delete :destroy, core_id: @core, id: @core_membership
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #CoreUser
 
@@ -87,31 +87,31 @@ class CoreMembershipsControllerTest < ActionController::TestCase
 
     should "not get :index" do
       get :index, core_id: @core
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not get :new" do
       get :new, core_id: @core
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not show core_membership" do
       get :show, core_id: @core, id: @core_membership
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not create core_membership" do
       assert_no_difference('CoreMembership.count') do
         post :create, @create_params
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not destroy core_membership" do
       assert_no_difference('CoreMembership.count') do
         delete :destroy, core_id: @core, id: @core_membership
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #ProjectUser
 
@@ -129,26 +129,26 @@ class CoreMembershipsControllerTest < ActionController::TestCase
 
     should "not get :new" do
       get :new, core_id: @core
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not show core_membership" do
       get :show, core_id: @core, id: @core_membership
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not create core_membership" do
       assert_no_difference('CoreMembership.count') do
         post :create, @create_params
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not destroy core_membership" do
       assert_no_difference('CoreMembership.count') do
         delete :destroy, core_id: @core, id: @core_membership
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #Non Core Member
 

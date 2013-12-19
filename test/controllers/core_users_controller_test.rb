@@ -43,7 +43,7 @@ class CoreUsersControllerTest < ActionController::TestCase
 
     should 'not get index' do
       get :index
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'not update CoreUser' do
@@ -51,7 +51,7 @@ class CoreUsersControllerTest < ActionController::TestCase
       @other_core_user.save
       assert !@other_core_user.is_enabled?, 'core_user should not be enabled'
       patch :update, id: @other_core_user, core_user: {is_enabled: true}
-      assert_response 403
+      assert_redirected_to root_path()
       t_u = CoreUser.find(@other_core_user.id)
       assert !t_u.is_enabled?, 'core_user should still not be enabled'
     end
@@ -61,7 +61,7 @@ class CoreUsersControllerTest < ActionController::TestCase
         assert cu.is_enabled?, "#{ cu.name } should be enabled"
         assert_no_difference('CoreUser.count') do
           delete :destroy, id: cu
-          assert_response 403
+          assert_redirected_to root_path()
         end
         t_u = CoreUser.find(cu.id)
         assert t_u.is_enabled?, "#{ t_u.name } should still be enabled"
@@ -79,7 +79,7 @@ class CoreUsersControllerTest < ActionController::TestCase
 
     should 'not get index' do
       get :index
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'not update CoreUser' do
@@ -87,7 +87,7 @@ class CoreUsersControllerTest < ActionController::TestCase
       @other_core_user.save
       assert !@other_core_user.is_enabled?, 'core_user should not be enabled'
       patch :update, id: @other_core_user, core_user: {is_enabled: true}
-      assert_response 403
+      assert_redirected_to root_path()
       t_u = CoreUser.find(@other_core_user.id)
       assert !t_u.is_enabled?, 'core_user should still not be enabled'
     end
@@ -97,7 +97,7 @@ class CoreUsersControllerTest < ActionController::TestCase
         assert cu.is_enabled?, "#{ cu.name } should be enabled"
         assert_no_difference('CoreUser.count') do
           delete :destroy, id: cu
-          assert_response 403
+          assert_redirected_to root_path()
         end
         t_u = CoreUser.find(cu.id)
         assert t_u.is_enabled?, "#{ t_u.name } should still be enabled"
@@ -113,7 +113,7 @@ class CoreUsersControllerTest < ActionController::TestCase
 
     should 'not get index' do
       get :index
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'not update CoreUser' do
@@ -121,7 +121,7 @@ class CoreUsersControllerTest < ActionController::TestCase
       @core_user.save
       assert !@core_user.is_enabled?, 'core_user should be enabled'
       patch :update, id: @core_user, core_user: {is_enabled: true}
-      assert_response 403
+      assert_redirected_to root_path()
       t_u = CoreUser.find(@core_user.id)
       assert !t_u.is_enabled?, 'core_user should still not be enabled'
     end
@@ -131,7 +131,7 @@ class CoreUsersControllerTest < ActionController::TestCase
         assert cu.is_enabled?, "#{ cu.name } should be enabled"
         assert_no_difference('CoreUser.count') do
           delete :destroy, id: cu
-          assert_response 403
+          assert_redirected_to root_path()
         end
         t_u = CoreUser.find(cu.id)
         assert t_u.is_enabled?, "#{ t_u.name } should still be enabled"

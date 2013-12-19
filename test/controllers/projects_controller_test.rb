@@ -33,7 +33,7 @@ class ProjectsControllerTest < ActionController::TestCase
 
     should "not get :new" do
       get :new
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "get index" do
@@ -56,7 +56,7 @@ class ProjectsControllerTest < ActionController::TestCase
         post :create, @create_params
       end
       assert_equal @puppet.id, @controller.current_user.id
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #CoreUser
 
@@ -71,7 +71,7 @@ class ProjectsControllerTest < ActionController::TestCase
 
     should "not get :new" do
       get :new
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "get index" do
@@ -102,7 +102,7 @@ class ProjectsControllerTest < ActionController::TestCase
         post :create, @create_params
       end
       assert_equal @puppet.id, @controller.current_user.id
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #ProjectUser
 
@@ -177,14 +177,14 @@ class ProjectsControllerTest < ActionController::TestCase
     should 'not be able to edit the project' do
       assert !@project.is_member?(@user), 'user should not be a member of the project'
       get :edit, id: @project
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'not be able to update the project' do
       new_description = "NEW DESCRIPTION"
       old_description = @project.description
       patch :update, id: @project, project: {description: new_description }
-      assert_response 403
+      assert_redirected_to root_path()
       t_p = Project.find(@project.id)
       assert_equal old_description, @project.description
     end

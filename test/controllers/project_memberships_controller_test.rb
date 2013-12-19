@@ -65,19 +65,19 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
     should "not get :new for project without membership" do
       assert !@project_without_membership.project_memberships.where(user_id: @puppet.id).exists?, 'core_user should not have a membership in project_without_membership'
       get :new, project_id: @project_without_membership
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not get :new for project with membership" do
       assert @project_with_membership.project_memberships.where(user_id: @puppet.id).exists?, 'core_user should have a membership in project_with_membership'
       get :new, project_id: @project_with_membership
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not show project_membership for project without membership" do
       assert !@project_without_membership.project_memberships.where(user_id: @puppet.id).exists?, 'core_user should not have a membership in project_without_membership'
       get :show, project_id: @project_without_membership, id: @project_without_membership.project_memberships.first
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "show project_membership for project with membership" do
@@ -94,7 +94,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_no_difference('ProjectMembership.count') do
         post :create, project_id: @project_without_membership, project_membership: { user_id: users(:admin).id }
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert !@project_without_membership.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should not have a membership in project_without_membership'
     end
 
@@ -104,7 +104,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_no_difference('ProjectMembership.count') do
         post :create, project_id: @project_with_membership, project_membership: { user_id: users(:non_admin).id }
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert !@project_with_membership.project_memberships.where(user_id: users(:non_admin).id).exists?, 'non_admin should not have a membership in project_with_membership'
     end
 
@@ -114,7 +114,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_no_difference('ProjectMembership.count') do
         delete :destroy, project_id: @project_without_membership, id: project_memberships(:one).id
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert @project_without_membership.project_memberships.where(user_id: users(:non_admin).id).exists?, 'non_admin should have a membership in project_without_membership'
     end
 
@@ -124,7 +124,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_no_difference('ProjectMembership.count') do
         delete :destroy, project_id: @project_with_membership, id: project_memberships(:three).id
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert @project_without_membership.project_memberships.where(user_id: users(:non_admin).id).exists?, 'non_admin should have a membership in project_without_membership'
     end
   end #CoreUser
@@ -151,22 +151,22 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
 
     should "not get :new for other project" do
       get :new, project_id: @other_project
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not get :new for its own project" do
       get :new, project_id: @puppet.project_id
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not show project_membership for other project" do
       get :show, project_id: @other_project, id: @other_project.project_memberships.first
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not show project_membership for its own project" do
       get :show, project_id: @puppet.project_id, id: @puppet.project.project_memberships.first
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not create project_membership for other project" do
@@ -174,7 +174,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_no_difference('ProjectMembership.count') do
         post :create, project_id: @other_project, project_membership: { user_id: users(:non_admin).id }
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert !@other_project.project_memberships.where(user_id: users(:non_admin).id).exists?, 'non_admin should not have a membership in other_project'
     end
 
@@ -183,7 +183,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_no_difference('ProjectMembership.count') do
         post :create, project_id: @puppet.project_id, project_membership: { user_id: users(:admin).id }
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert !@puppet.project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should not have a membership in puppet.project'
     end
 
@@ -192,7 +192,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_no_difference('ProjectMembership.count') do
         delete :destroy, project_id: @other_project, id: @other_project.project_memberships.where(user_id: users(:admin).id).first.id
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert @other_project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should have a membership in other_project'
     end
 
@@ -201,7 +201,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_no_difference('ProjectMembership.count') do
         delete :destroy, project_id: @puppet.project_id, id: @puppet.project.project_memberships.where(user_id: users(:non_admin).id).first.id
       end
-      assert_response 403
+      assert_redirected_to root_path()
       assert @puppet.project.project_memberships.where(user_id: users(:non_admin).id).exists?, 'non_admin should have a membership in puppet.project'
     end
   end #ProjectUser
@@ -220,26 +220,26 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
 
     should "not get :new" do
       get :new, project_id: @project
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not show project_membership" do
       get :show, project_id: @project, id: @project_membership
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not create project_membership" do
       assert_no_difference('ProjectMembership.count') do
         post :create, @create_params
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not destroy project_membership" do
       assert_no_difference('ProjectMembership.count') do
         delete :destroy, project_id: @project, id: @project_membership
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #RepositoryUser Non Project Member
 

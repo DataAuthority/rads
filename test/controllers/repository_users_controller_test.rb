@@ -59,7 +59,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
 
     should 'not get new if they already have an account' do
       get :new
-      assert_response 403
+      assert_redirected_to root_path()
       assert_not_nil assigns(:shib_user)
     end
 
@@ -159,14 +159,14 @@ class RepositoryUsersControllerTest < ActionController::TestCase
     should "not get new" do
       get :new
       assert_not_nil assigns(:shib_user)
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not create user" do
       assert_no_difference('RepositoryUser.count') do
         post :create, @create_params
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "show user" do
@@ -176,7 +176,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
 
     should 'not edit another user' do
       get :edit, id: @enabled_user
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "be able to edit their own account" do
@@ -187,7 +187,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
     should "not update another user" do
       @update_params[:id] = @enabled_user.id
       patch :update, @update_params
-      assert_response 403
+      assert_redirected_to root_path()
       @t_user = RepositoryUser.find(@enabled_user.id)
       assert_equal @enabled_user.email, @t_user.email
     end
@@ -206,7 +206,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
       assert_no_difference('RepositoryUser.count') do
         delete :destroy, id: @enabled_user
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "destroy user" do
@@ -222,7 +222,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
       assert !@enabled_user.is_enabled, 'user should now be disabled'
 
       patch :update, id: @enabled_user, repository_user: { is_enabled: "true" }
-      assert_response 403
+      assert_redirected_to root_path()
 
       @t_user = RepositoryUser.find(@enabled_user.id)
       assert !@t_user.is_enabled?, 'user is enabled after update'
@@ -239,7 +239,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
     should 'not disable another user' do
       assert @enabled_user.is_enabled?, 'other user is not enabled before update'
       patch :update, id: @enabled_user, repository_user: { is_enabled: "false" }
-      assert_response 403
+      assert_redirected_to root_path()
       @t_user = RepositoryUser.find(@enabled_user.id)
       assert @t_user.is_enabled?, 'user is not enabled after update'
     end
@@ -266,7 +266,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
 
     should 'not show another user' do
       get :show, id: @enabled_user
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'not edit another user' do
@@ -349,14 +349,14 @@ class RepositoryUsersControllerTest < ActionController::TestCase
     should "not get new" do
       get :new
       assert_not_nil assigns(:shib_user)
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "not create user" do
       assert_no_difference('RepositoryUser.count') do
         post :create, @create_params
       end
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should "show user" do
@@ -430,7 +430,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
     should "not destroy themselves" do
       assert @user.is_enabled?, 'admin should be enabled before destroy'
       delete :destroy, id: @user
-      assert_response 403
+      assert_redirected_to root_path()
       @t_user = RepositoryUser.find(@user.id)
       assert @t_user.is_enabled?, 'admin should still be enabled after destroy'
     end
@@ -482,7 +482,7 @@ class RepositoryUsersControllerTest < ActionController::TestCase
 
     should 'not show another user' do
       get :show, id: @enabled_user
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'not edit another user' do
