@@ -274,13 +274,63 @@ class RecordsControllerTest < ActionController::TestCase
 
   context 'index' do
     setup do
+      @user_with_no_records = users(:dm)
+      @member_project = projects(:one)
+      @non_member_project = projects(:two)
+    end
+
+    should 'render successfully when zero records have been returned' do
+      authenticate_existing_user(@user_with_no_records, true)
+      assert_equal 0, @user_with_no_records.records.count
+      assert @user_with_no_records.records.empty?
+      get :index
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).empty?, 'records should be empty'  
     end
 
     should 'show current_user.records by default' do
+      authenticate_existing_user(@user, true)
+      record_count = @user.records.count
+      assert record_count > 0, 'user should have records'
+      get :index
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert_equal record_count, assigns(:records).count
+      assigns(:records).each do |record|
+        assert_equal @user.id, record.creator_id
+      end
     end
 
-    should 'accept affiliated_with_project=project_id parameter and show records affiliated with the project' do
+    should 'accept affiliated_with_project=project_id parameter and show records affiliated with the project for project_member' do
+      authenticate_existing_user(@user, true)
+      assert @member_project.is_member?(@user), 'user should be a member of the member_project'
+      record_count = @member_project.records.count
+      assert record_count > 0, 'project should have affiliated records'
+      get :index, affiliated_with_project: @member_project.id
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert_not_nil assigns(:project)
+      assert_equal @member_project.id, assigns(:project).id
+      assert_equal record_count, assigns(:records).count
+      assigns(:records).each do |record|
+        assert @member_project.is_affiliated_record?(record), 'record should be affiliated with member_project'
+      end
     end
 
+    should 'accept affiliated_with_project=project_id parameter but render user.records if user is not a member of the project' do
+      authenticate_existing_user(@user, true)
+      assert !@non_member_project.is_member?(@user), 'user should not be a member of the non_member_project'
+      record_count = @user.records.count
+      assert record_count > 0, 'user should have records'
+      get :index, affiliated_with_project: @non_member_project.id
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert_equal record_count, assigns(:records).count
+      assigns(:records).each do |record|
+        assert_equal @user.id, record.creator_id
+        assert !@non_member_project.is_affiliated_record?(record), 'record should not be affiliated with non_member_project'
+      end
+    end
   end #index
 end

@@ -8,7 +8,19 @@ class RecordsController < ApplicationController
       @redirect_target = records_url
     else
       check_session
-      @records = Record.accessible_by(current_ability)
+
+      unless current_user.nil?
+        if params[:affiliated_with_project]
+          @project = Project.find(params[:affiliated_with_project])
+          if @project.is_member? current_user
+            @records = @project.records
+          else
+            @records = current_user.records
+          end
+        else
+          @records = current_user.records
+        end
+      end
     end
   end
 

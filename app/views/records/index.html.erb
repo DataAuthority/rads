@@ -23,6 +23,20 @@ $(function(){
     end
   end if can? :new, Record 
 %>
+<div id='records_nav'>
+  <ul>
+    <li><%= link_to 'My Records', records_path() %></li>
+    <li>
+      <p>My Projects</p>
+      <ul>
+<%      current_user.project_memberships.each do |pm| %>
+        <li><%= link_to pm.project, records_path(affiliated_with_project: pm.project_id) %></li>
+<%      end %>
+      </ul>      
+    </li>
+   </ul>
+</div>
+<div id='records'>
 <% if @records.empty? %>
 <p>There are no records to display.</p>
 <% else %>
@@ -62,3 +76,4 @@ $(function(){
 
 <br>
 <% end %>
+</div>
