@@ -23,6 +23,7 @@ $(function(){
     end
   end if can? :new, Record 
 %>
+<% if current_user %>
 <div id='records_nav'>
   <ul>
     <li><%= link_to 'My Records', records_path() %></li>
@@ -36,6 +37,7 @@ $(function(){
     </li>
    </ul>
 </div>
+<% end %>
 <div id='records'>
 <% if @records.empty? %>
 <p>There are no records to display.</p>
