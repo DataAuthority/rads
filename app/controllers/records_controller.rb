@@ -22,6 +22,8 @@ class RecordsController < ApplicationController
         end
       end
     end
+
+    @records = @records.order('created_at desc') if @records
   end
 
   def show
