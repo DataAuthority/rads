@@ -7,6 +7,10 @@ class Record < ActiveRecord::Base
 
   scope :find_by_md5, ->(md5) {where(content_fingerprint: md5)}
 
+  def to_s
+    "#{content_file_name} (#{created_at})"
+  end
+
   private
 
   Paperclip.interpolates :interpolated_path do |attachment, style|
