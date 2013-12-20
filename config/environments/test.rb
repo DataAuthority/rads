@@ -37,5 +37,5 @@ Rads::Application.configure do
   config.shibboleth_logout_url = '/Shibboleth.sso/Logout?return=https://shib.oit.duke.edu/cgi-bin/logout.pl'
   config.shibboleth_login_url = '/Shibboleth.sso/Login'
 
-  config.primary_storage_root = '/nfs/primary/test'
+  config.primary_storage_root = "/nfs/primary/test/#{ENV['USER']}"
 end
