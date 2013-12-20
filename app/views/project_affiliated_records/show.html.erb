@@ -1,11 +1,11 @@
 <p>
   <strong>Project:</strong>
-  <%= @project_affiliated_record.project_id %>
+  <%= link_to @project_affiliated_record.project, project_path(@project_affiliated_record.project.id) %>
 </p>
 
 <p>
   <strong>Record:</strong>
-  <%= @project_affiliated_record.record_id %>
+  <%= link_to @project_affiliated_record.affiliated_record, record_path(@project_affiliated_record.affiliated_record.id) %>
 </p>
 
 <%= link_to 'Back', project_project_affiliated_records_path(@project) %>
