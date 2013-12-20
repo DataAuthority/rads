@@ -12,8 +12,8 @@
 <%= render '/layouts/navigation' %>
 <% end %>
 <%= render 'layouts/authentication' %>
-<p id="alert"><%= alert %></p>
-<p id="notice"><%= notice %></p>
+<%= content_tag(:p, alert, id: :notice) if alert %>
+<%= content_tag(:p, notice, id: :notice) if notice %>
 <%= yield %>
 
 <% end %>
