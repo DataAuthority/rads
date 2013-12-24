@@ -61,10 +61,12 @@ class RecordsControllerTest < ActionController::TestCase
     end
 
     should "post create" do
-      assert_difference('Record.count') do
-        post :create, record: {
-          content: fixture_file_upload('attachments/content.txt', 'text/plain')
-        }
+      assert_difference('AuditedActivity.count') do
+        assert_difference('Record.count') do
+          post :create, record: {
+            content: fixture_file_upload('attachments/content.txt', 'text/plain')
+          }
+        end
       end
       assert_not_nil assigns(:record)
       assert_redirected_to record_path(assigns(:record))
@@ -148,10 +150,12 @@ class RecordsControllerTest < ActionController::TestCase
     end
 
     should "post create" do
-      assert_difference('Record.count') do
-        post :create, record: {
-          content: fixture_file_upload('attachments/content.txt', 'text/plain')
-        }
+      assert_difference('AuditedActivity.count') do
+        assert_difference('Record.count') do
+          post :create, record: {
+            content: fixture_file_upload('attachments/content.txt', 'text/plain')
+          }
+        end
       end
       assert_not_nil assigns(:record)
       assert_redirected_to record_path(assigns(:record))
@@ -260,12 +264,14 @@ class RecordsControllerTest < ActionController::TestCase
       @puppet = users(:project_user)
       session[:switch_to_user_id] = @puppet.id
       assert_equal 'ProjectUser', @controller.current_user.type
-      assert_difference('Record.count') do
-        assert_difference('ProjectAffiliatedRecord.count') do
-          post :create, record: {
-            content: fixture_file_upload('attachments/content.txt', 'text/plain')
-          }
-          assert_not_nil assigns(:record)
+      assert_difference('AuditedActivity.count') do
+        assert_difference('Record.count') do
+          assert_difference('ProjectAffiliatedRecord.count') do
+            post :create, record: {
+              content: fixture_file_upload('attachments/content.txt', 'text/plain')
+            }
+            assert_not_nil assigns(:record)
+          end
         end
       end
       assert ProjectAffiliatedRecord.where(record_id: assigns(:record).id, project_id: @puppet.project_id).exists?, 'ProjectAffiliatedRecord should have been created for project_user.project and newly created record'
