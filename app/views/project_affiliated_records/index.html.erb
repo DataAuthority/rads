@@ -13,8 +13,12 @@
   <tbody>
     <% @project_affiliated_records.each do |project_affiliated_record| %>
       <tr>
-        <td><%= project_affiliated_record.project_id %></td>
-        <td><%= project_affiliated_record.record_id %></td>
+        <td>
+          <%= link_to project_affiliated_record.project, project_path(project_affiliated_record.project.id) %>
+        </td>
+        <td>
+          <%= link_to project_affiliated_record.affiliated_record, record_path(project_affiliated_record.affiliated_record.id) %>
+        </td>
         <td><%= link_to 'Show', [project_affiliated_record.project, project_affiliated_record] %></td>
         <td><%= link_to 'Destroy', [project_affiliated_record.project, project_affiliated_record], method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
