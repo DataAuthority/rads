@@ -3,7 +3,6 @@ require 'test_helper'
 class AuditedActivityTest < ActiveSupport::TestCase
   should belong_to(:current_user).class_name('User')
   should belong_to(:authenticated_user).class_name('User')
-  should belong_to :record
 
   should validate_presence_of :current_user_id
   should validate_presence_of :authenticated_user_id
