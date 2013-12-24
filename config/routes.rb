@@ -1,4 +1,6 @@
 Rads::Application.routes.draw do
+  resources :audited_activities, only: [:index, :show]
+
   resources :project_users, except: [:new, :create, :edit]
 
   resources :projects, except: [:destroy] do

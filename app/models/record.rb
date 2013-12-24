@@ -1,7 +1,7 @@
 class Record < ActiveRecord::Base
-
   belongs_to :creator, class_name: 'User'
   has_many :project_affiliated_records, inverse_of: :affiliated_record
+  has_many :audited_activities
 
   has_attached_file :content, path: ":interpolated_path"
 

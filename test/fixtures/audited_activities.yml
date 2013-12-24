@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  authenticated_user_id: 1
+  current_user_id: 1
+  controller_name: MyString
+  http_method: MyString
+  action: MyString
+  params: MyText
+  record_id: 1
+
+two:
+  authenticated_user_id: 1
+  current_user_id: 1
+  controller_name: MyString
+  http_method: MyString
+  action: MyString
+  params: MyText
+  record_id: 1

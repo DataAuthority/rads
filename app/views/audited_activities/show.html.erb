@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Authenticated user:</strong>
+  <%= @audited_activity.authenticated_user_id %>
+</p>
+
+<p>
+  <strong>Current user:</strong>
+  <%= @audited_activity.current_user_id %>
+</p>
+
+<p>
+  <strong>Controller name:</strong>
+  <%= @audited_activity.controller_name %>
+</p>
+
+<p>
+  <strong>Http method:</strong>
+  <%= @audited_activity.http_method %>
+</p>
+
+<p>
+  <strong>Action:</strong>
+  <%= @audited_activity.action %>
+</p>
+
+<p>
+  <strong>Params:</strong>
+  <%= @audited_activity.params %>
+</p>
+
+<p>
+  <strong>Record:</strong>
+  <%= @audited_activity.record_id %>
+</p>
+
+<%= link_to 'Edit', edit_audited_activity_path(@audited_activity) %> |
+<%= link_to 'Back', audited_activities_path %>

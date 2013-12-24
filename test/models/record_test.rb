@@ -5,6 +5,7 @@ class RecordTest < ActiveSupport::TestCase
   should belong_to :creator
   should have_attached_file(:content)
   should have_many :project_affiliated_records
+  should have_many :audited_activities
 
   setup do
     @test_content_path = Rails.root.to_s + '/test/fixtures/attachments/content.txt'
