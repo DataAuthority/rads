@@ -76,4 +76,12 @@ class ActiveSupport::TestCase
       assert_redirected_to redirect_path.merge({:target => @request.original_url})
     end
   end
+
+  # Audited activity testing
+  def assert_audited_activity(&block)
+    assert_difference('AuditedActivity.count') do
+      block.call()
+    end
+    # Test that the correct information was audited
+  end
 end
