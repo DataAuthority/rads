@@ -66,8 +66,10 @@ class RecordsControllerTest < ActionController::TestCase
           post :create, record: {
             content: fixture_file_upload('attachments/content.txt', 'text/plain')
           }
+          assert_not_nil assigns(:record)
         end
       end
+      assert_equal assigns(:record).id, assigns(:audited_activity).record_id
       assert_not_nil assigns(:record)
       assert_redirected_to record_path(assigns(:record))
       assert_equal @admin.id, assigns(:record).creator_id
@@ -105,9 +107,12 @@ class RecordsControllerTest < ActionController::TestCase
       size = @admin_record.content_file_size
       path = @admin_record.content.path
       assert File.exist?( path ), 'content should be present before destroy'
-      assert_no_difference('Record.count') do
-        delete :destroy, id: @admin_record
+      assert_audited_activity(@admin, @admin, 'delete', 'destroy', 'records') do
+        assert_no_difference('Record.count') do
+          delete :destroy, id: @admin_record
+        end
       end
+      assert_equal @admin_record.id, assigns(:audited_activity).record_id
       assert_redirected_to records_path
       assert_not_nil assigns(:record)
       @tr = Record.find(assigns(:record).id)
@@ -120,8 +125,10 @@ class RecordsControllerTest < ActionController::TestCase
 
     should "not destroy someone elses record" do
       assert @user_record.content.present?, 'content should be present before destroy'
-      assert_no_difference('Record.count') do
-        delete :destroy, id: @user_record
+      assert_no_difference('AuditedActivity.count') do
+        assert_no_difference('Record.count') do
+          delete :destroy, id: @user_record
+        end
       end
       assert_redirected_to root_path()
       assert_not_nil assigns(:record)
@@ -155,8 +162,10 @@ class RecordsControllerTest < ActionController::TestCase
           post :create, record: {
             content: fixture_file_upload('attachments/content.txt', 'text/plain')
           }
+          assert_not_nil assigns(:record)
         end
       end
+      assert_equal assigns(:record).id, assigns(:audited_activity).record_id
       assert_not_nil assigns(:record)
       assert_redirected_to record_path(assigns(:record))
       assert_equal @user.id, assigns(:record).creator_id
@@ -193,9 +202,12 @@ class RecordsControllerTest < ActionController::TestCase
       size = @user_record.content_file_size
       path = @user_record.content.path
       assert File.exist?( path ), 'content should be present before destroy'
-      assert_no_difference('Record.count') do
-        delete :destroy, id: @user_record
+      assert_audited_activity(@user, @user, 'delete', 'destroy', 'records') do
+        assert_no_difference('Record.count') do
+          delete :destroy, id: @user_record
+        end
       end
+      assert_equal @user_record.id, assigns(:audited_activity).record_id
       assert_redirected_to records_path
       assert_not_nil assigns(:record)
       @tr = Record.find(assigns(:record).id)
@@ -208,8 +220,10 @@ class RecordsControllerTest < ActionController::TestCase
 
     should "not destroy someone elses record" do
       assert @admin_record.content.present?, 'content should be present before destroy'
-      assert_no_difference('Record.count') do
-        delete :destroy, id: @admin_record
+      assert_no_difference('AuditedActivity.count') do
+        assert_no_difference('Record.count') do
+          delete :destroy, id: @admin_record
+        end
       end
       assert_redirected_to root_path()
       assert_not_nil assigns(:record)
@@ -274,6 +288,7 @@ class RecordsControllerTest < ActionController::TestCase
           end
         end
       end
+      assert_equal assigns(:record).id, assigns(:audited_activity).record_id
       assert ProjectAffiliatedRecord.where(record_id: assigns(:record).id, project_id: @puppet.project_id).exists?, 'ProjectAffiliatedRecord should have been created for project_user.project and newly created record'
     end
   end #ProjectAffiliatedRecord

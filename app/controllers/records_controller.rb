@@ -50,6 +50,7 @@ class RecordsController < ApplicationController
     end
     respond_to do |format|
       if @record.save
+        @audited_activity.record_id = @record.id
         format.html { redirect_to @record, notice: 'Record was successfully created.' }
         format.json { render action: 'show', status: :created, location: @record }
       else
@@ -63,6 +64,7 @@ class RecordsController < ApplicationController
     File.delete(@record.content.path)
     @record.is_destroyed = true
     @record.save
+    @audited_activity.record_id = @record.id
     respond_to do |format|
       format.html { redirect_to records_url }
       format.json { head :no_content }
