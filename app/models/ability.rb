@@ -17,7 +17,7 @@ class Ability
       if user.is_administrator?
         can :manage, User, :type => nil
         can [:read, :edit, :update, :destroy, :switch_to], [RepositoryUser, CoreUser, ProjectUser]
-        can :read, Record
+        can :read, [Record,AuditedActivity]
         cannot :destroy, User, :id => user.id
       else
         can :read, RepositoryUser
