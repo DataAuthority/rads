@@ -8,8 +8,6 @@
       <th>Controller name</th>
       <th>Http method</th>
       <th>Action</th>
-      <th>Params</th>
-      <th>Record</th>
       <th></th>
       <th></th>
       <th></th>
@@ -19,13 +17,11 @@
   <tbody>
     <% @audited_activities.each do |audited_activity| %>
       <tr>
-        <td><%= audited_activity.authenticated_user_id %></td>
-        <td><%= audited_activity.current_user_id %></td>
+        <td><%= audited_activity.authenticated_user %></td>
+        <td><%= audited_activity.current_user %></td>
         <td><%= audited_activity.controller_name %></td>
         <td><%= audited_activity.http_method %></td>
         <td><%= audited_activity.action %></td>
-        <td><%= audited_activity.params %></td>
-        <td><%= audited_activity.record_id %></td>
         <td><%= link_to 'Show', audited_activity %></td>
       </tr>
     <% end %>
