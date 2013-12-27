@@ -78,10 +78,17 @@ class ActiveSupport::TestCase
   end
 
   # Audited activity testing
-  def assert_audited_activity(&block)
+  def assert_audited_activity(current_user, authenticated_user, method, action, controller_name, &block)
     assert_difference('AuditedActivity.count') do
       block.call()
+      # Test that the correct information was audited
+      assert_not_nil assigns(:audited_activity)
+      assert assigns(:audited_activity).valid?, "ERRORS #{ assigns(:audited_activity).errors.messages.inspect }"
+      assert_equal current_user.id, assigns(:audited_activity).current_user_id
+      assert_equal authenticated_user.id, assigns(:audited_activity).authenticated_user_id
+      assert_equal controller_name, assigns(:audited_activity).controller_name
+      assert_equal action, assigns(:audited_activity).action
+      assert_equal method, assigns(:audited_activity).http_method
     end
-    # Test that the correct information was audited
   end
 end

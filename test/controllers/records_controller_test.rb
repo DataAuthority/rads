@@ -61,7 +61,7 @@ class RecordsControllerTest < ActionController::TestCase
     end
 
     should "post create" do
-      assert_audited_activity do
+      assert_audited_activity(@admin, @admin, 'post', 'create', 'records') do
         assert_difference('Record.count') do
           post :create, record: {
             content: fixture_file_upload('attachments/content.txt', 'text/plain')
@@ -150,7 +150,7 @@ class RecordsControllerTest < ActionController::TestCase
     end
 
     should "post create" do
-      assert_audited_activity do
+      assert_audited_activity(@user, @user, 'post','create','records') do
         assert_difference('Record.count') do
           post :create, record: {
             content: fixture_file_upload('attachments/content.txt', 'text/plain')
@@ -264,7 +264,7 @@ class RecordsControllerTest < ActionController::TestCase
       @puppet = users(:project_user)
       session[:switch_to_user_id] = @puppet.id
       assert_equal 'ProjectUser', @controller.current_user.type
-      assert_audited_activity do
+      assert_audited_activity(@puppet, @project_member, 'post','create','records') do
         assert_difference('Record.count') do
           assert_difference('ProjectAffiliatedRecord.count') do
             post :create, record: {

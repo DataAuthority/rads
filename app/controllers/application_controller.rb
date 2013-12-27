@@ -13,7 +13,6 @@ class ApplicationController < ActionController::Base
     method = "#{resource}_params"
     params[resource] &&= send(method) if respond_to?(method, true)
   end
-  before_action :audit_activity
 
   rescue_from ActiveRecord::RecordNotFound, :with => :missing_record
   rescue_from CanCan::AccessDenied, :with => :action_denied
@@ -31,13 +30,13 @@ class ApplicationController < ActionController::Base
 
 private
   def audit_activity
-    AuditedActivity.create({
-      current_user_id: 1,
-      authenticated_user_id: 2,
-      controller_name: 'foo',
-      http_method: 'get',
-      action: 'bar',
-      params: 'params go here'
+    @audited_activity = AuditedActivity.create({
+      current_user_id: current_user.id,
+      authenticated_user_id: shib_user.id,
+      controller_name: controller_name,
+      http_method: request.method.downcase,
+      action: action_name,
+      params: params.to_json 
     })
   end
 

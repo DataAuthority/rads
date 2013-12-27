@@ -1,6 +1,7 @@
 class RecordsController < ApplicationController
   skip_before_action :check_session, only: [:index]
   load_and_authorize_resource except: [:index]
+  before_action :audit_activity, only: [:create, :destroy]
 
   def index
     if params[:md5]
