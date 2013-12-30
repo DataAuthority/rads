@@ -1,6 +1,7 @@
 <p>
   <strong>File Name:</strong>
   <%= @record.content_file_name %>
+  <%= link_to 'Provenance', record_provenance_show_path(record_id: @record.id, format: 'xml') %>
 </p>
 
 <p>

@@ -1,0 +1,7 @@
+<% unless @rendered_cores[prov_core.id] %>
+  <prov:agent prov:id="radsc:<%= prov_core.id %>">
+    <prov:type>prov:Organization</prov:type>
+    <foaf:givenName>Core <%= prov_core.name %></foaf:givenName>
+  </prov:agent>
+<%   @rendered_cores[prov_core.id] = true %>
+<% end %>

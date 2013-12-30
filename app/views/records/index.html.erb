@@ -55,6 +55,7 @@ $(function(){
       <th></th>
       <th></th>
       <th></th>
+      <th></th>
     </tr>
   </thead>
 
@@ -70,6 +71,7 @@ $(function(){
         <td><%= record.created_at.httpdate %></td>
         <td><%= download_link(record) unless current_user && record.is_destroyed? %></td>
         <td><%= link_to 'Show', record if can? :show, record %></td>
+        <td><%= link_to 'Provenance', record_provenance_show_path(record_id: record.id, format: 'xml') %></td>
         <td><%= link_to 'Destroy', record, method: :delete, data: { confirm: 'Are you sure?' } if can?(:destroy, record) && !record.is_destroyed? %></td>
       </tr>
     <% end %>

@@ -1,0 +1,7 @@
+<% unless @rendered_projects[prov_project.id] %>
+  <prov:agent prov:id="radsp:<%= prov_project.id %>">
+    <prov:type>prov:Organization</prov:type>
+    <foaf:givenName>Project <%= prov_project.name %></foaf:givenName>
+  </prov:agent>
+<%   @rendered_projects[prov_project.id] = true %>
+<% end %>

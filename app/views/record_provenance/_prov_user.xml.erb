@@ -1,0 +1,27 @@
+<% unless @rendered_users[prov_user.id] %>
+  <prov:agent prov:id="radsu:<%= prov_user.id %>">
+    <foaf:givenName><%= prov_user %></foaf:givenName>
+<%   if prov_user.is_a? RepositoryUser %>
+    <prov:type>prov:Person</prov:type>
+    <foaf:mbox>mailto:<%= prov_user.email %></foaf:mbox>
+  </prov:agent>
+<%   else %>
+    <prov:type>prov:SoftwareAgent</prov:type>
+  </prov:agent>
+<%     if prov_user.is_a? CoreUser %>
+<%= render partial: "prov_core", object: prov_user.core %>
+  <prov:actedOnBehalfOf>
+    <prov:delegate prov:ref="radsu:<%= prov_user.id %>"/>
+    <prov:responsible prov:ref="radsc:<%= prov_user.core_id %>"/>
+  </prov:actedOnBehalfOf>
+<%   end %>
+<%     if prov_user.is_a? ProjectUser %>
+<%= render partial: "prov_project", object: prov_user.project %>
+  <prov:actedOnBehalfOf>
+    <prov:delegate prov:ref="radsu:<%= prov_user.id %>"/>
+    <prov:responsible prov:ref="radsp:<%= prov_user.project_id %>"/>
+  </prov:actedOnBehalfOf>
+<%     end %>
+<%   end %>
+<% @rendered_users[prov_user.id] = true %>
+<% end %>

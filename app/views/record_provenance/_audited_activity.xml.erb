@@ -1,0 +1,30 @@
+<%= render partial: "prov_user", object: audited_activity.current_user %>
+<% unless audited_activity.current_user.id == audited_activity.authenticated_user.id %>
+<%= render partial: "prov_user", object: audited_activity.authenticated_user %>
+  <prov:actedOnBehalfOf>
+    <prov:delegate prov:ref="radsu:<%= audited_activity.current_user_id %>"/>
+    <prov:responsible prov:ref="radsu:<%= audited_activity.authenticated_user_id %>"/>
+  </prov:actedOnBehalfOf>
+<% end %>
+<% if audited_activity.action == 'create' %>
+  <prov:wasAttributedTo>
+    <prov:entity prov:ref="radsf:<%= audited_activity.record_id %>"/>
+    <prov:agent prov:ref="radsu:<%= audited_activity.current_user_id  %>"/>
+  </prov:wasAttributedTo>
+  <prov:wasGeneratedBy>
+    <prov:entity prov:ref="radsf:<%= audited_activity.record_id %>"/>
+    <prov:time><%= audited_activity.created_at %></prov:time>
+  </prov:wasGeneratedBy>
+<% end %>
+<% if audited_activity.action == 'destroy' %>
+  <prov:activity prov:id="radsactivity:destruction" />
+  <prov:wasAssociatedWith>
+    <prov:activity prov:ref="radsactivity:destruction"/>
+    <prov:agent prov:ref="radsu:<%= audited_activity.current_user_id %>"/>
+  </prov:wasAssociatedWith>
+  <prov:wasInvalidatedBy>
+    <prov:entity prov:ref="radsf:<%= audited_activity.record_id %>"/>
+    <prov:activity prov:ref="radsactivity:destruction"/>
+    <prov:time><%= audited_activity.created_at %></prov:time>
+  </prov:wasInvalidatedBy>
+<% end %>

@@ -1,4 +1,5 @@
 Rads::Application.routes.draw do
+  get "record_provenance/show"
   resources :audited_activities, only: [:index, :show]
 
   resources :project_users, except: [:new, :create, :edit]
