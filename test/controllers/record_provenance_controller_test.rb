@@ -9,6 +9,8 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     @record = records(:user)
     @record.content = @test_content
     @record.save
+
+    @unexpected_md5 = 'foobarbaz'
   end
 
   teardown do
@@ -16,7 +18,7 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     @record.destroy
   end
 
-  should 'require a parameter to sho' do
+  should 'require a parameter to show' do
     get :show
     assert_response 403
   end
@@ -74,4 +76,28 @@ class RecordProvenanceControllerTest < ActionController::TestCase
       assert_equal @record.id, assigns(:record).id
     end
   end #md5
+
+  context 'unexpected md5' do
+    should "not get show without authentication" do
+      get :show, md5: @unexpected_md5
+      assert_response 403
+      assert_nil assigns(:record)
+    end
+
+    should "not get show with authentication" do
+      authenticate_existing_user(users(:non_admin), true)
+      get :show, md5: @unexpected_md5
+      assert_response 403
+      assert_nil assigns(:record)
+    end
+
+    should "not get show with switch_user" do
+      authenticate_existing_user(users(:non_admin), true)
+      @puppet = users(:project_user)
+      session[:switch_to_user_id] = @puppet.id
+      get :show, md5: @unexpected_md5
+      assert_response 403
+      assert_nil assigns(:record)
+    end
+  end #unexpected md5
 end
