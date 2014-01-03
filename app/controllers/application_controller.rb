@@ -30,7 +30,7 @@ class ApplicationController < ActionController::Base
 
 private
   def audit_activity
-    @audited_activity = AuditedActivity.create({
+    @audited_activity = AuditedActivity.new({
       current_user_id: current_user.id,
       authenticated_user_id: shib_user.id,
       controller_name: controller_name,
@@ -38,6 +38,11 @@ private
       action: action_name,
       params: params.to_json 
     })
+
+    yield
+
+    @audited_activity.record_id = @record.id if @record
+    @audited_activity.save
   end
 
   def check_session
