@@ -78,10 +78,21 @@ class AuditedActivitiesControllerTest < ActionController::TestCase
       assert_response :success
     end
 
-    should 'get show' do
+    should 'get show with record_id' do
+      @audited_activity.record_id = Record.first.id
+      @audited_activity.save
       get :show, id: @audited_activity
       assert_response :success
       assert_not_nil assigns(:audited_activity)
+      assert_not_nil assigns(:record)
+      assert_equal @audited_activity.id, assigns(:audited_activity).id
+    end
+
+    should 'get show without record_id' do
+      get :show, id: @audited_activity
+      assert_response :success
+      assert_not_nil assigns(:audited_activity)
+      assert_nil assigns(:record)
       assert_equal @audited_activity.id, assigns(:audited_activity).id
     end
   end #Admin

@@ -4,16 +4,16 @@ one:
   authenticated_user_id: 1
   current_user_id: 1
   controller_name: MyString
-  http_method: MyString
-  action: MyString
+  http_method: post
+  action: update
   params: MyText
-  record_id: 1
+  record_id: 
 
 two:
   authenticated_user_id: 1
   current_user_id: 1
   controller_name: MyString
-  http_method: MyString
-  action: MyString
+  http_method: post
+  action: delete
   params: MyText
-  record_id: 1
+  record_id: 

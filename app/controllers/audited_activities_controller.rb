@@ -5,6 +5,7 @@ class AuditedActivitiesController < ApplicationController
   end
 
   def show
+    @record = Record.find(@audited_activity.record_id) if @audited_activity.record_id
   end
 
   def new
