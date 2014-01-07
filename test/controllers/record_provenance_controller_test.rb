@@ -27,16 +27,18 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     should "get show without authentication" do
       get :show, record_id: @record.id
       assert_response :success
-      assert_not_nil assigns(:record)
-      assert_equal @record.id, assigns(:record).id
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
     end
 
     should "get show with authentication" do
       authenticate_existing_user(users(:non_admin), true)
       get :show, record_id: @record.id
       assert_response :success
-      assert_not_nil assigns(:record)
-      assert_equal @record.id, assigns(:record).id
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
     end
 
     should "get show with switch_user" do
@@ -45,8 +47,9 @@ class RecordProvenanceControllerTest < ActionController::TestCase
       session[:switch_to_user_id] = @puppet.id
       get :show, record_id: @record.id
       assert_response :success
-      assert_not_nil assigns(:record)
-      assert_equal @record.id, assigns(:record).id
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
     end
   end #record_id
 
@@ -54,16 +57,18 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     should "get show without authentication" do
       get :show, md5: @expected_md5
       assert_response :success
-      assert_not_nil assigns(:record)
-      assert_equal @record.id, assigns(:record).id
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
     end
 
     should "get show with authentication" do
       authenticate_existing_user(users(:non_admin), true)
       get :show, md5: @expected_md5
       assert_response :success
-      assert_not_nil assigns(:record)
-      assert_equal @record.id, assigns(:record).id
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
     end
 
     should "get show with switch_user" do
@@ -72,8 +77,9 @@ class RecordProvenanceControllerTest < ActionController::TestCase
       session[:switch_to_user_id] = @puppet.id
       get :show, md5: @expected_md5
       assert_response :success
-      assert_not_nil assigns(:record)
-      assert_equal @record.id, assigns(:record).id
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
     end
   end #md5
 
@@ -81,14 +87,14 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     should "not get show without authentication" do
       get :show, md5: @unexpected_md5
       assert_response 404
-      assert_nil assigns(:record)
+      assert (assigns(:records).count == 0), 'records should be empty'
     end
 
     should "not get show with authentication" do
       authenticate_existing_user(users(:non_admin), true)
       get :show, md5: @unexpected_md5
       assert_response 404
-      assert_nil assigns(:record)
+      assert (assigns(:records).count == 0), 'records should be empty'
     end
 
     should "not get show with switch_user" do
@@ -97,7 +103,7 @@ class RecordProvenanceControllerTest < ActionController::TestCase
       session[:switch_to_user_id] = @puppet.id
       get :show, md5: @unexpected_md5
       assert_response 404
-      assert_nil assigns(:record)
+      assert (assigns(:records).count == 0), 'records should be empty'
     end
   end #unexpected md5
 end

@@ -2,12 +2,12 @@ class RecordProvenanceController < ApplicationController
   skip_before_action :check_session
   def show
     if params[:record_id]
-      @record = Record.find(params[:record_id])
+      @records = Record.where(id: params[:record_id])
     elsif params[:md5]
-      @record = Record.find_by_md5(params[:md5]).first
+      @records = Record.find_by_md5(params[:md5])
     end
 
-    unless @record
+    if @records.nil? || (@records.count < 1)
       not_found && return 
     end
     
