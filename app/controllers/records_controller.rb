@@ -71,6 +71,19 @@ class RecordsController < ApplicationController
 
   private
 
+    def filter_audited_params(params)
+      new_params = params.clone
+      if new_params[:record]
+        if new_params[:record][:content]
+          new_params[:record][:content] = {
+            content_type: params[:record][:content].content_type,
+            original_filename: params[:record][:content].original_filename
+          }
+        end
+      end
+      new_params
+    end
+
     # Never trust parameters from the scary internet, only allow the white list through.
     def record_params
       params.require(:record).permit(:content)

@@ -36,13 +36,17 @@ private
       controller_name: controller_name,
       http_method: request.method.downcase,
       action: action_name,
-      params: params.to_json 
+      params: filter_audited_params(params).to_json 
     })
 
     yield
 
     @audited_activity.record_id = @record.id if @record
     @audited_activity.save
+  end
+
+  def filter_audited_params(params)
+    params
   end
 
   def check_session
