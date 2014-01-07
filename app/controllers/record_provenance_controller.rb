@@ -8,7 +8,7 @@ class RecordProvenanceController < ApplicationController
     end
 
     unless @record
-      access_denied && return 
+      not_found && return 
     end
     
     @rendered_users = {}

@@ -129,4 +129,8 @@ private
   def access_denied
     render file: "#{Rails.root}/public/403", formats: [:html], status: 403, layout: false
   end
+
+  def not_found
+    render file: "#{Rails.root}/public/404", formats: [:html], status: 404, layout: false
+  end
 end
