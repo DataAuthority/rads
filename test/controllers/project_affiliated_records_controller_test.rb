@@ -76,14 +76,14 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
         post :create, @create_params
       end
       assert_not_nil assigns(:project_affiliated_record)
-      assert_redirected_to project_project_affiliated_record_url(@project, assigns(:project_affiliated_record).id)
+      assert_redirected_to project_url(@project)
     end
 
     should "destroy project_affiliated_record" do
       assert_difference('ProjectAffiliatedRecord.count', -1) do
         delete :destroy, project_id: @project, id: @project_affiliated_record
       end
-      assert_redirected_to project_project_affiliated_records_url(@project)
+      assert_redirected_to project_url(@project)
     end
   end #ProjectMember
 

@@ -19,7 +19,7 @@ class ProjectAffiliatedRecordsController < ApplicationController
     @unaffiliated_records = current_user.records.reject {|r| @project.is_affiliated_record? r}
     respond_to do |format|
       if @project_affiliated_record.save
-        format.html { redirect_to [@project, @project_affiliated_record], notice: 'Project affiliated record was successfully created.' }
+        format.html { redirect_to @project, notice: 'Project affiliated record was successfully created.' }
         format.json { render action: 'show', status: :created, location: @project_affiliated_record }
       else
         format.html { render action: 'new' }
@@ -31,7 +31,7 @@ class ProjectAffiliatedRecordsController < ApplicationController
   def update
     respond_to do |format|
       if @project_affiliated_record.update(project_affiliated_record_params)
-        format.html { redirect_to [@project, @project_affiliated_record], notice: 'Project affiliated record was successfully updated.' }
+        format.html { redirect_to @project, notice: 'Project affiliated record was successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
@@ -43,7 +43,7 @@ class ProjectAffiliatedRecordsController < ApplicationController
   def destroy
     @project_affiliated_record.destroy
     respond_to do |format|
-      format.html { redirect_to project_project_affiliated_records_url(@project) }
+      format.html { redirect_to @project }
       format.json { head :no_content }
     end
   end
