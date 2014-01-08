@@ -13,7 +13,15 @@
   <%= @project.creator %>
 </p>
 
+<%= render partial: 'project_memberships/project_memberships', locals: { project_memberships: @project.project_memberships } if can? :index, @project.project_memberships.build() %>
+
+<% if can? :new, @project.project_memberships.build() %>
+<%= link_to 'New project membership', new_project_project_membership_path(@project) %> |
+<% end %>
 <% if can? :edit, @project %>
 <%= link_to 'Edit', edit_project_path(@project) %> |
+<% end %>
+<% if can? :index, @project.project_affiliated_records.build() %>
+<%= link_to 'Affiliated records', project_project_affiliated_records_path(@project) if can? :index, @project.project_affiliated_records.build() %> |
 <% end %>
 <%= link_to 'Back', projects_path %>
