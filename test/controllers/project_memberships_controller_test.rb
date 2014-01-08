@@ -277,14 +277,14 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
         assert assigns(:project_membership).errors.messages.empty?, "#{ assigns(:project_membership).errors.messages.inspect }"
         assert assigns(:project_membership).valid?, "#{ assigns(:project_membership).errors.inspect }"
       end
-      assert_redirected_to project_project_membership_url(@project, assigns(:project_membership))
+      assert_redirected_to project_url(@project)
     end
 
     should "destroy project_membership" do
       assert_difference('ProjectMembership.count', -1) do
         delete :destroy, project_id: @project, id: @project_membership
       end
-      assert_redirected_to project_project_memberships_url(@project)
+      assert_redirected_to project_url(@project)
     end
 
   end #RepositoryUser Project Member
