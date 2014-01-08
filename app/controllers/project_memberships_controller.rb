@@ -16,7 +16,7 @@ class ProjectMembershipsController < ApplicationController
     @non_members = User.all.reject {|u| @project.is_member? u}
     respond_to do |format|
       if @project_membership.save
-        format.html { redirect_to [@project, @project_membership], notice: 'Project membership was successfully created.' }
+        format.html { redirect_to @project, notice: 'Project membership was successfully created.' }
         format.json { render action: 'show', status: :created, location: @project_membership }
       else
         format.html { render action: 'new' }
@@ -28,7 +28,7 @@ class ProjectMembershipsController < ApplicationController
   def destroy
     @project_membership.destroy
     respond_to do |format|
-      format.html { redirect_to project_project_memberships_url }
+      format.html { redirect_to @project }
       format.json { head :no_content }
     end
   end
