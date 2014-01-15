@@ -39,7 +39,7 @@
 <% end %>
 <% end %>
 
-<%= link_to 'New project membership', new_project_project_membership_path(@project) if can? :new, @project.project_memberships.build() %>
+<%= link_to 'New project membership', new_project_project_membership_path(@project) if can? :new, ProjectMembership.new(project_id: @project.id) %>
 <br>
 <br>
 

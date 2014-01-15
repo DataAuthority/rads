@@ -15,6 +15,6 @@
 <p>
   <strong>Core Members:</strong>
 <%= render partial: 'core_memberships/core_memberships', locals: { core_memberships: @core.core_memberships } %>
-<%= link_to 'Add New Member', new_core_core_membership_path(@core) if can? :create, @core.core_memberships.build %>
+<%= link_to 'Add New Member', new_core_core_membership_path(@core) if can? :create, CoreMembership.new(core_id: @core.id) %>
 </p>
 <%= link_to 'Back', cores_path %>

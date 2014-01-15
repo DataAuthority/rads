@@ -20,7 +20,7 @@
         <td><%= core.name %></td>
         <td><%= core.description %></td>
         <td><%= core.creator %></td>
-        <td><%= link_to 'Manage Memberships', core_core_memberships_path(core) if can? :create, core.core_memberships.build %></td>
+        <td><%= link_to 'Manage Memberships', core_core_memberships_path(core) if can? :create, CoreMembership.new(core_id: core.id) %></td>
         <td><%= link_to 'Show', core if can? :show, core%></td>
       </tr>
     <% end %>
