@@ -145,6 +145,33 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_equal @user.id, @t_project.creator_id
       assert @t_project.project_memberships.where(user_id: @user.id).exists?, 'creator should have a new project_membership for the project'
     end
+
+    should "create a project with project_affiliated_records_attributes" do
+      [ records(:user), records(:user_unaffiliated) ].each do |should_be_affiliated|
+        assert !@project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ @project.id }"
+      end
+      @create_params[:project][:project_affiliated_records_attributes] = [
+                                                     { record_id: records(:user).id },
+                                                     { record_id: records(:user_unaffiliated).id },
+                                                     ]
+      assert_difference('Project.count') do
+        assert_difference('ProjectUser.count') do
+          assert_difference('ProjectAffiliatedRecord.count', 2) do
+            post :create, @create_params
+            assert_not_nil assigns(:project)
+            assert assigns(:project).valid?, "#{ assigns(:project).errors.messages.inspect }"
+          end
+        end
+      end
+      assert_not_nil assigns(:project)
+      assert_redirected_to project_path(assigns(:project))
+      @t_project = Project.find(assigns(:project).id)
+      assert_equal @user.id, @t_project.creator_id
+      assert @t_project.project_memberships.where(user_id: @user.id).exists?, 'creator should have a new project_membership for the project'
+      [ records(:user), records(:user_unaffiliated) ].each do |should_be_affiliated|
+        assert @t_project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should be affiliated with #{ @t_project.id }"
+      end
+    end
   end #RepositoryUser
 
   context 'ProjectMember' do
@@ -165,6 +192,22 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_redirected_to project_path(@project)
       t_p = Project.find(@project.id)
       assert_equal new_description, t_p.description
+    end
+
+     should 'be able to update the project to add project_affiliated_records_attributes' do
+      [ records(:user), records(:user_unaffiliated) ].each do |should_be_affiliated|
+        assert !@project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ @project.id }"
+      end
+      assert_difference('ProjectAffiliatedRecord.count', 2) do
+        patch :update, id: @project, project: {project_affiliated_records_attributes: [ 
+                                                                            { record_id: records(:user).id },
+                                                                            { record_id: records(:user_unaffiliated).id }                                                                        ]}
+      end
+      assert_redirected_to project_path(@project)
+      t_p = Project.find(@project.id)
+      [ records(:user), records(:user_unaffiliated) ].each do |should_be_affiliated|
+        assert t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should be affiliated with #{ t_p.id }"
+      end
     end
   end #ProjectMember
 
