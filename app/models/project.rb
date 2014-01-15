@@ -6,7 +6,7 @@ class Project < ActiveRecord::Base
   has_one :project_user, inverse_of: :project
   has_many :project_affiliated_records, inverse_of: :project
   has_many :records, through: :project_affiliated_records, source: :affiliated_record
-  accepts_nested_attributes_for :project_affiliated_records
+  accepts_nested_attributes_for :project_affiliated_records, allow_destroy: true
 
   def to_s
     name

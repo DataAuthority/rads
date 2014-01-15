@@ -15,6 +15,9 @@ class ProjectsController < ApplicationController
 
   def edit
     @unaffiliated_records = current_user.records.reject {|r| @project.is_affiliated_record? r}
+    @unaffiliated_records.each do |record|
+      @project.project_affiliated_records.build(record_id: record.id)
+    end
   end
 
   def create
@@ -47,6 +50,6 @@ class ProjectsController < ApplicationController
   private
     # Never trust parameters from the scary internet, only allow the white list through.
     def project_params
-      params.require(:project).permit(:name, :description, project_affiliated_records_attributes: [ :record_id ])
+      params.require(:project).permit(:name, :description, project_affiliated_records_attributes: [:id, :_destroy, :record_id])
     end
 end
