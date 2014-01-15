@@ -13,15 +13,69 @@
   <%= @project.creator %>
 </p>
 
-<%= render partial: 'project_memberships/project_memberships', locals: { project_memberships: @project.project_memberships } if can? :index, @project.project_memberships.build() %>
+<% if can? :index, ProjectMembership.new(project_id: @project.id) %>
+<% if @project_memberships.empty? %>
+<p>There are no project memberships to display.</p>
+<% else %>
+<table>
+  <thead>
+    <tr>
+      <th>User</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
 
-<% if can? :new, @project.project_memberships.build() %>
-<%= link_to 'New project membership', new_project_project_membership_path(@project) %> |
+  <tbody>
+    <% @project_memberships.each do |project_membership| %>
+      <tr>
+        <td><%= project_membership.user %></td>
+        <td><%= link_to 'Show', [project_membership.project, project_membership] if can? :show, project_membership %></td>
+        <td><%= link_to 'Destroy', [project_membership.project, project_membership], method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, project_membership %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
 <% end %>
+<% end %>
+
+<%= link_to 'New project membership', new_project_project_membership_path(@project) if can? :new, @project.project_memberships.build() %>
+<br>
+<br>
+
+<% if @project_affiliated_records.empty? %>
+<p>There are no affiliated records to display.</p>
+<% else %>
+<table>
+  <thead>
+    <tr>
+      <th>Affiliated record</th>
+      <th>Creator</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @project_affiliated_records.each do |project_affiliated_record| %>
+      <tr>
+        <td>
+          <%= link_to project_affiliated_record, record_path(project_affiliated_record.record_id) %>
+        </td>
+        <td>
+          <%= project_affiliated_record.affiliated_record.creator %>
+        </td>
+        <td><%= link_to 'Destroy', [project_affiliated_record.project, project_affiliated_record], method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, project_affiliated_record %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<% end %>
+
+<%= link_to 'Affiliate record', new_project_project_affiliated_record_path(@project) if can? :new, @project.project_affiliated_records.build() %>
+<br>
+<br>
+
 <% if can? :edit, @project %>
 <%= link_to 'Edit', edit_project_path(@project) %> |
-<% end %>
-<% if can? :index, @project.project_affiliated_records.build() %>
-<%= link_to 'Affiliated records', project_project_affiliated_records_path(@project) if can? :index, @project.project_affiliated_records.build() %> |
 <% end %>
 <%= link_to 'Back', projects_path %>

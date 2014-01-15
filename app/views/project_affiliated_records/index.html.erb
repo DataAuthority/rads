@@ -1,5 +1,8 @@
-<h1>Listing project_affiliated_records</h1>
+<h1>Listing affiliated records</h1>
 
+<% if @project_affiliated_records.empty? %>
+<p>There are no affiliated records to display.</p>
+<% else %>
 <table>
   <thead>
     <tr>
@@ -27,5 +30,6 @@
 </table>
 
 <br>
+<% end %>
 
 <%= link_to 'New Project affiliated record', new_project_project_affiliated_record_path(@project) %>

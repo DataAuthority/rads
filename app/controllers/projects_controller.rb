@@ -5,6 +5,8 @@ class ProjectsController < ApplicationController
   end
 
   def show
+    @project_affiliated_records = @project.project_affiliated_records
+    @project_memberships = @project.project_memberships
   end
 
   def new
