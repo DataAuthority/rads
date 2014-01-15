@@ -122,6 +122,10 @@ class ProjectsControllerTest < ActionController::TestCase
       get :new
       assert_response :success
       assert_not_nil assigns(:project)
+      assert_not_nil assigns(:unaffiliated_records)
+      assert !assigns(:unaffiliated_records).empty?, 'should have unaffiliated_records'
+      assert assigns(:unaffiliated_records).include?(records(:user_unaffiliated)), 'should include user_unaffiliated in unaffiliated_records'
+      assert !assigns(:unaffiliated_records).include?(records(:admin)), 'should not include another users record in unaffiliated_records'
     end
 
     should "get show" do
@@ -184,6 +188,11 @@ class ProjectsControllerTest < ActionController::TestCase
       assert @project.is_member?(@user), 'user should be a member of the project'
       get :edit, id: @project
       assert_response :success
+      assert_not_nil assigns(:unaffiliated_records)
+      assert !assigns(:unaffiliated_records).empty?, 'should have unaffiliated_records'
+      assert assigns(:unaffiliated_records).include?(records(:user_unaffiliated)), 'should include user_unaffiliated in unaffiliated_records'
+      assert !assigns(:unaffiliated_records).include?(records(:project_affiliated_one)), 'should not include affiliated records in unaffiliated_records'
+      assert !assigns(:unaffiliated_records).include?(records(:admin)), 'should not include another users record in unaffiliated_records'
     end
 
     should 'be able to update the project' do
