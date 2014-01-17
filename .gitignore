@@ -22,3 +22,7 @@ pickle-email-*.html
 config/initializers/secret_token.rb
 VERSION
 Gemfile.lock
+config/database.yml
+config/database.yml.pg
+
+
