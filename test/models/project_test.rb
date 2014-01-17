@@ -40,19 +40,32 @@ class ProjectTest < ActiveSupport::TestCase
   end #nil user
 
   context 'CoreUser' do
+
     should 'pass ability profile' do
+      member_tested = non_member_tested = false
       CoreUser.all.each do |core_user|
         if core_user.is_enabled?
           allowed_abilities(core_user, Project, [:index] )
           allowed_abilities(core_user, @project, [:show] )
-          denied_abilities(core_user, @project, [:edit, :update])
+          denied_abilities(core_user, @project, [:edit])
           denied_abilities(core_user, Project.new, [:new, :create])
+          Project.all.each do |project|
+            if project.is_member?(core_user)
+              member_tested = true
+              allowed_abilities(core_user, project, [:update])
+            else
+              non_member_tested = true
+              denied_abilities(core_user, project, [:update])
+            end
+          end
         else
           denied_abilities(core_user, Project, [:index] )
           denied_abilities(core_user, @project, [:show, :edit, :update])
           denied_abilities(core_user, Project.new, [:new, :create])
         end
       end
+      assert member_tested, 'membership access should have been tested'
+      assert non_member_tested, 'no membership access should have been tested'
     end
   end #CoreUser
 

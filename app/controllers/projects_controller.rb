@@ -50,6 +50,10 @@ class ProjectsController < ApplicationController
   private
     # Never trust parameters from the scary internet, only allow the white list through.
     def project_params
-      params.require(:project).permit(:name, :description, project_affiliated_records_attributes: [:id, :_destroy, :record_id])
+      permitted_params = [project_affiliated_records_attributes: [:id, :_destroy, :record_id]]
+      if current_user.type == 'RepositoryUser'
+        permitted_params = [:name, :description] + permitted_params
+      end
+      params.require(:project).permit(permitted_params)
     end
 end

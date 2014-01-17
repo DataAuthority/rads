@@ -29,6 +29,8 @@ class ProjectsControllerTest < ActionController::TestCase
       authenticate_existing_user(@user, true)
       @puppet = users(:core_user)
       session[:switch_to_user_id] = @puppet.id
+      @member_project = @puppet.projects.first
+      @unaffiliated_records = @puppet.records.to_a
     end
 
     should "not get :new" do
@@ -57,6 +59,60 @@ class ProjectsControllerTest < ActionController::TestCase
       end
       assert_equal @puppet.id, @controller.current_user.id
       assert_redirected_to root_path()
+    end
+
+    should 'be able to affiliate multiple records with a project if they are a member' do
+      assert @member_project.is_member?(@puppet), 'core_user should be a member of member_project'
+      @unaffiliated_records.each do |should_be_affiliated|
+        assert !@member_project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ @member_project.id }"
+      end
+      assert_difference('ProjectAffiliatedRecord.count', @unaffiliated_records.length) do
+        patch :update, id: @member_project, project: {
+          project_affiliated_records_attributes: @unaffiliated_records.map {|r|
+            { record_id: r.id }
+          }
+        }
+      end
+      assert_redirected_to project_path(@member_project)
+      t_p = Project.find(@member_project.id)
+      @unaffiliated_records.each do |should_be_affiliated|
+        assert t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should be affiliated with #{ t_p.id }"
+      end
+    end
+
+    should 'not update project name or description even if they are a member' do
+      orig_name = @member_project.name
+      orig_description = @member_project.description
+      new_name = 'evil_core_project'
+      new_description = 'this is evil cores project now'
+      assert @member_project.is_member?(@puppet), 'core_user should be a member of member_project'
+      patch :update, id: @member_project, project: {
+        name: new_name,
+        description: new_description
+      }
+      assert_response 403
+      t_p = Project.find(@member_project.id)
+      assert_equal orig_name, @member_project.name
+      assert_equal orig_description, @member_project.description
+    end
+
+    should 'not affiliate records with a  project if they are not a member' do
+      assert !@project.is_member?(@puppet), 'core_user should not be a member of project'
+      @unaffiliated_records.each do |should_be_affiliated|
+        assert !@project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ @project.id }"
+      end
+      assert_no_difference('ProjectAffiliatedRecord.count') do
+        patch :update, id: @project, project: {
+          project_affiliated_records_attributes: @unaffiliated_records.map {|r|
+            { record_id: r.id }
+          }
+        }
+      end
+      assert_redirected_to root_path()
+      t_p = Project.find(@project.id)
+      @unaffiliated_records.each do |should_be_affiliated|
+        assert !t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should still not be affiliated with #{ t_p.id }"
+      end
     end
   end #CoreUser
 

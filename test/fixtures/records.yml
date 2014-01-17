@@ -12,6 +12,9 @@ admin:
 core_user:
   creator: :core_user
 
+core_user_two:
+  creator: :core_user
+
 project_user:
   creator: :project_user
 
