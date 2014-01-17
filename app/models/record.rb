@@ -3,6 +3,8 @@ class Record < ActiveRecord::Base
   has_many :project_affiliated_records, inverse_of: :affiliated_record
   has_many :audited_activities
 
+  accepts_nested_attributes_for :project_affiliated_records
+
   has_attached_file :content, path: ":interpolated_path"
 
   scope :find_by_md5, ->(md5) {where(content_fingerprint: md5)}

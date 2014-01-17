@@ -11,11 +11,13 @@ class RecordsControllerTest < ActionController::TestCase
     @user_record = records(:user)
     @user_record.content = @test_content
     @user_record.save
+    @user_project = projects(:one)
 
     @admin = users(:admin)
     @admin_record = records(:admin)
     @admin_record.content = @test_content
     @admin_record.save
+    @admin_project = projects(:two)
   end
 
   teardown do
@@ -76,6 +78,30 @@ class RecordsControllerTest < ActionController::TestCase
       assert_equal @expected_md5, assigns(:record).content_fingerprint
       @expected_record_path = [ @admin.storage_path,  assigns(:record).id, assigns(:record).content_file_name ].join('/')
       assert_equal @expected_record_path, assigns(:record).content.path
+      assigns(:record).content.destroy
+      assigns(:record).destroy
+    end
+
+    should "post create, with project_affiliated_records_attributes" do
+      assert_audited_activity(@admin, @admin, 'post', 'create', 'records') do
+        assert_difference('Record.count') do
+          assert_difference('ProjectAffiliatedRecord.count') do
+            post :create, record: {
+              content: fixture_file_upload('attachments/content.txt', 'text/plain'),
+              project_affiliated_records_attributes: [{project_id: @admin_project.id}]
+            }
+            assert_not_nil assigns(:record)
+          end
+        end
+      end
+      assert_equal assigns(:record).id, assigns(:audited_activity).record_id
+      assert_not_nil assigns(:record)
+      assert_redirected_to record_path(assigns(:record))
+      assert_equal @admin.id, assigns(:record).creator_id
+      assert_equal @expected_md5, assigns(:record).content_fingerprint
+      @expected_record_path = [ @admin.storage_path,  assigns(:record).id, assigns(:record).content_file_name ].join('/')
+      assert_equal @expected_record_path, assigns(:record).content.path
+      assert @admin_project.is_affiliated_record?(assigns(:record)), 'record should be affiliated with admin_project'
       assigns(:record).content.destroy
       assigns(:record).destroy
     end
@@ -173,6 +199,31 @@ class RecordsControllerTest < ActionController::TestCase
       @expected_record_path = [ @user.storage_path,  assigns(:record).id, assigns(:record).content_file_name ].join('/')
       assert_equal @expected_record_path, assigns(:record).content.path
       assert File.exists? assigns(:record).content.path
+      assigns(:record).content.destroy
+      assigns(:record).destroy
+    end
+
+    should "post create, with project_affiliated_records_attributes" do
+      assert_audited_activity(@user, @user, 'post','create','records') do
+        assert_difference('Record.count') do
+          assert_difference('ProjectAffiliatedRecord.count') do
+            post :create, record: {
+              content: fixture_file_upload('attachments/content.txt', 'text/plain'),
+              project_affiliated_records_attributes: [{project_id: @user_project.id.to_s}]
+            }
+            assert_not_nil assigns(:record)
+          end
+        end
+      end
+      assert_equal assigns(:record).id, assigns(:audited_activity).record_id
+      assert_not_nil assigns(:record)
+      assert_redirected_to record_path(assigns(:record))
+      assert_equal @user.id, assigns(:record).creator_id
+      assert_equal @expected_md5, assigns(:record).content_fingerprint
+      @expected_record_path = [ @user.storage_path,  assigns(:record).id, assigns(:record).content_file_name ].join('/')
+      assert_equal @expected_record_path, assigns(:record).content.path
+      assert File.exists? assigns(:record).content.path
+      assert @user_project.is_affiliated_record?(assigns(:record)), 'record should be affiliated with user_project'
       assigns(:record).content.destroy
       assigns(:record).destroy
     end
