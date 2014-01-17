@@ -15,6 +15,11 @@
     <%= f.file_field :content %>
   </div>
 
+  <%= f.fields_for :project_affiliated_records do |ff| %>
+    <%= ff.label :project_id %>
+    <%= ff.collection_select :project_id, current_user.projects, :id, :to_s %>
+  <% end %>
+
   <div class="actions">
     <%= f.submit %>
   </div>

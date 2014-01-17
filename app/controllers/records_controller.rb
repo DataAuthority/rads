@@ -41,6 +41,7 @@ class RecordsController < ApplicationController
   end
 
   def new
+    @record.project_affiliated_records.build unless current_user.projects.empty?
   end
 
   def create
