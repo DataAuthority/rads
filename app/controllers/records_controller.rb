@@ -1,26 +1,18 @@
 class RecordsController < ApplicationController
-  skip_before_action :check_session, only: [:index]
   load_and_authorize_resource except: [:index]
   around_action :audit_activity, only: [:create, :destroy]
 
   def index
-    if params[:md5]
-      @records = Record.find_by_md5(params[:md5]).select(:content_fingerprint, :created_at)
-      @redirect_target = records_url
-    else
-      check_session
-
-      unless current_user.nil?
-        if params[:affiliated_with_project]
-          @project = Project.find(params[:affiliated_with_project])
-          if @project.is_member? current_user
-            @records = @project.records
-          else
-            @records = current_user.records
-          end
+    unless current_user.nil?
+      if params[:affiliated_with_project]
+        @project = Project.find(params[:affiliated_with_project])
+        if @project.is_member? current_user
+          @records = @project.records
         else
           @records = current_user.records
         end
+      else
+        @records = current_user.records
       end
     end
 

@@ -28,25 +28,13 @@ class RecordsControllerTest < ActionController::TestCase
   end
 
   context 'Unauthenticated User' do
-    should "get index with md5=value html parameter" do
-      assert Record.find_by_md5(@expected_md5).count > 0, 'there should be a file with the expected md5'
-      get :index, md5: @expected_md5
-      assert_response :success
-      assert_not_nil assigns(:records)
-      assert assigns(:records).count > 0, 'there should be records with the expected md5'
-      assigns(:records).each do |record|
-        assert_equal @expected_md5, record.content_fingerprint
-      end
-    end
-
-    should 'not get index without md5=value html parameter' do
+    should 'not get index' do
       get :index
       assert_redirected_to sessions_new_url(:target => records_url)
     end
   end #Unauthenticated User
 
   context 'Admin' do
-
     setup do
       authenticate_existing_user(@admin, true)
     end
