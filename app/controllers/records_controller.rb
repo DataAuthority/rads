@@ -4,13 +4,10 @@ class RecordsController < ApplicationController
 
   def index
     unless current_user.nil?
-      if params[:affiliated_with_project]
-        @project = Project.find(params[:affiliated_with_project])
-        if @project.is_member? current_user
-          @records = @project.records
-        else
-          @records = current_user.records
-        end
+      @record_filter = RecordFilter.new(params[:record_filter])
+      if @record_filter.affiliated_with_project?
+        @project = current_user.projects.find(@record_filter.affiliated_with_project)
+        @records = @project.records
       else
         @records = current_user.records
       end

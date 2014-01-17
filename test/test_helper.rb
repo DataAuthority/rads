@@ -91,4 +91,16 @@ class ActiveSupport::TestCase
       assert_equal method, assigns(:audited_activity).http_method
     end
   end
+
+  def self.should_respond_to(method)
+    should "respond to #{method}" do
+      assert_respond_to subject, method
+    end
+  end
+
+  def self.class_should_respond_to(method)
+    should "respond to class #{method}" do
+      assert_respond_to subject.class, method
+    end
+  end
 end

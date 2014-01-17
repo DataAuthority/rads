@@ -137,4 +137,8 @@ private
   def not_found
     render file: "#{Rails.root}/public/404", formats: [:html], status: 404, layout: false
   end
+
+  def missing_record
+    render file: "#{Rails.root}/public/404", formats: [:html], status: 404, layout: false
+  end
 end

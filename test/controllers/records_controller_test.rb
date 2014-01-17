@@ -362,12 +362,12 @@ class RecordsControllerTest < ActionController::TestCase
       end
     end
 
-    should 'accept affiliated_with_project=project_id parameter and show records affiliated with the project for project_member' do
+    should 'accept record_filter[affiliated_with_project]=project_id parameter and show records affiliated with the project for project_member' do
       authenticate_existing_user(@user, true)
       assert @member_project.is_member?(@user), 'user should be a member of the member_project'
       record_count = @member_project.records.count
       assert record_count > 0, 'project should have affiliated records'
-      get :index, affiliated_with_project: @member_project.id
+      get :index, record_filter: {affiliated_with_project: @member_project.id}
       assert_response :success
       assert_not_nil assigns(:records)
       assert_not_nil assigns(:project)
@@ -378,19 +378,14 @@ class RecordsControllerTest < ActionController::TestCase
       end
     end
 
-    should 'accept affiliated_with_project=project_id parameter but render user.records if user is not a member of the project' do
+    should 'accept record_filter[affiliated_with_project]=project_id parameter but render user.records if user is not a member of the project' do
       authenticate_existing_user(@user, true)
       assert !@non_member_project.is_member?(@user), 'user should not be a member of the non_member_project'
       record_count = @user.records.count
       assert record_count > 0, 'user should have records'
-      get :index, affiliated_with_project: @non_member_project.id
-      assert_response :success
-      assert_not_nil assigns(:records)
-      assert_equal record_count, assigns(:records).count
-      assigns(:records).each do |record|
-        assert_equal @user.id, record.creator_id
-        assert !@non_member_project.is_affiliated_record?(record), 'record should not be affiliated with non_member_project'
-      end
+      get :index, record_filter: {affiliated_with_project: @non_member_project.id}
+      assert_response 404
+      assert_nil assigns(:records)
     end
   end #index
 end
