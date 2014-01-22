@@ -99,16 +99,16 @@ class RecordTest < ActiveSupport::TestCase
     setup do
       @user = users(:non_admin)
       @project_with_membership = projects(:one)
-      @project_without_membership = projects(:two)
+      @project_record_not_owned_by_user = records(:project_one_affiliated_project_user)
+      @non_member_project_record = records(:project_two_affiliated)
     end
 
     should 'pass ability profile' do
-      @project_with_membership.records.each do |mr|
-        allowed_abilities(@user, mr, [:index, :show])
-      end
-      @project_without_membership.records.each do |nmr|
-        denied_abilities(@user, nmr, [:index, :show])
-      end
+      assert @project_with_membership.is_member?(@user), 'user should be a member of the project'
+      assert @project_with_membership.is_affiliated_record?(@project_record_not_owned_by_user), 'record should be affiliated with project'
+      allowed_abilities(@user, @project_record_not_owned_by_user, [:index, :show])
+      denied_abilities(@user, @project_record_not_owned_by_user, [:destroy])
+      denied_abilities(@user, @non_member_project_record, [:index, :show, :destroy])
     end
   end #ProjectMembership
 end

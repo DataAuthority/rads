@@ -2,8 +2,12 @@
 
 one:
   project: :one
-  affiliated_record: :project_affiliated_one
+  affiliated_record: :project_one_affiliated
 
 two:
   project: :two
-  affiliated_record: :project_affiliated_two
+  affiliated_record: :project_two_affiliated
+
+three:
+  project: :one
+  affiliated_record: :project_one_affiliated_project_user

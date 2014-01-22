@@ -247,7 +247,7 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_not_nil assigns(:unaffiliated_records)
       assert !assigns(:unaffiliated_records).empty?, 'should have unaffiliated_records'
       assert assigns(:unaffiliated_records).include?(records(:user_unaffiliated)), 'should include user_unaffiliated in unaffiliated_records'
-      assert !assigns(:unaffiliated_records).include?(records(:project_affiliated_one)), 'should not include affiliated records in unaffiliated_records'
+      assert !assigns(:unaffiliated_records).include?(records(:project_one_affiliated)), 'should not include affiliated records in unaffiliated_records'
       assert !assigns(:unaffiliated_records).include?(records(:admin)), 'should not include another users record in unaffiliated_records'
     end
 

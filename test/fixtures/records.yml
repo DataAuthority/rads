@@ -18,8 +18,11 @@ core_user_two:
 project_user:
   creator: :project_user
 
-project_affiliated_one:
+project_one_affiliated:
   creator: :non_admin
 
-project_affiliated_two:
+project_one_affiliated_project_user:
+  creator: :project_user
+
+project_two_affiliated:
   creator: :project_user_two
