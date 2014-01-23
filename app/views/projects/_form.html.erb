@@ -20,15 +20,7 @@
     <%= f.text_area :description %>
   </div>
 
-  <fieldset>
-    <%= f.fields_for :project_affiliated_records do |rf| %>
-      <%= rf.hidden_field :id %>
-      <%= rf.hidden_field :record_id %>
-      <%= rf.check_box :_destroy, {:checked => rf.object.persisted?}, '0', '1' %>
-      <%= rf.label :_destroy, rf.object.affiliated_record %>
-      <br>
-    <% end %>
-  </fieldset>
+  <%= render partial: 'project_affiliated_records_fieldset', locals: {f: f} %>
 
   <div class="actions">
     <%= f.submit %>
