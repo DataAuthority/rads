@@ -11,6 +11,11 @@ class ProjectsController < ApplicationController
 
   def new
     @unaffiliated_records = current_user.records
+    @unaffiliated_records.each do |record|
+      @project.project_affiliated_records.build(record_id: record.id)
+    end
+
+    @potential_members = User.all - [current_user]
   end
 
   def edit
@@ -18,6 +23,8 @@ class ProjectsController < ApplicationController
     @unaffiliated_records.each do |record|
       @project.project_affiliated_records.build(record_id: record.id)
     end
+
+    @potential_members = User.all.reject {|u| @project.is_member? u}
   end
 
   def create
