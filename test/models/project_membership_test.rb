@@ -75,11 +75,11 @@ class ProjectMembershipTest < ActiveSupport::TestCase
     end
 
     should 'pass ability profile' do
-      Core.all.each do |core|
-        denied_abilities(@user, core.core_memberships, [:index] )
-        denied_abilities(@user, core.core_memberships.build, [:new, :create])
+      Project.all.each do |project|
+        denied_abilities(@user, project.project_memberships, [:index] )
+        denied_abilities(@user, project.project_memberships.build, [:new, :create])
       end
-      denied_abilities(@user, @core_membership, [:show, :destroy])
+      denied_abilities(@user, @project_membership, [:show, :destroy])
     end
   end #CoreUser
 end
