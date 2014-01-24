@@ -16,6 +16,9 @@ class ProjectsController < ApplicationController
     end
 
     @potential_members = User.all - [current_user]
+    @potential_members.each do |user|
+      @project.project_memberships.build(user_id: user.id)
+    end
   end
 
   def edit
@@ -25,6 +28,9 @@ class ProjectsController < ApplicationController
     end
 
     @potential_members = User.all.reject {|u| @project.is_member? u}
+    @potential_members.each do |user|
+      @project.project_memberships.build(user_id: user.id)
+    end
   end
 
   def create
@@ -57,7 +63,10 @@ class ProjectsController < ApplicationController
   private
     # Never trust parameters from the scary internet, only allow the white list through.
     def project_params
-      permitted_params = [project_affiliated_records_attributes: [:id, :_destroy, :record_id]]
+      permitted_params = [
+        project_affiliated_records_attributes: [:id, :_destroy, :record_id],
+        project_memberships_attributes: [:id, :_destroy, :user_id]
+      ]
       if current_user.type == 'RepositoryUser'
         permitted_params = [:name, :description] + permitted_params
       end

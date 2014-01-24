@@ -190,7 +190,9 @@ class ProjectsControllerTest < ActionController::TestCase
       assert !assigns(:unaffiliated_records).empty?, 'should have unaffiliated_records'
       assert assigns(:unaffiliated_records).include?(records(:user_unaffiliated)), 'should include user_unaffiliated in unaffiliated_records'
       assert !assigns(:unaffiliated_records).include?(records(:admin)), 'should not include another users record in unaffiliated_records'
+
       assert_equal assigns(:project).project_affiliated_records.length, assigns(:unaffiliated_records).length
+      assert_equal assigns(:project).project_memberships.length, assigns(:potential_members).length
     end
 
     should "get show" do
@@ -216,8 +218,8 @@ class ProjectsControllerTest < ActionController::TestCase
     end
 
     should "create a project with project_affiliated_records_attributes" do
-      [ records(:user), records(:user_unaffiliated) ].each do |should_be_affiliated|
-        assert !@project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ @project.id }"
+      [ records(:user), records(:user_unaffiliated) ].each do |should_not_be_affiliated|
+        assert !@project.is_affiliated_record?(should_not_be_affiliated), "#{ should_not_be_affiliated.id } should not be affiliated with #{ @project.id }"
       end
       @create_params[:project][:project_affiliated_records_attributes] = [
                                                      { record_id: records(:user).id },
@@ -241,6 +243,33 @@ class ProjectsControllerTest < ActionController::TestCase
         assert @t_project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should be affiliated with #{ @t_project.id }"
       end
     end
+ 
+    should "create a project with project_membership_attributes" do
+      @create_params[:project][:project_memberships_attributes] = []
+      potential_members = %w{enabled disabled admin dm core_user project_user}
+      potential_members.each do |user_type|
+        assert !@project.is_member?(users(user_type.to_sym)), "#{ user_type } should not be affiliated with #{ @project.id }"
+        @create_params[:project][:project_memberships_attributes] << { user_id: users(user_type.to_sym).id }
+      end
+
+      assert_difference('Project.count') do
+        assert_difference('ProjectUser.count') do
+          assert_difference('ProjectMembership.count', potential_members.length + 1) do
+            post :create, @create_params
+            assert_not_nil assigns(:project)
+            assert assigns(:project).valid?, "#{ assigns(:project).errors.messages.inspect }"
+          end
+        end
+      end
+      assert_not_nil assigns(:project)
+      assert_redirected_to project_path(assigns(:project))
+      @t_project = Project.find(assigns(:project).id)
+      assert_equal @user.id, @t_project.creator_id
+      assert @t_project.project_memberships.where(user_id: @user.id).exists?, 'creator should have a new project_membership for the project'
+      potential_members.each do |user_type|
+        assert assigns(:project).is_member?(users(user_type.to_sym)), "#{ user_type } should be affiliated with #{ assigns(:project).id }"
+      end
+    end
   end #RepositoryUser
 
   context 'ProjectMember' do
@@ -252,6 +281,7 @@ class ProjectsControllerTest < ActionController::TestCase
     should 'be able to edit the project' do
       assert @project.is_member?(@user), 'user should be a member of the project'
       original_affiliated_record_count = @project.project_affiliated_records.count
+      original_membership_count = @project.project_memberships.count
       get :edit, id: @project
       assert_response :success
 
@@ -268,7 +298,9 @@ class ProjectsControllerTest < ActionController::TestCase
       assert assigns(:unaffiliated_records).include?(records(:user_unaffiliated)), 'should include user_unaffiliated in unaffiliated_records'
       assert !assigns(:unaffiliated_records).include?(records(:project_one_affiliated)), 'should not include affiliated records in unaffiliated_records'
       assert !assigns(:unaffiliated_records).include?(records(:admin)), 'should not include another users record in unaffiliated_records'
+
       assert_equal original_affiliated_record_count, assigns(:project).project_affiliated_records.length - assigns(:unaffiliated_records).length
+      assert_equal original_membership_count, assigns(:project).project_memberships.length - assigns(:potential_members).length
     end
 
     should 'be able to update the project' do
@@ -279,9 +311,9 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_equal new_description, t_p.description
     end
 
-     should 'be able to update the project to add project_affiliated_records_attributes' do
-      [ records(:user), records(:user_unaffiliated) ].each do |should_be_affiliated|
-        assert !@project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ @project.id }"
+    should 'be able to update the project to add project_affiliated_records_attributes' do
+      [ records(:user), records(:user_unaffiliated) ].each do |should_not_be_affiliated|
+        assert !@project.is_affiliated_record?(should_not_be_affiliated), "#{ should_not_be_affiliated.id } should not be affiliated with #{ @project.id }"
       end
       assert_difference('ProjectAffiliatedRecord.count', 2) do
         patch :update, id: @project, project: {project_affiliated_records_attributes: [ 
@@ -292,6 +324,24 @@ class ProjectsControllerTest < ActionController::TestCase
       t_p = Project.find(@project.id)
       [ records(:user), records(:user_unaffiliated) ].each do |should_be_affiliated|
         assert t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should be affiliated with #{ t_p.id }"
+      end
+    end
+
+    should 'be able to update the project to add project_memberships_attributes' do
+      update_params = {project_memberships_attributes: []}
+      potential_members = %w{enabled disabled admin dm core_user project_user}
+      potential_members.each do |user_type|
+        assert !@project.is_member?(users(user_type.to_sym)), "#{ user_type } should not be affiliated with #{ @project.id }"
+        update_params[:project_memberships_attributes] << { user_id: users(user_type.to_sym).id }
+      end
+
+      assert_difference('ProjectMembership.count', potential_members.length) do
+        patch :update, id: @project, project: update_params
+      end
+      assert_redirected_to project_path(@project)
+      t_p = Project.find(@project.id)
+      potential_members.each do |user_type|
+        assert t_p.is_member?(users(user_type.to_sym)), "#{ user_type } should not be affiliated with #{ t_p.id }"
       end
     end
   end #ProjectMember
