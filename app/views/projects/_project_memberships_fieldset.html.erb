@@ -1,0 +1,12 @@
+  <fieldset>
+    <legend>Project memberships</legend>
+    <%= f.fields_for :project_memberships do |uf| %>
+    <% if !uf.object.persisted? || can?(:destroy, uf.object) %>
+      <%= uf.hidden_field :id %>
+      <%= uf.hidden_field :user_id %>
+      <%= uf.check_box :_destroy, {:checked => uf.object.persisted?}, '0', '1' %>
+      <%= uf.label :_destroy, uf.object.user %>
+      <br>
+    <% end %>
+    <% end %>
+  </fieldset>
