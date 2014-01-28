@@ -38,6 +38,14 @@ admin:
   is_enabled: true
   is_administrator: true
 
+other_admin:
+  name: other_admin
+  type: RepositoryUser
+  email: other_admin.user@duke.edu
+  netid: otheradmin1234
+  is_enabled: true
+  is_administrator: true
+
 non_admin:
   name: non admin
   type: RepositoryUser

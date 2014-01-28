@@ -19,6 +19,7 @@ class Ability
         can [:read, :edit, :update, :destroy, :switch_to], [RepositoryUser, CoreUser, ProjectUser]
         can :read, [Record,AuditedActivity]
         cannot :destroy, User, :id => user.id
+        cannot [:edit, :update, :destroy], User, :id => user.acting_on_behalf_of
       else
         can :read, RepositoryUser
         can [:edit, :update, :destroy], RepositoryUser, :id => user.id

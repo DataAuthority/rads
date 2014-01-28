@@ -40,4 +40,14 @@ class UserTest < ActiveSupport::TestCase
     assert @admin_user.is_administrator?, "#{ @admin_user } should be an administrator"
     assert !@non_admin_user.is_administrator?, "#{ @non_admin_user } should not be an administrator"
   end
+
+  should 'support acting_on_behalf_of' do
+    @user = users(:core_user)
+    assert_respond_to @user, 'acting_on_behalf_of'
+    assert @user.acting_on_behalf_of.nil?, 'should be nil'
+
+    responsible_user_id = users(:non_admin).id
+    @user.acting_on_behalf_of = responsible_user_id
+    assert_equal responsible_user_id, @user.acting_on_behalf_of
+  end
 end

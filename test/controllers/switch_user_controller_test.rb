@@ -128,6 +128,8 @@ class SwitchUserControllerTest < ActionController::TestCase
       assert_equal core_user.name, @controller.current_user.name
       assert_equal core_user.id, @controller.current_user.id
       assert_equal @user.id, session[:switch_back_user_id]
+      assert_not_nil @controller.current_user.acting_on_behalf_of
+      assert_equal @user.id, @controller.current_user.acting_on_behalf_of
       session[:switch_to_user_id] = nil
       session[:switch_back_user_id] = nil
     end
@@ -154,6 +156,8 @@ class SwitchUserControllerTest < ActionController::TestCase
       assert_equal project_user.name, @controller.current_user.name
       assert_equal project_user.id, @controller.current_user.id
       assert_equal @user.id, session[:switch_back_user_id]
+      assert_not_nil @controller.current_user.acting_on_behalf_of
+      assert_equal @user.id, @controller.current_user.acting_on_behalf_of
       session[:switch_to_user_id] = nil
       session[:switch_back_user_id] = nil
     end
@@ -163,6 +167,7 @@ class SwitchUserControllerTest < ActionController::TestCase
       assert_redirected_to repository_users_url
       assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
       assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
+      assert @controller.current_user.acting_on_behalf_of.nil?, 'current_user should not be acting on behalf of another user anymore'
     end
   end #NonAdmin
 
@@ -182,6 +187,8 @@ class SwitchUserControllerTest < ActionController::TestCase
         assert_equal ouser.name, @controller.current_user.name
         assert_equal ouser.id, @controller.current_user.id
         assert_equal @user.id, session[:switch_back_user_id]
+        assert_not_nil @controller.current_user.acting_on_behalf_of
+        assert_equal @user.id, @controller.current_user.acting_on_behalf_of
         session[:switch_to_user_id] = nil
         session[:switch_back_user_id] = nil
       end
@@ -197,6 +204,8 @@ class SwitchUserControllerTest < ActionController::TestCase
         assert_equal ouser.name, @controller.current_user.name
         assert_equal ouser.id, @controller.current_user.id
         assert_equal @user.id, session[:switch_back_user_id]
+        assert_not_nil @controller.current_user.acting_on_behalf_of
+        assert_equal @user.id, @controller.current_user.acting_on_behalf_of
         session[:switch_to_user_id] = nil
         session[:switch_back_user_id] = nil
       end
@@ -212,6 +221,8 @@ class SwitchUserControllerTest < ActionController::TestCase
         assert_equal ouser.name, @controller.current_user.name
         assert_equal ouser.id, @controller.current_user.id
         assert_equal @user.id, session[:switch_back_user_id]
+        assert_not_nil @controller.current_user.acting_on_behalf_of
+        assert_equal @user.id, @controller.current_user.acting_on_behalf_of
         session[:switch_to_user_id] = nil
         session[:switch_back_user_id] = nil
       end
@@ -224,6 +235,7 @@ class SwitchUserControllerTest < ActionController::TestCase
       assert session[:switch_to_user_id].nil?, 'switch_to_user_id should not be in the session after destroy'
       assert session[:switch_back_user_id].nil?, 'switch_back_user_id should not be in the session after destroy'
       assert_equal @user.id, @controller.current_user.id
+      assert @controller.current_user.acting_on_behalf_of.nil?, 'current user should not be acting_on_bahalf of another user'
     end
   end # Admin
 

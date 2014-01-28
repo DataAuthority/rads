@@ -1,4 +1,6 @@
 class User < ActiveRecord::Base
+  attr_accessor :acting_on_behalf_of
+
   has_many :records, foreign_key: :creator_id
   has_many :project_memberships
   has_many :projects, through: :project_memberships

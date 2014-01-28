@@ -75,7 +75,20 @@ class RepositoryUserTest < ActiveSupport::TestCase
       allowed_abilities(@self, @self, [:index, :show, :edit, :update])
       denied_abilities(@self, @self, [:destroy])
       allowed_abilities(@self, @other, [:index, :show, :edit, :update, :destroy, :switch_to])
-      denied_abilities(@self, RepositoryUser.new, [:new, :create])
+      denied_abilities(@self, RepositoryUser.new, [:new, :create])      
+    end
+  end #admin user
+
+  context 'admin switched to other admin user' do
+    setup do
+      @self = users(:admin)
+      @puppet = users(:other_admin)
+      @puppet.acting_on_behalf_of = @self.id
+    end
+
+    should 'pass ability profile' do
+      allowed_abilities(@puppet, @self, [:index, :show])
+      denied_abilities(@puppet, @self, [:edit, :update, :destroy])
     end
   end #admin user
 

@@ -24,17 +24,25 @@ class ActiveSupport::TestCase
 
   # Helpers for testing abilities 
   def allowed_abilities(user, object, actions)
-      ability = Ability.new(user)
-      actions.each do |action|
-        assert ability.can?(action, object), "#{user.inspect}\n[ CANNOT! ] #{action}\n #{ object.inspect }"
-      end
+    ability = Ability.new(user)
+    user_information = "#{user.inspect}"
+    if user && user.acting_on_behalf_of
+      user_information = "#{ user_information } acting on behalf of #{ user.acting_on_behalf_of }"
+    end
+    actions.each do |action|
+      assert ability.can?(action, object), "#{user_information}\n[ CANNOT! ] #{action}\n #{ object.inspect }"
+    end
   end
   
   def denied_abilities(user, object, actions)
-      ability = Ability.new(user)
-      actions.each do |action|
-        assert ability.cannot?(action, object), "#{user.inspect}\n [ CAN! ] #{action}\n #{ object.inspect }"
-      end
+    ability = Ability.new(user)
+    user_information = "#{user.inspect}"
+    if user && user.acting_on_behalf_of
+      user_information = "#{ user_information } acting on behalf of #{ user.acting_on_behalf_of }"
+    end
+    actions.each do |action|
+      assert ability.cannot?(action, object), "#{user_information}\n [ CAN! ] #{action}\n #{ object.inspect }"
+    end
   end
 
   def ignore_authorization(controller)

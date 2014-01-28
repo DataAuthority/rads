@@ -107,6 +107,7 @@ private
     if session[:switch_to_user_id]
       unless @puppet && @puppet.id == session[:switch_to_user_id]
         @puppet = User.find(session[:switch_to_user_id])
+        @puppet.acting_on_behalf_of = session[:switch_back_user_id]
       end
     else
       @puppet = nil
