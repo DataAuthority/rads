@@ -20,6 +20,8 @@
     <%= f.text_area :description %>
   </div>
 
+  <%= render(partial: 'project_memberships_fieldset', locals: {f: f}) unless @potential_members.empty? %>
+
   <div class="actions">
     <%= f.submit %>
   </div>

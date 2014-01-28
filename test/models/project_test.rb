@@ -9,6 +9,7 @@ class ProjectTest < ActiveSupport::TestCase
   should have_many :project_affiliated_records
   should have_many(:records).through(:project_affiliated_records)
   should accept_nested_attributes_for :project_affiliated_records
+  should accept_nested_attributes_for :project_memberships
 
   setup do
     @project = projects(:one)
