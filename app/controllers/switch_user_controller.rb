@@ -7,12 +7,20 @@ class SwitchUserController < ApplicationController
     authorize! :switch_to, target_user
     session[:switch_back_user_id] = current_user.id
     session[:switch_to_user_id] = target_user.id
-    redirect_to params[:target]
+    if params[:target]
+      redirect_to params[:target]
+    else
+      redirect_to root_path
+    end
   end
 
   def destroy
     session[:switch_to_user_id] = nil
     session[:switch_back_user_id] = nil
-    redirect_to params[:target]
+    if params[:target]
+      redirect_to params[:target]
+    else
+      redirect_to root_path
+    end
   end
 end

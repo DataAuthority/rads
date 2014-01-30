@@ -120,8 +120,8 @@ class SwitchUserControllerTest < ActionController::TestCase
       core = cores(:one)
       core_user = core.core_user
       assert core.core_memberships.where(repository_user_id: @user.id).exists?, 'user should be a member of the core'
-      get :switch_to, id: core_user.id, target: @controller.url_for(core_user)
-      assert_redirected_to @controller.url_for(core_user)
+      get :switch_to, id: core_user.id
+      assert_redirected_to root_url
       assert_not_nil session[:switch_to_user_id]
       assert_not_nil session[:switch_back_user_id]
       assert_equal core_user.id, session[:switch_to_user_id]
@@ -163,8 +163,8 @@ class SwitchUserControllerTest < ActionController::TestCase
     end
 
     should 'get destroy' do
-      get :destroy, target: repository_users_url
-      assert_redirected_to repository_users_url
+      get :destroy
+      assert_redirected_to root_url
       assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
       assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
       assert @controller.current_user.acting_on_behalf_of.nil?, 'current_user should not be acting on behalf of another user anymore'

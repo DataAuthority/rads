@@ -7,7 +7,7 @@
   <% if puppet %>
     <p>
       Acting as <b><%= puppet.name %></b>.
-      <%= link_to 'Switch back', switch_back_url(target: url_for(params.merge(only_path: false)))  %>
+      <%= link_to 'Switch back', switch_back_url  %>
     </p>
   <% else %>
     <div>
