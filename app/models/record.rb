@@ -1,6 +1,7 @@
 class Record < ActiveRecord::Base
   belongs_to :creator, class_name: 'User'
   has_many :project_affiliated_records, inverse_of: :affiliated_record
+  has_many :projects, through: :project_affiliated_records
   has_many :audited_activities
 
   accepts_nested_attributes_for :project_affiliated_records

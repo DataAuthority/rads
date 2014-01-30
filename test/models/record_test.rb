@@ -5,6 +5,7 @@ class RecordTest < ActiveSupport::TestCase
   should belong_to :creator
   should have_attached_file(:content)
   should have_many :project_affiliated_records
+  should have_many(:projects).through(:project_affiliated_records)
   should have_many :audited_activities
   should accept_nested_attributes_for :project_affiliated_records
 
