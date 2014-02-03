@@ -37,6 +37,8 @@ $(function(){
 <% if @records.empty? %>
 <p>There are no records to display.</p>
 <% else %>
+<%= page_entries_info @records %>
+<%= will_paginate @records %>
 <table>
   <thead>
     <tr>
@@ -74,6 +76,7 @@ $(function(){
     <% end %>
   </tbody>
 </table>
+<%= will_paginate @records %>
 
 <br>
 <% end %>

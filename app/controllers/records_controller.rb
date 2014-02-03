@@ -14,6 +14,13 @@ class RecordsController < ApplicationController
     end
 
     @records = @records.order('created_at desc') if @records
+
+    respond_to do |format|
+      format.html do
+        @records = @records.page(params[:page]).per_page(30) if @records 
+      end
+      format.json
+    end
   end
 
   def show
