@@ -20,8 +20,7 @@
 <table>
   <thead>
     <tr>
-      <th>User</th>
-      <th></th>
+      <th>Members</th>
       <th></th>
     </tr>
   </thead>
@@ -30,8 +29,7 @@
     <% @project_memberships.each do |project_membership| %>
       <tr>
         <td><%= project_membership.user %></td>
-        <td><%= link_to 'Show', [project_membership.project, project_membership] if can? :show, project_membership %></td>
-        <td><%= link_to 'Destroy', [project_membership.project, project_membership], method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, project_membership %></td>
+        <td><%= link_to 'Revoke', [project_membership.project, project_membership], method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, project_membership %></td>
       </tr>
     <% end %>
   </tbody>
@@ -39,7 +37,7 @@
 <% end %>
 <% end %>
 
-<%= link_to 'New project membership', new_project_project_membership_path(@project) if can? :new, ProjectMembership.new(project_id: @project.id) %>
+<%= link_to 'Add new member', new_project_project_membership_path(@project) if can? :new, ProjectMembership.new(project_id: @project.id) %>
 <br>
 <br>
 
@@ -64,7 +62,7 @@
         <td>
           <%= project_affiliated_record.affiliated_record.creator %>
         </td>
-        <td><%= link_to 'Destroy', [project_affiliated_record.project, project_affiliated_record], method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, project_affiliated_record %></td>
+        <td><%= link_to 'Unaffiliate', [project_affiliated_record.project, project_affiliated_record], method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, project_affiliated_record %></td>
       </tr>
     <% end %>
   </tbody>
