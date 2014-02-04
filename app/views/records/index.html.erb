@@ -15,6 +15,31 @@
 %>
 $(function(){
   $(".dropzone").dropzone( {
+    autoProcessQueue: false,
+    init: function() {
+      var the_dz = this;
+      var file_count = 0;
+      
+      the_dz.on("addedfile", function(file) { 
+        file_count++;
+        var cur_file_num = file_count;
+        window.setTimeout(function(){
+          if ( cur_file_num == file_count ) {
+            if ( file_count < 4 ||
+                 confirm("You are about to upload " + file_count + " files. Would you like to continue?") ) {
+              the_dz.processQueue();
+            }
+            else {
+              the_dz.removeAllFiles();
+            }
+            file_count = 0;
+          }
+        }, 3000);
+      });
+      the_dz.on("complete", function(file) { 
+        the_dz.processQueue();
+      });
+    },
     params: {
       <%= dropzone_params.join(', ').html_safe %>
     },
