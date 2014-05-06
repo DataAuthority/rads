@@ -4,8 +4,8 @@ source 'https://rubygems.org'
 gem 'rails', '4.0.0'
 
 gem 'sqlite3'
-gem 'pg'
-gem 'mysql'
+#gem 'pg'
+#gem 'mysql'
 gem 'paperclip', '~> 3.5'
 
 # Use SCSS for stylesheets
