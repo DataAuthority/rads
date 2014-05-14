@@ -26,9 +26,4 @@ Rads::Application.configure do
   # This option may cause significant delays in view rendering with a large
   # number of complex assets.
   config.assets.debug = true
-
-  config.shibboleth_logout_url = '/Shibboleth.sso/Logout?return=https://shib.oit.duke.edu/cgi-bin/logout.pl'
-  config.shibboleth_login_url = '/Shibboleth.sso/Login'
-
-  config.primary_storage_root = '/nfs/primary/development'
 end
