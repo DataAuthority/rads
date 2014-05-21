@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.1.1'
+gem 'rails'
 
 gem 'sqlite3'
 #gem 'pg'
@@ -38,7 +38,7 @@ group :doc do
   gem 'sdoc', require: false
 end
 
-gem 'cancan'
+gem 'cancancan'
 gem 'will_paginate', '~> 3.0'
 
 # Use ActiveModel has_secure_password

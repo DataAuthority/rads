@@ -58,7 +58,7 @@ class ProjectsControllerTest < ActionController::TestCase
         post :create, @create_params
       end
       assert_equal @puppet.id, @controller.current_user.id
-      assert_redirected_to root_path()
+      assert_response 403
     end
 
     should 'be able to affiliate multiple records with a project if they are a member' do
@@ -158,7 +158,7 @@ class ProjectsControllerTest < ActionController::TestCase
         post :create, @create_params
       end
       assert_equal @puppet.id, @controller.current_user.id
-      assert_redirected_to root_path()
+      assert_response 403
     end
   end #ProjectUser
 
@@ -243,7 +243,7 @@ class ProjectsControllerTest < ActionController::TestCase
         assert @t_project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should be affiliated with #{ @t_project.id }"
       end
     end
- 
+
     should "create a project with project_membership_attributes" do
       @create_params[:project][:project_memberships_attributes] = []
       potential_members = %w{enabled disabled admin dm core_user project_user}
@@ -275,7 +275,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'ProjectMember' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)      
+      authenticate_existing_user(@user, true)
     end
 
     should 'be able to edit the project' do
@@ -316,7 +316,7 @@ class ProjectsControllerTest < ActionController::TestCase
         assert !@project.is_affiliated_record?(should_not_be_affiliated), "#{ should_not_be_affiliated.id } should not be affiliated with #{ @project.id }"
       end
       assert_difference('ProjectAffiliatedRecord.count', 2) do
-        patch :update, id: @project, project: {project_affiliated_records_attributes: [ 
+        patch :update, id: @project, project: {project_affiliated_records_attributes: [
                                                                             { record_id: records(:user).id },
                                                                             { record_id: records(:user_unaffiliated).id }                                                                        ]}
       end
@@ -349,7 +349,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'NonMember' do
     setup do
       @user = users(:dm)
-      authenticate_existing_user(@user, true)      
+      authenticate_existing_user(@user, true)
     end
 
     should 'not be able to edit the project' do
