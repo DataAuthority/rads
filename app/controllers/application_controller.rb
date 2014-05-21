@@ -8,11 +8,6 @@ class ApplicationController < ActionController::Base
 
   before_action :check_session
   before_action :redirect_disabled_users
-  before_action do
-    resource = controller_name.singularize.to_sym
-    method = "#{resource}_params"
-    params[resource] &&= send(method) if respond_to?(method, true)
-  end
 
   rescue_from ActiveRecord::RecordNotFound, :with => :missing_record
   rescue_from CanCan::AccessDenied, :with => :action_denied
@@ -36,7 +31,7 @@ private
       controller_name: controller_name,
       http_method: request.method.downcase,
       action: action_name,
-      params: filter_audited_params(params).to_json 
+      params: filter_audited_params(params).to_json
     })
 
     yield
@@ -50,8 +45,8 @@ private
   end
 
   def check_session
-    authenticated && 
-      session_created && 
+    authenticated &&
+      session_created &&
       session_valid(url_for(params.merge(:only_path => false)))
   end
 
@@ -76,7 +71,7 @@ private
 
   def session_valid(redirect_if_fail)
     load_shib_user
-    if (request.env['HTTP_SHIB_SESSION_ID'] != session[:shib_session_id]) ||     
+    if (request.env['HTTP_SHIB_SESSION_ID'] != session[:shib_session_id]) ||
         (request.env['HTTP_SHIB_SESSION_INDEX'] != session[:shib_session_index])
       reset_session
       @shib_user = nil

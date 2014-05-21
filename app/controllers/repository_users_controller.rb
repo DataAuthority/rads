@@ -45,7 +45,7 @@ class RepositoryUsersController < ApplicationController
 
   def update
     respond_to do |format|
-      if @repository_user.update(params[:repository_user])
+      if @repository_user.update(repository_user_params)
         format.html { redirect_to @repository_user, notice: 'Repository user was successfully updated.' }
         format.json { head :no_content }
       else
@@ -70,7 +70,7 @@ class RepositoryUsersController < ApplicationController
   def repository_user_params
     permitted_params = [:name, :email]
     if current_user && current_user.is_administrator? && params[:id] != current_user.id.to_s
-      permitted_params = [:is_enabled, :is_administrator] 
+      permitted_params = [:is_enabled, :is_administrator]
     end
     params.require(:repository_user).permit(permitted_params)
   end

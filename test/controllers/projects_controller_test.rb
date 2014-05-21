@@ -58,7 +58,7 @@ class ProjectsControllerTest < ActionController::TestCase
         post :create, @create_params
       end
       assert_equal @puppet.id, @controller.current_user.id
-      assert_response 403
+      assert_redirected_to root_path()
     end
 
     should 'be able to affiliate multiple records with a project if they are a member' do
@@ -90,7 +90,7 @@ class ProjectsControllerTest < ActionController::TestCase
         name: new_name,
         description: new_description
       }
-      assert_response 403
+      assert_redirected_to project_path(@member_project)
       t_p = Project.find(@member_project.id)
       assert_equal orig_name, @member_project.name
       assert_equal orig_description, @member_project.description
@@ -158,7 +158,7 @@ class ProjectsControllerTest < ActionController::TestCase
         post :create, @create_params
       end
       assert_equal @puppet.id, @controller.current_user.id
-      assert_response 403
+      assert_redirected_to root_path()
     end
   end #ProjectUser
 
