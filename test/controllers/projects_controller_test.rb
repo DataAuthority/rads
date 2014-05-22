@@ -80,6 +80,27 @@ class ProjectsControllerTest < ActionController::TestCase
       end
     end
 
+    should 'not be able to affiliate multiple records with a project if one of the records is not owned by them' do
+      assert @member_project.is_member?(@puppet), 'core_user should be a member of member_project'
+      @unaffiliated_records[0] = records(:user_unaffiliated)
+      assert @unaffiliated_records[0].creator_id != @puppet.id, 'the first unaffiliated_record should not be owned by the user'
+      @unaffiliated_records.each do |should_be_affiliated|
+        assert !@member_project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ @member_project.id }"
+      end
+      assert_no_difference('ProjectAffiliatedRecord.count') do
+        patch :update, id: @member_project, project: {
+          project_affiliated_records_attributes: @unaffiliated_records.map {|r|
+            { record_id: r.id }
+          }
+        }
+      end
+      assert_redirected_to root_path()
+      t_p = Project.find(@member_project.id)
+      @unaffiliated_records.each do |should_be_affiliated|
+        assert !t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ t_p.id }"
+      end
+    end
+
     should 'not update project name or description even if they are a member' do
       orig_name = @member_project.name
       orig_description = @member_project.description
@@ -96,7 +117,7 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_equal orig_description, @member_project.description
     end
 
-    should 'not affiliate records with a  project if they are not a member' do
+    should 'not affiliate records with a project if they are not a member' do
       assert !@project.is_member?(@puppet), 'core_user should not be a member of project'
       @unaffiliated_records.each do |should_be_affiliated|
         assert !@project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ @project.id }"
@@ -219,6 +240,7 @@ class ProjectsControllerTest < ActionController::TestCase
 
     should "create a project with project_affiliated_records_attributes" do
       [ records(:user), records(:user_unaffiliated) ].each do |should_not_be_affiliated|
+        assert should_not_be_affiliated.creator_id == @user.id, "user should own record"
         assert !@project.is_affiliated_record?(should_not_be_affiliated), "#{ should_not_be_affiliated.id } should not be affiliated with #{ @project.id }"
       end
       @create_params[:project][:project_affiliated_records_attributes] = [
@@ -242,6 +264,28 @@ class ProjectsControllerTest < ActionController::TestCase
       [ records(:user), records(:user_unaffiliated) ].each do |should_be_affiliated|
         assert @t_project.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should be affiliated with #{ @t_project.id }"
       end
+    end
+
+    should "not create a project with project_affiliated_records_attributes for records that they do not own" do
+      [ records(:core_user), records(:user_unaffiliated) ].each do |should_not_be_affiliated|
+        assert !@project.is_affiliated_record?(should_not_be_affiliated), "#{ should_not_be_affiliated.id } should not be affiliated with #{ @project.id }"
+      end
+      assert records(:core_user).creator_id != @user.id, 'record should not be owned by the user'
+      @create_params[:project][:project_affiliated_records_attributes] = [
+                                                     { record_id: records(:core_user).id },
+                                                     { record_id: records(:user_unaffiliated).id },
+                                                     ]
+      assert_no_difference('Project.count') do
+        assert_no_difference('ProjectUser.count') do
+          assert_no_difference('ProjectAffiliatedRecord.count') do
+            post :create, @create_params
+            assert_not_nil assigns(:project)
+            assert assigns(:project).valid?, "#{ assigns(:project).errors.messages.inspect }"
+          end
+        end
+      end
+      assert_not_nil assigns(:project)
+      assert_redirected_to root_path
     end
 
     should "create a project with project_membership_attributes" do
@@ -324,6 +368,23 @@ class ProjectsControllerTest < ActionController::TestCase
       t_p = Project.find(@project.id)
       [ records(:user), records(:user_unaffiliated) ].each do |should_be_affiliated|
         assert t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should be affiliated with #{ t_p.id }"
+      end
+    end
+
+    should 'not be able to update the project to add project_affiliated_records_attributes if one or more records are not owned by the user' do
+      [ records(:core_user), records(:user_unaffiliated) ].each do |should_not_be_affiliated|
+        assert !@project.is_affiliated_record?(should_not_be_affiliated), "#{ should_not_be_affiliated.id } should not be affiliated with #{ @project.id }"
+      end
+      assert records(:core_user).creator_id != @user.id, 'the core_user record should not be created by the user'
+      assert_no_difference('ProjectAffiliatedRecord.count') do
+        patch :update, id: @project, project: {project_affiliated_records_attributes: [
+                                                                        { record_id: records(:core_user).id },
+                                                                        { record_id: records(:user_unaffiliated).id }                                                                        ]}
+      end
+      assert_redirected_to root_path()
+      t_p = Project.find(@project.id)
+      [ records(:core_user), records(:user_unaffiliated) ].each do |should_be_affiliated|
+        assert !t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ t_p.id }"
       end
     end
 

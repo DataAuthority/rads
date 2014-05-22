@@ -63,8 +63,8 @@ class RecordTest < ActiveSupport::TestCase
   context 'non_admin' do
     should 'pass ability profile' do
       allowed_abilities(@user, Record, [:index])
-      allowed_abilities(@user, @user_record, [:index, :show, :destroy])
-      denied_abilities(@user, @admin_record, [:index, :show, :destroy])
+      allowed_abilities(@user, @user_record, [:index, :show, :affiliate, :destroy])
+      denied_abilities(@user, @admin_record, [:index, :show, :affiliate, :destroy])
       allowed_abilities(@user, @user.records.build, [:new, :create])
     end
   end #non_admin
@@ -72,8 +72,8 @@ class RecordTest < ActiveSupport::TestCase
   context 'CoreUser' do
     should 'pass ability profile' do
       allowed_abilities(@core_user, Record, [:index])
-      allowed_abilities(@core_user, @core_user_record, [:index, :show, :destroy])
-      denied_abilities(@core_user, @admin_record, [:index, :show, :destroy])
+      allowed_abilities(@core_user, @core_user_record, [:index, :show, :affiliate, :destroy])
+      denied_abilities(@core_user, @admin_record, [:index, :show, :affiliate, :destroy])
       allowed_abilities(@core_user, @core_user.records.build, [:new, :create])
     end
   end #CoreUser
@@ -81,8 +81,8 @@ class RecordTest < ActiveSupport::TestCase
   context 'ProjectUser' do
     should 'pass ability profile' do
       allowed_abilities(@project_user, Record, [:index])
-      allowed_abilities(@project_user, @project_user_record, [:index, :show, :destroy])
-      denied_abilities(@project_user, @admin_record, [:index, :show, :destroy])
+      allowed_abilities(@project_user, @project_user_record, [:index, :show, :affiliate, :destroy])
+      denied_abilities(@project_user, @admin_record, [:index, :show, :affiliate, :destroy])
       allowed_abilities(@project_user, @project_user.records.build, [:new, :create])
     end
   end #ProjectUser
@@ -91,6 +91,7 @@ class RecordTest < ActiveSupport::TestCase
     should 'pass ability profile' do      
       allowed_abilities(@admin, Record, [:index] )
       allowed_abilities(@admin, @user_record, [:show])
+      denied_abilities(@admin, @user_record, [:affiliate])
       allowed_abilities(@admin, @admin.records.build, [:new, :create])
       denied_abilities(@admin, @user.records.build, [:new, :create])
     end
@@ -108,8 +109,8 @@ class RecordTest < ActiveSupport::TestCase
       assert @project_with_membership.is_member?(@user), 'user should be a member of the project'
       assert @project_with_membership.is_affiliated_record?(@project_record_not_owned_by_user), 'record should be affiliated with project'
       allowed_abilities(@user, @project_record_not_owned_by_user, [:index, :show])
-      denied_abilities(@user, @project_record_not_owned_by_user, [:destroy])
-      denied_abilities(@user, @non_member_project_record, [:index, :show, :destroy])
+      denied_abilities(@user, @project_record_not_owned_by_user, [:affiliate, :destroy])
+      denied_abilities(@user, @non_member_project_record, [:index, :show, :affiliate, :destroy])
     end
   end #ProjectMembership
 end

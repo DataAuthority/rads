@@ -1,5 +1,6 @@
 class ProjectsController < ApplicationController
   load_and_authorize_resource
+  before_action :authorize_affiliated_records, only: [:update, :create]
 
   def index
   end
@@ -71,5 +72,20 @@ class ProjectsController < ApplicationController
         permitted_params = [:name, :description] + permitted_params
       end
       params.require(:project).permit(permitted_params)
+    end
+
+    def authorize_affiliated_records
+      params = project_params
+      if params[:project_affiliated_records_attributes]
+        params[:project_affiliated_records_attributes].each do |par|
+          case action_name
+          when 'create'
+            @project.creator_id = current_user.id
+            authorize! :affiliate, Record.find(par[:record_id])
+          when 'update'
+            authorize! :create, ProjectAffiliatedRecord.new(par.merge(:project_id => @project.id))
+          end
+        end
+      end
     end
 end
