@@ -78,14 +78,13 @@ class ProjectsController < ApplicationController
       params = project_params
       if params[:project_affiliated_records_attributes]
         params[:project_affiliated_records_attributes].each do |par|
-          case action_name
-          when 'create'
-            @project.creator_id = current_user.id
-            authorize! :affiliate, Record.find(par[:record_id])
-          when 'update'
-            authorize! :create, ProjectAffiliatedRecord.new(par.merge(:project_id => @project.id))
-          end
+        if @project.id.nil?
+          @project.creator_id = current_user.id
+          authorize! :affiliate, Record.find(par[:record_id])
+        else
+          authorize! :create, ProjectAffiliatedRecord.new(par.merge(:project_id => @project.id))
         end
       end
     end
+  end
 end
