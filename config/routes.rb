@@ -1,4 +1,6 @@
 Rads::Application.routes.draw do
+  resources :cart_records, only: [:index, :create, :destroy]
+
   get "record_provenance/show"
   resources :audited_activities, only: [:index, :show]
 
