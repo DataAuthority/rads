@@ -19,6 +19,7 @@ class Ability
         can :manage, User, :type => nil
         can [:read, :edit, :update, :destroy, :switch_to], [RepositoryUser, CoreUser, ProjectUser]
         can :read, [Record,AuditedActivity]
+        can :manage, CartRecord, :user_id => user.id
         cannot :destroy, User, :id => user.id
         cannot [:edit, :update, :destroy], User, :id => user.acting_on_behalf_of
       else

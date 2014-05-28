@@ -1,21 +1,21 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 user:
-  record: :user
+  stored_record: :user
   user: :non_admin
 
 other_user:
-  record: :core_user
+  stored_record: :core_user
   user: :core_user
 
 core_user:
-  record: :core_user
+  stored_record: :core_user
   user: :core_user
 
 admin:
-  record: :admin
+  stored_record: :admin
   user: :admin
 
 project_user:
-  record: :project_user
+  stored_record: :project_user
   user: :project_user

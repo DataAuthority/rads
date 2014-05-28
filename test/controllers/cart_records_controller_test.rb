@@ -17,7 +17,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       assert_redirected_to cart_records_url
       assert_not_nil assigns(:cart_record)
       assert_equal @user.id, assigns(:cart_record).user_id
-      assert_eqaual @user_record.id, assigns(:cart_record).record_id
+      assert_equal @user_record.id, assigns(:cart_record).record_id
     end
 
     should 'destroy their cart_record' do
@@ -45,7 +45,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       assert_redirected_to cart_records_url
       assert_not_nil assigns(:cart_record)
       assert_equal @user.id, assigns(:cart_record).user_id
-      assert_eqaual @readable_record.id, assigns(:cart_record).record_id
+      assert_equal @readable_record.id, assigns(:cart_record).record_id
     end
   end
 
