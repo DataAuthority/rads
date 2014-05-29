@@ -13,9 +13,10 @@ class CartRecordsControllerTest < ActionController::TestCase
     should 'create a cart_record with their own record' do
       assert_difference('CartRecord.count') do
         post :create, cart_record: { record_id: @user_record.id }
+        assert_not_nil assigns(:cart_record)
+        assert assigns(:cart_record).valid?, "#{ assigns(:cart_record).errors.messages.inspect }"
       end
       assert_redirected_to cart_records_url
-      assert_not_nil assigns(:cart_record)
       assert_equal @user.id, assigns(:cart_record).user_id
       assert_equal @user_record.id, assigns(:cart_record).record_id
     end
@@ -86,7 +87,7 @@ class CartRecordsControllerTest < ActionController::TestCase
     setup do
       @user = users(:non_admin)
       authenticate_existing_user(@user, true)
-      @user_record = records(:user)
+      @user_record = records(:user_unaffiliated)
       @user_cart_record = cart_records(:user)
       @other_user_cart_record = cart_records(:other_user)
       @readable_record = records(:project_one_affiliated_project_user)
@@ -101,7 +102,7 @@ class CartRecordsControllerTest < ActionController::TestCase
     setup do
       @user = users(:admin)
       authenticate_existing_user(@user, true)
-      @user_record = records(:admin)
+      @user_record = records(:admin_two)
       @user_cart_record = cart_records(:admin)
       @other_user_cart_record = cart_records(:user)
       @readable_record = records(:project_one_affiliated_project_user)
@@ -117,7 +118,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
 
-      @user_record = records(:project_user)
+      @user_record = records(:project_one_affiliated_project_user)
       @user_cart_record = cart_records(:project_user)
       @other_user_cart_record = cart_records(:user)
 
@@ -135,7 +136,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
 
-      @user_record = records(:core_user)
+      @user_record = records(:core_user_two)
       @user_cart_record = cart_records(:core_user)
       @other_user_cart_record = cart_records(:user)
       @readable_record = records(:project_two_affiliated)

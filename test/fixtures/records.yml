@@ -9,6 +9,9 @@ user_unaffiliated:
 admin:
   creator: :admin
 
+admin_two:
+  creator: :admin
+
 core_user:
   creator: :core_user
 

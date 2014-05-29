@@ -4,6 +4,7 @@ class CartRecordTest < ActiveSupport::TestCase
   should belong_to :user
   should belong_to :stored_record
   should validate_presence_of :record_id
+  should validate_uniqueness_of(:record_id).scoped_to(:user_id)
 
   context 'nil user' do
     should 'pass ability profile' do
