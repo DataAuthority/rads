@@ -1,19 +1,19 @@
-<h1>Listing cart_records</h1>
+<h1>Listing records in cart</h1>
 
 <table>
   <thead>
     <tr>
       <th>Record</th>
       <th>User</th>
-      <th colspan="3"></th>
+      <th></th>
     </tr>
   </thead>
 
   <tbody>
     <% @cart_records.each do |cart_record| %>
       <tr>
-        <td><%= cart_record.record_id %></td>
-        <td><%= cart_record.user_id %></td>
+        <td><%= cart_record.stored_record %></td>
+        <td><%= cart_record.user %></td>
         <td><%= link_to 'Destroy', cart_record, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
