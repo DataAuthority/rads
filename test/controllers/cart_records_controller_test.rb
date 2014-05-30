@@ -2,17 +2,6 @@ require 'test_helper'
 
 class CartRecordsControllerTest < ActionController::TestCase
 
-  def self.test_empty_cart()
-    should 'delete :empty' do
-      cart_records_count = @user.cart_records.count
-      assert cart_records_count > 0, 'user should have cart_records'
-      assert_difference('CartRecord.count', -cart_records_count) do
-        delete :empty
-      end
-      assert_redirected_to cart_records_url
-    end
-  end
-
   def self.test_cart_management()
     should 'get :index' do
       get :index
@@ -44,6 +33,16 @@ class CartRecordsControllerTest < ActionController::TestCase
         delete :destroy, id: @other_user_cart_record
       end
       assert_redirected_to root_path
+    end
+
+    should 'delete :empty' do
+      cart_records_count = @user.cart_records.count
+      assert cart_records_count > 0, 'user should have cart_records'
+      assert CartRecord.count > cart_records_count
+      assert_difference('CartRecord.count', -cart_records_count) do
+        delete :empty
+      end
+      assert_redirected_to cart_records_url
     end
   end
 
@@ -112,7 +111,6 @@ class CartRecordsControllerTest < ActionController::TestCase
     test_cart_management
     test_add_readable_record
     test_unreadable_record
-    test_empty_cart
   end
 
   context "authenticated Admin" do
@@ -126,7 +124,6 @@ class CartRecordsControllerTest < ActionController::TestCase
     end
     test_cart_management
     test_add_readable_record
-    test_empty_cart
   end
 
   context "authenticated ProjectUser" do
@@ -145,7 +142,6 @@ class CartRecordsControllerTest < ActionController::TestCase
     end
     test_cart_management
     test_unreadable_record
-    test_empty_cart
   end
 
   context "authenticated CoreUser" do
@@ -164,6 +160,5 @@ class CartRecordsControllerTest < ActionController::TestCase
     test_cart_management
     test_add_readable_record
     test_unreadable_record
-    test_empty_cart
   end
 end
