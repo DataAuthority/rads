@@ -1,5 +1,7 @@
 Rads::Application.routes.draw do
-  resources :cart_records, only: [:index, :create, :destroy]
+  resources :cart_records, only: [:index, :create, :destroy] do
+    delete "empty", on: :collection
+  end
 
   get "record_provenance/show"
   resources :audited_activities, only: [:index, :show]
