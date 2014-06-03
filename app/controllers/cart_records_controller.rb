@@ -1,9 +1,6 @@
 class CartRecordsController < ApplicationController
   load_and_authorize_resource :except => [:empty]
 
-  def index
-  end
-
   def create
     @cart_record.user_id = current_user.id
     respond_to do |format|
@@ -19,14 +16,6 @@ class CartRecordsController < ApplicationController
 
   def destroy
     @cart_record.destroy
-    respond_to do |format|
-      format.html { redirect_to cart_records_url }
-      format.json { head :no_content }
-    end
-  end
-
-  def empty
-    current_user.cart_records.destroy_all
     respond_to do |format|
       format.html { redirect_to cart_records_url }
       format.json { head :no_content }

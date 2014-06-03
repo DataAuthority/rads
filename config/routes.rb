@@ -1,7 +1,5 @@
 Rads::Application.routes.draw do
-  resources :cart_records, only: [:index, :create, :destroy] do
-    delete "empty", on: :collection
-  end
+  resources :cart_records, only: [:create, :destroy]
 
   get "record_provenance/show"
   resources :audited_activities, only: [:index, :show]
@@ -19,6 +17,7 @@ Rads::Application.routes.draw do
   end
 
   resources :records, only: [:index, :show, :new, :create, :destroy]
+  resource :cart, only: [:show, :update, :destroy]
   resources :repository_users
 
   get "switch_user/switch_to", as: 'switch_to'

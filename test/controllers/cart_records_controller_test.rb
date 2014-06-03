@@ -3,13 +3,6 @@ require 'test_helper'
 class CartRecordsControllerTest < ActionController::TestCase
 
   def self.test_cart_management()
-    should 'get :index' do
-      get :index
-      assert_response :success
-      assert_not_nil assigns(:cart_records)
-      assert assigns(:cart_records).include? @user_cart_record
-    end
-
     should 'create a cart_record with their own record' do
       assert_difference('CartRecord.count') do
         post :create, cart_record: { record_id: @user_record.id }
@@ -33,16 +26,6 @@ class CartRecordsControllerTest < ActionController::TestCase
         delete :destroy, id: @other_user_cart_record
       end
       assert_redirected_to root_path
-    end
-
-    should 'delete :empty' do
-      cart_records_count = @user.cart_records.count
-      assert cart_records_count > 0, 'user should have cart_records'
-      assert CartRecord.count > cart_records_count
-      assert_difference('CartRecord.count', -cart_records_count) do
-        delete :empty
-      end
-      assert_redirected_to cart_records_url
     end
   end
 
@@ -84,18 +67,6 @@ class CartRecordsControllerTest < ActionController::TestCase
     assert_raises(ActionController::UrlGenerationError) {
       patch :update, id: @cart_record
     }
-  end
-
-  context "unauthenticated user" do
-    should 'not get :index' do
-      get :index
-      assert_redirected_to sessions_new_url(:target => cart_records_url)
-    end
-
-    should 'not delete :empty' do
-      delete :empty
-      assert_redirected_to sessions_new_url(:target => empty_cart_records_url)
-    end
   end
 
   context "authenticated RepositoryUser" do

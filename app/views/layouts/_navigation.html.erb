@@ -7,5 +7,5 @@
   <%= link_to 'core users', core_users_url if can? :index, CoreUser %>
   <%= link_to 'users', repository_users_url if can? :index, RepositoryUser %>
   <%= link_to 'records', records_url if can? :index, Record %>
-  <%= link_to 'cart', cart_records_url if can? :index, CartRecord %>
+  <%= link_to 'cart', cart_url %>
 </div>
