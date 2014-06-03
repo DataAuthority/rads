@@ -4,6 +4,10 @@ class CartsController < ApplicationController
   end
 
   def update
+    respond_to do |format|
+      format.html { redirect_to cart_url }
+      format.json { head :no_content }
+    end
   end
 
   def destroy

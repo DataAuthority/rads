@@ -27,9 +27,12 @@ class CartsControllerTest < ActionController::TestCase
     should 'destroy all cart_record records if all cart_records are tied to records that the user owns' do
       assert @user.cart_records.count > 0, 'there should be some cart_records'
       @user.cart_records.each do |cr|
-        assert_equal @user.id, cr.stored_record.creator_id
-        assert File.exists?(cr.stored_record.content.path), 'file should exist before destroy'
-        assert !cr.stored_record.is_destroyed?, 'record should not be destroyed'
+        if @user.id == cr.stored_record.creator_id
+          assert File.exists?(cr.stored_record.content.path), 'file should exist before destroy'
+          assert !cr.stored_record.is_destroyed?, 'record should not be destroyed'
+        else
+          cr.destroy
+        end
       end
       put :update, cart: {action: 'destroy_records'}
       @user.cart_records.each do |cr|
@@ -42,7 +45,6 @@ class CartsControllerTest < ActionController::TestCase
       assert @readable_record_cart_record.stored_record.creator_id != @user.id, 'user should not own readable_record'
       assert @user.cart_records.count > 0, 'there should be some cart_records'
       @user.cart_records.each do |cr|
-        assert_equal @user.id, cr.stored_record.creator_id
         assert File.exists?(cr.stored_record.content.path), "file #{cr.stored_record.content.path} should exist before destroy"
         assert !cr.stored_record.is_destroyed?, 'record should not be destroyed'
       end
@@ -58,9 +60,12 @@ class CartsControllerTest < ActionController::TestCase
     should 'affiliate all cart_record records to a project if all cart_records are tied to records that the user owns and the user can affiliate to the project' do
       user_cart_records = 0
       @user.cart_records.each do |cr|
-        assert_equal @user.id, cr.stored_record.creator_id
-        assert !@project.is_affiliated_record?(cr.stored_record), 'record should not be affiliated with the project'
-        user_cart_records += 1
+        if @user.id == cr.stored_record.creator_id
+          assert !@project.is_affiliated_record?(cr.stored_record), 'record should not be affiliated with the project'
+          user_cart_records += 1
+        else
+          cr.destroy
+        end
       end
       assert user_cart_records > 0, 'there should be some cart_records'
       assert_difference('ProjectAffiliatedRecord.count', +user_cart_records) do
@@ -75,10 +80,13 @@ class CartsControllerTest < ActionController::TestCase
       assert @readable_record_cart_record.stored_record.creator_id != @user.id, 'user should not own readable_record'
       user_cart_records = 0
       @user.cart_records.each do |cr|
-        assert_equal @user.id, cr.stored_record.creator_id
+        if @project.is_affiliated_record?(cr.stored_record)
+          @project.project_affiliated_records.where(record_id: cr.record_id).destroy_all
+        end
         assert !@project.is_affiliated_record?(cr.stored_record), 'record should not be affiliated with the project'
         user_cart_records += 1
       end
+
       assert user_cart_records > 0, 'there should be some cart_records'
       assert_no_difference('ProjectAffiliatedRecord.count') do
         put :update, cart: {action: 'affiliate_to_project', project_id: @project.id}
@@ -89,12 +97,16 @@ class CartsControllerTest < ActionController::TestCase
     end
 
     should 'not affliate any records to a project if the user cannot affiliate to the project' do
-      assert !@project.is_member?(@user.id), 'user should not be a member'
+      assert !@other_project.is_member?(@user), 'user should not be a member'
       user_cart_records = 0
       @user.cart_records.each do |cr|
-        assert_equal @user.id, cr.stored_record.creator_id
-        assert !@other_project.is_affiliated_record?(cr.stored_record), 'record should not be affiliated with the project'
-        user_cart_records += 1
+        if @user.id == cr.stored_record.creator_id
+          assert_equal @user.id, cr.stored_record.creator_id
+          assert !@other_project.is_affiliated_record?(cr.stored_record), 'record should not be affiliated with the project'
+          user_cart_records += 1
+        else
+          cr.destroy
+        end
       end
       assert user_cart_records > 0, 'there should be some cart_records'
       assert_no_difference('ProjectAffiliatedRecord.count') do
@@ -140,8 +152,10 @@ class CartsControllerTest < ActionController::TestCase
 
     teardown do
       @user.cart_records.each do |cr|
-        cr.stored_record.content.destroy
-        cr.stored_record.destroy
+        if cr.stored_record
+          cr.stored_record.content.destroy
+          cr.stored_record.destroy
+        end        
       end
     end
 
@@ -165,9 +179,11 @@ class CartsControllerTest < ActionController::TestCase
     end
 
     teardown do
-      @user.cart_record.each do |cr|
-        cr.stored_record.content.destroy
-        cr.stored_record.destroy
+      @user.cart_records.each do |cr|
+        if cr.stored_record
+          cr.stored_record.content.destroy
+          cr.stored_record.destroy
+        end
       end
     end
 
@@ -191,9 +207,11 @@ class CartsControllerTest < ActionController::TestCase
     end
 
     teardown do
-      @user.cart_record.each do |cr|
-        cr.stored_record.content.destroy
-        cr.stored_record.destroy
+      @user.cart_records.each do |cr|
+        if cr.stored_record
+          cr.stored_record.content.destroy
+          cr.stored_record.destroy
+        end
       end
     end
 
@@ -208,7 +226,7 @@ class CartsControllerTest < ActionController::TestCase
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @user_cart_record = cart_records(:core_user)
-      @readable_record_cart_record = @user.cart_records.create(record_id: @user_record.id)
+      @readable_record_cart_record = @user.cart_records.create(record_id: records(:project_two_affiliated).id)
       @user.cart_records.each do |cr|
         cr.stored_record.content = @test_content
         cr.stored_record.save
@@ -218,9 +236,11 @@ class CartsControllerTest < ActionController::TestCase
     end
 
     teardown do
-      @user.cart_record.each do |cr|
-        cr.stored_record.content.destroy
-        cr.stored_record.destroy
+      @user.cart_records.each do |cr|
+        if cr.stored_record
+          cr.stored_record.content.destroy
+          cr.stored_record.destroy
+        end
       end
     end
 
