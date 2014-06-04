@@ -34,10 +34,13 @@ class CartsControllerTest < ActionController::TestCase
           cr.destroy
         end
       end
+      stored_records = @user.cart_records.collect {|r| r.stored_record}
+      assert_equal stored_records.count, stored_records.uniq.count
       put :update, cart: {action: 'destroy_records'}
-      @user.cart_records.each do |cr|
-        assert !File.exists?(cr.stored_record.content.path), 'file should not exist after destroy'
+      assert_not_nil assigns(:cart_records)
+      assigns(:cart_records).each do |cr|
         assert cr.stored_record.is_destroyed?, 'record should now be destroyed'
+        assert !File.exists?(cr.stored_record.content.path), 'file should not exist after destroy'
       end
     end
 
@@ -49,7 +52,8 @@ class CartsControllerTest < ActionController::TestCase
         assert !cr.stored_record.is_destroyed?, 'record should not be destroyed'
       end
       put :update, cart: {action: 'destroy_records'}
-      @user.cart_records.each do |cr|
+      assert_not_nil assigns(:cart_records)
+      assigns(:cart_records).each do |cr|
         assert File.exists?(cr.stored_record.content.path), 'file should still exist after destroy'
         assert !cr.stored_record.is_destroyed?, 'record should still not be destroyed'
       end
