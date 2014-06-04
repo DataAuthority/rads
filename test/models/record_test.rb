@@ -39,6 +39,17 @@ class RecordTest < ActiveSupport::TestCase
     @core_user_record.destroy
   end
 
+  should 'support destroy_content method' do
+    assert_respond_to @user_record, 'destroy_content'
+    assert_not_nil @user_record.content
+    assert File.exists?(@user_record.content.path), 'content should exist'
+    assert !@user_record.is_destroyed?, 'record.is_destroyed? should be false'
+    assert @user_record.destroy_content, 'should be able to destroy record content'
+    assert @user_record.is_destroyed?, 'record.is_destroyed? should be true'
+    assert !@user_record.changed?, 'record should be saved'
+    assert !File.exists?(@user_record.content.path), 'content should not exist'
+  end
+
   should 'support find_by_md5 method' do
     assert_respond_to Record, 'find_by_md5'
     @trec = Record.find_by_md5(@expected_md5).take!

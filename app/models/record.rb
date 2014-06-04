@@ -10,6 +10,12 @@ class Record < ActiveRecord::Base
 
   scope :find_by_md5, ->(md5) {where(content_fingerprint: md5)}
 
+  def destroy_content
+    self.is_destroyed = true
+    File.delete(content.path)
+    self.save
+  end
+
   def to_s
     "#{content_file_name} (#{created_at})"
   end
