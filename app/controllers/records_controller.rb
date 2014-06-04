@@ -57,9 +57,7 @@ class RecordsController < ApplicationController
   end
 
   def destroy
-    File.delete(@record.content.path)
-    @record.is_destroyed = true
-    @record.save
+    @record.destroy_content
     respond_to do |format|
       format.html { redirect_to records_url }
       format.json { head :no_content }
