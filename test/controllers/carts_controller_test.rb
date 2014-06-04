@@ -75,9 +75,6 @@ class CartsControllerTest < ActionController::TestCase
       assert_difference('ProjectAffiliatedRecord.count', +user_cart_records) do
         put :update, cart: {action: 'affiliate_to_project', project_id: @project.id}
       end
-      @user.cart_records.each do |cr|
-        assert @project.is_affiliated_record?(cr.stored_record), 'record should now be affiliated with the project'
-      end
     end
 
     should 'not affliate any records to a project if one or more cart_records are tied to records that the user does not own' do
@@ -115,9 +112,6 @@ class CartsControllerTest < ActionController::TestCase
       assert user_cart_records > 0, 'there should be some cart_records'
       assert_no_difference('ProjectAffiliatedRecord.count') do
         put :update, cart: {action: 'affiliate_to_project', project_id: @other_project.id}
-      end
-      @user.cart_records.each do |cr|
-        assert !@other_project.is_affiliated_record?(cr.stored_record), 'record should still not be affiliated with the project'
       end
     end
   end
