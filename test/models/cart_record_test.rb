@@ -10,7 +10,7 @@ class CartRecordTest < ActiveSupport::TestCase
     should 'pass ability profile' do
       denied_abilities(nil, CartRecord, [:index] )
       denied_abilities(nil, cart_records(:user), [:destroy])
-      denied_abilities(nil, cart_records(:other_user), [:destroy])
+      denied_abilities(nil, cart_records(:core_user), [:destroy])
       denied_abilities(nil, CartRecord.new, [:create])
     end
   end #nil user
@@ -24,7 +24,7 @@ class CartRecordTest < ActiveSupport::TestCase
     should 'pass ability profile' do
       allowed_abilities(@user, CartRecord, [:index])
       allowed_abilities(@user, cart_records(:user), [:destroy])
-      denied_abilities(@user, cart_records(:other_user), [:destroy])
+      denied_abilities(@user, cart_records(:core_user), [:destroy])
       allowed_abilities(@user, CartRecord.new(user_id: @user.id, record_id: records(:user).id), [:create])
       denied_abilities(@user, CartRecord.new(user_id: @other_user.id, record_id: records(:user).id), [:create])
 

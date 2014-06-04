@@ -75,7 +75,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       authenticate_existing_user(@user, true)
       @user_record = records(:user_unaffiliated)
       @user_cart_record = cart_records(:user)
-      @other_user_cart_record = cart_records(:other_user)
+      @other_user_cart_record = cart_records(:core_user)
       @readable_record = records(:project_one_affiliated_project_user)
       @unreadable_record = records(:core_user)
     end

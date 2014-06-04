@@ -4,10 +4,6 @@ user:
   stored_record: :user
   user: :non_admin
 
-other_user:
-  stored_record: :core_user
-  user: :core_user
-
 core_user:
   stored_record: :core_user
   user: :core_user
