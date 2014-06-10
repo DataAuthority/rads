@@ -29,3 +29,20 @@ project_one_affiliated_project_user:
 
 project_two_affiliated:
   creator: :project_user_two
+
+user_is_destroyed:
+  creator: :non_admin
+  is_destroyed: true
+
+admin_is_destroyed:
+  creator: :admin
+  is_destroyed: true
+
+core_user_is_destroyed:
+  creator: :core_user
+  is_destroyed: true
+
+project_user_is_destroyed:
+  creator: :project_user
+  is_destroyed: true
+

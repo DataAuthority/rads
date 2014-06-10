@@ -19,15 +19,19 @@ class RecordTest < ActiveSupport::TestCase
     @user_record.content = @test_content
     @user_record.save
     @expected_path = [ @user.storage_path,  @user_record.id, @user_record.content_file_name ].join('/')
+    @user_is_destroyed_record = records(:user_is_destroyed)
 
     @admin = users(:admin)
     @admin_record = records(:admin)
+    @admin_is_destroyed_record = records(:admin_is_destroyed)
 
     @core_user = users(:core_user)
     @core_user_record = records(:core_user)
+    @core_user_is_destroyed_record = records(:core_user_is_destroyed)
 
     @project_user = users(:project_user)
     @project_user_record = records(:project_user)
+    @project_user_is_destroyed_record = records(:project_user_is_destroyed)
   end
 
   teardown do
@@ -75,6 +79,7 @@ class RecordTest < ActiveSupport::TestCase
     should 'pass ability profile' do
       allowed_abilities(@user, Record, [:index])
       allowed_abilities(@user, @user_record, [:index, :show, :affiliate, :destroy])
+      denied_abilities(@user, @user_is_destroyed_record, [:destroy])
       denied_abilities(@user, @admin_record, [:index, :show, :affiliate, :destroy])
       allowed_abilities(@user, @user.records.build, [:new, :create])
     end
@@ -84,6 +89,7 @@ class RecordTest < ActiveSupport::TestCase
     should 'pass ability profile' do
       allowed_abilities(@core_user, Record, [:index])
       allowed_abilities(@core_user, @core_user_record, [:index, :show, :affiliate, :destroy])
+      denied_abilities(@core_user, @core_user_is_destroyed_record, [:destroy])
       denied_abilities(@core_user, @admin_record, [:index, :show, :affiliate, :destroy])
       allowed_abilities(@core_user, @core_user.records.build, [:new, :create])
     end
@@ -93,6 +99,7 @@ class RecordTest < ActiveSupport::TestCase
     should 'pass ability profile' do
       allowed_abilities(@project_user, Record, [:index])
       allowed_abilities(@project_user, @project_user_record, [:index, :show, :affiliate, :destroy])
+      denied_abilities(@project_user, @project_user_is_destroyed_record, [:destroy])
       denied_abilities(@project_user, @admin_record, [:index, :show, :affiliate, :destroy])
       allowed_abilities(@project_user, @project_user.records.build, [:new, :create])
     end
@@ -103,6 +110,8 @@ class RecordTest < ActiveSupport::TestCase
       allowed_abilities(@admin, Record, [:index] )
       allowed_abilities(@admin, @user_record, [:show])
       denied_abilities(@admin, @user_record, [:affiliate])
+      allowed_abilities(@admin, @admin_record, [:index, :show, :affiliate, :destroy])
+      denied_abilities(@admin, @admin_is_destroyed_record, [:destroy])
       allowed_abilities(@admin, @admin.records.build, [:new, :create])
       denied_abilities(@admin, @user.records.build, [:new, :create])
     end

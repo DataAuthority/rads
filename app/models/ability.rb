@@ -9,6 +9,7 @@ class Ability
     else
       can :read, Project
       can :manage, Record, :creator_id => user.id
+      cannot :destroy, Record, :is_destroyed => true
       can :read, Record, :id => user.projects.collect{|p| p.project_affiliated_records.collect{|m| m.record_id}}.flatten
       can [:index, :show, :new, :destroy], ProjectAffiliatedRecord, :project_id => user.projects.collect{|p| p.id}
       can [:create], ProjectAffiliatedRecord, :project_id => user.projects.collect{|p| p.id}, :record_id => user.records.collect{|r| r.id}
