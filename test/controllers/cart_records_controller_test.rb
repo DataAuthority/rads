@@ -9,7 +9,7 @@ class CartRecordsControllerTest < ActionController::TestCase
         assert_not_nil assigns(:cart_record)
         assert assigns(:cart_record).valid?, "#{ assigns(:cart_record).errors.messages.inspect }"
       end
-      assert_redirected_to cart_records_url
+      assert_redirected_to cart_url
       assert_equal @user.id, assigns(:cart_record).user_id
       assert_equal @user_record.id, assigns(:cart_record).record_id
     end
@@ -18,7 +18,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       assert_difference('CartRecord.count',-1) do
         delete :destroy, id: @user_cart_record
       end
-      assert_redirected_to cart_records_url
+      assert_redirected_to cart_url
     end
 
     should 'not destroy a cart_record belonging to another user' do
@@ -36,7 +36,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       assert_difference('CartRecord.count') do
         post :create, cart_record: { record_id: @readable_record.id }
       end
-      assert_redirected_to cart_records_url
+      assert_redirected_to cart_url
       assert_not_nil assigns(:cart_record)
       assert_equal @user.id, assigns(:cart_record).user_id
       assert_equal @readable_record.id, assigns(:cart_record).record_id
