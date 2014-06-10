@@ -42,6 +42,11 @@ class Ability
       if user.type == 'CoreUser'
         can :read, Core, id: user.core_id
         can :update, Project, :id => user.projects.collect{|m| m.id}
+        cannot :edit, Project
+      end
+      if user.type == 'ProjectUser'
+        can :update, Project, :id => user.projects.collect{|m| m.id}
+        cannot :edit, Project
       end
     end
   end

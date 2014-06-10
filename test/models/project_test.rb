@@ -71,6 +71,10 @@ class ProjectTest < ActiveSupport::TestCase
   end #CoreUser
 
   context 'ProjectUser' do
+    setup do
+      @member_project = projects(:three)
+    end
+
     should 'pass ability profile' do
       ProjectUser.all.each do |project_user|
         if project_user.is_enabled?
@@ -78,6 +82,12 @@ class ProjectTest < ActiveSupport::TestCase
           allowed_abilities(project_user, @project, [:show] )
           denied_abilities(project_user, @project, [:edit, :update])
           denied_abilities(project_user, Project.new, [:new, :create])
+          if @member_project.is_member?(project_user)
+            denied_abilities(project_user, @member_project, [:edit])
+            allowed_abilities(project_user, @member_project, [:update])
+          else
+            denied_abilities(project_user, @member_project, [:edit, :update])
+          end
         else
           denied_abilities(project_user, Project, [:index] )
           denied_abilities(project_user, @project, [:show, :edit, :update])

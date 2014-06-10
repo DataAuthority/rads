@@ -15,3 +15,7 @@ three:
 four:
   project: :two
   user: :core_user
+
+five:
+  project: :three
+  user: :project_user

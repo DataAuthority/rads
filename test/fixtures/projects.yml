@@ -10,4 +10,7 @@ two:
   description: This is the second
   creator: :admin
 
-
+three:
+ name: Project3
+ description: This is the third
+ creator: :non_admin

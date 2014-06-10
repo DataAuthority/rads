@@ -20,15 +20,20 @@ class ProjectAffiliatedRecordTest < ActiveSupport::TestCase
   context 'ProjectUser' do
     setup do
       @user = users(:project_user)
+      @project = projects(:three)
+      @project_affiliated_record = project_affiliated_records(:four)
+      @unaffiliated_record = records(:project_user)
+      @unowned_record = records(:admin)
     end
 
     should 'pass ability profile' do
-      denied_abilities(nil, ProjectAffiliatedRecord, [:index] )
-      denied_abilities(nil, ProjectAffiliatedRecord.new, [:new, :create])
-      ProjectAffiliatedRecord.all.each do |par|
-        denied_abilities(nil, par, [:show, :destroy])
-      end
-    end    
+      allowed_abilities(@user, @project.project_affiliated_records.first, [:index])
+      allowed_abilities(@user, @project.project_affiliated_records.build(), [:new])
+      allowed_abilities(@user, @project.project_affiliated_records.build(record_id: @unaffiliated_record.id), [:create])
+      denied_abilities(@user, @project.project_affiliated_records.build(record_id: @unowned_record.id), [:create])
+      allowed_abilities(@user, @project_affiliated_record, [:show, :destroy])
+    end
+
   end #ProjectUser
 
   context 'ProjectMember' do
