@@ -17,7 +17,7 @@
       <tr>
         <td><%= cart_record.stored_record %></td>
         <td><%= cart_record.user %></td>
-        <td><%= link_to 'Destroy', cart_record, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= link_to 'Remove', cart_record, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
   </tbody>
