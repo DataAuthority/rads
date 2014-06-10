@@ -5,6 +5,7 @@ class ProjectAffiliatedRecordTest < ActiveSupport::TestCase
   should belong_to :affiliated_record
   should validate_presence_of :project
   should validate_presence_of :affiliated_record
+  should validate_uniqueness_of(:project_id).scoped_to(:record_id)
 
   context 'nil user' do
     should 'pass ability profile' do
