@@ -3,6 +3,8 @@ class CartsController < ApplicationController
   before_action :load_and_authorize_records, only: :update
 
   def show
+    @cart = Cart.new(params[:cart])
+    @projects = current_user.projects
   end
 
   def update

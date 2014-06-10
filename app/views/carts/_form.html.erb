@@ -1,0 +1,11 @@
+<%= form_for(@cart, url: cart_path, method: :patch) do |f| %>
+  <%= f.radio_button :action, :destroy_records %>
+  <%= f.label "action_destroy_records", 'Destroy content' %>
+
+  <%= f.radio_button :action, :affiliate_to_project %>
+  <%= f.label "action_affiliate_to_project", "Affiliate to" %>
+  <%= f.label :project_id %>
+  <%= f.collection_select :project_id, @projects, :id, :to_s %>
+
+  <%= f.submit 'Whaterver' %>
+<% end %>

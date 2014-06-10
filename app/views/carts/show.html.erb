@@ -1,5 +1,8 @@
-<h1>Listing records in cart</h1><%= link_to 'Empty', cart_url, method: :delete, data: { confirm: 'Are you sure?' } %>
+<h1>Listing records in cart</h1>
 
+<%= render 'form' %>
+
+<%= link_to 'Empty', cart_url, method: :delete, data: { confirm: 'Are you sure?' } %>
 <table>
   <thead>
     <tr>
