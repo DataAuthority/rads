@@ -19,3 +19,35 @@ four:
 five:
   project: :three
   user: :project_user
+
+project_membership_creator:
+  project: :membership_test
+  user: :p_m_creator
+  is_administrator: true
+  is_data_producer: true
+  is_data_consumer: true
+  is_data_manager: true
+
+project_membership_member:
+  project: :membership_test
+  user: :p_m_member
+
+project_membership_administrator:
+  project: :membership_test
+  user: :p_m_administrator
+  is_administrator: true
+
+project_membership_consumer:
+  project: :membership_test
+  user: :p_m_consumer
+  is_data_consumer: true
+
+project_membership_producer:
+  project: :membership_test
+  user: :p_m_producer
+  is_data_producer: true
+
+project_membership_d_manager:
+  project: :membership_test
+  user: :p_m_dmanager
+  is_data_manager: true

@@ -14,3 +14,8 @@ three:
  name: Project3
  description: This is the third
  creator: :non_admin
+
+membership_test:
+  name: ProjectMembershipTest
+  description: Tests for Project Membership and Roles
+  creator: :p_m_creator

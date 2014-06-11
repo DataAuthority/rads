@@ -77,3 +77,53 @@ project_user_two:
   type: ProjectUser
   project: :two
   is_enabled: true
+
+p_m_creator:
+  name: p_m_creator
+  type: RepositoryUser
+  email: p_m_creator@duke.edu
+  netid: p_m_creator1234
+  is_enabled: true
+  is_administrator: false
+
+p_m_dmanager:
+  name: p_m_dmanager
+  type: RepositoryUser
+  email: p_m_dmanager@duke.edu
+  netid: p_m_dmanager1234
+  is_enabled: true
+  is_administrator: false
+
+p_m_producer:
+  name: p_m_producer
+  type: RepositoryUser
+  email: p_m_producer@duke.edu
+  netid: p_m_producer1234
+  is_enabled: true
+  is_administrator: false
+
+p_m_administrator:
+  name: p_m_administrator
+  type: RepositoryUser
+  email: p_m_administrator@duke.edu
+  netid: p_m_administrator1234
+  is_enabled: true
+  is_administrator: false
+
+p_m_consumer:
+  name: p_m_consumer
+  type: RepositoryUser
+  email: p_m_consumer@duke.edu
+  netid: p_m_consumer1234
+  is_enabled: true
+  is_administrator: false
+
+p_m_member:
+  name: p_m_member
+  type: RepositoryUser
+  email: p_m_member@duke.edu
+  netid: p_m_member1234
+  is_enabled: true
+  is_administrator: false
+
+  

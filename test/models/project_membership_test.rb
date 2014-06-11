@@ -6,6 +6,22 @@ class ProjectMembershipTest < ActiveSupport::TestCase
   should validate_presence_of :user_id
   should validate_presence_of :project
 
+  should allow_value(true).for(:is_administrator)
+  should_respond_to(:is_administrator)
+  should_respond_to(:is_administrator?)
+
+  should allow_value(true).for(:is_data_consumer)
+  should_respond_to(:is_data_consumer)
+  should_respond_to(:is_data_consumer?)
+
+  should allow_value(true).for(:is_data_producer)
+  should_respond_to(:is_data_producer)
+  should_respond_to(:is_data_producer?)
+
+  should allow_value(true).for(:is_data_manager)
+  should_respond_to(:is_data_manager)
+  should_respond_to(:is_data_manager?)
+
   # Abilities
 
   context 'nil user' do
