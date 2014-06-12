@@ -7,10 +7,9 @@ class Ability
     elsif !user.is_enabled?
       can :show, RepositoryUser, :id => user.id
     else
-      # can [:index, :show], ProjectAffiliatedRecord, :project_id => user.project_memberships.collect{|p| p.project_id}
-      # can [:new, :create, :destroy], ProjectAffiliatedRecord, :project_id => user.project_memberships.where(is_data_producer: true).collect{|p| p.project_id}, :record_id => user.records.collect{|r| r.id}
-
-      can [:index, :show], ProjectAffiliatedRecord, project_id: user.projects.collect{|p| p.id }
+      can [:index, :show], ProjectAffiliatedRecord, :project_id => user.project_memberships.collect{|p| p.project_id}
+      can :new, ProjectAffiliatedRecord, :project_id => user.project_memberships.where(is_data_producer: true).collect{|p| p.project_id}
+      can [:create, :destroy], ProjectAffiliatedRecord, :project_id => user.project_memberships.where(is_data_producer: true).collect{|p| p.project_id}, :record_id => user.records.collect{|r| r.id}
       can :read, Project
       can :manage, Record, :creator_id => user.id
       cannot :destroy, Record, :is_destroyed => true
