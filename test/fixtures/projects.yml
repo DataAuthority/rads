@@ -19,3 +19,9 @@ membership_test:
   name: ProjectMembershipTest
   description: Tests for Project Membership and Roles
   creator: :p_m_creator
+
+p_m_project:
+  name: p_m_project
+  description: other project projectUser for project membership test
+  creator: :p_m_creator
+

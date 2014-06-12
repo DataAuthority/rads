@@ -49,3 +49,29 @@ project_user_is_destroyed:
   creator: :project_user
   is_destroyed: true
 
+pm_pu_producer_affiliated_record:
+  creator: :p_m_pu_producer
+
+pm_pu_producer_unaffiliated_record:
+  creator: :p_m_pu_producer
+
+pm_cu_producer_affiliated_record:
+  creator: :p_m_cu_producer
+
+pm_cu_producer_unaffiliated_record:
+  creator: :p_m_cu_producer
+
+pm_producer_affiliated_record:
+  creator: :p_m_producer
+
+pm_producer_unaffiliated_record:
+  creator: :p_m_producer
+
+pm_administrator_record:
+  creator: :p_m_administrator
+
+pm_consumer_record:
+  creator: :p_m_consumer
+
+pm_dmanager_record:
+  creator: :p_m_dmanager

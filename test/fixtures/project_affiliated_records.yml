@@ -15,3 +15,15 @@ three:
 four:
   project: :three
   affiliated_record: :project_three_affiliated_project_user
+
+pm_pu_producer_affiliated:
+  project: :project_membership
+  affiliated_record: :pm_pu_producer_affiliated_record
+
+pm_cu_producer_affiliated:
+  project: :project_membership
+  affiliated_record: :pm_cu_producer_affiliated_record
+
+pm_producer_affiliated:
+  project: :project_membership
+  affiliated_record: :pm_producer_affiliated_record

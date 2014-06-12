@@ -51,3 +51,13 @@ project_membership_d_manager:
   project: :membership_test
   user: :p_m_dmanager
   is_data_manager: true
+
+project_membership_pu:
+  project: :membership_test
+  user: p_m_pu_producer
+  is_data_producer: true
+
+project_membership_cu:
+  project: :membership_test
+  user: p_m_cu_producer
+  is_data_producer: true

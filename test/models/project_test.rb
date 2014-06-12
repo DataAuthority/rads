@@ -43,19 +43,19 @@ class ProjectTest < ActiveSupport::TestCase
   context 'CoreUser' do
 
     should 'pass ability profile' do
-      member_tested = non_member_tested = false
+      cannot_update_tested = producer_tested = false
       CoreUser.all.each do |core_user|
         if core_user.is_enabled?
           allowed_abilities(core_user, Project, [:index] )
-          allowed_abilities(core_user, @project, [:show] )
-          denied_abilities(core_user, @project, [:edit])
           denied_abilities(core_user, Project.new, [:new, :create])
           Project.all.each do |project|
-            if project.is_member?(core_user)
-              member_tested = true
+            allowed_abilities(core_user, project, [:show] )
+            denied_abilities(core_user, project, [:edit])
+            if core_user.project_memberships.where(project_id: project.id, is_data_producer: true).exists?
+              producer_tested = true
               allowed_abilities(core_user, project, [:update])
             else
-              non_member_tested = true
+              cannot_update_tested = true
               denied_abilities(core_user, project, [:update])
             end
           end
@@ -65,28 +65,28 @@ class ProjectTest < ActiveSupport::TestCase
           denied_abilities(core_user, Project.new, [:new, :create])
         end
       end
-      assert member_tested, 'membership access should have been tested'
-      assert non_member_tested, 'no membership access should have been tested'
+      assert cannot_update_tested, 'user that cannot_update should have been tested'
+      assert producer_tested, 'data_prodcuer in project should have been tested'
     end
   end #CoreUser
 
   context 'ProjectUser' do
-    setup do
-      @member_project = projects(:three)
-    end
-
     should 'pass ability profile' do
+      cannot_update_tested = producer_tested = false
       ProjectUser.all.each do |project_user|
         if project_user.is_enabled?
           allowed_abilities(project_user, Project, [:index] )
-          allowed_abilities(project_user, @project, [:show] )
-          denied_abilities(project_user, @project, [:edit, :update])
           denied_abilities(project_user, Project.new, [:new, :create])
-          if @member_project.is_member?(project_user)
-            denied_abilities(project_user, @member_project, [:edit])
-            allowed_abilities(project_user, @member_project, [:update])
-          else
-            denied_abilities(project_user, @member_project, [:edit, :update])
+          Project.all.each do |project|
+            allowed_abilities(project_user, project, [:show] )
+            denied_abilities(project_user, project, [:edit])
+            if project_user.project_memberships.where(project_id: project.id, is_data_producer: true).exists?
+              producer_tested = true
+              allowed_abilities(project_user, project, [:update])
+            else
+              cannot_update_tested = true
+              denied_abilities(project_user, project, [:update])
+            end
           end
         else
           denied_abilities(project_user, Project, [:index] )
@@ -94,27 +94,55 @@ class ProjectTest < ActiveSupport::TestCase
           denied_abilities(project_user, Project.new, [:new, :create])
         end
       end
+      assert cannot_update_tested, 'user that cannot_update should have been tested'
+      assert producer_tested, 'data_prodcuer in project should have been tested'
     end
   end #ProjectUser
 
   context 'RepositoryUser' do
     should 'pass ability profile' do
+      cannot_update_tested = member_without_producer_or_administrator_tested = producer_tested = producer_not_administrator_tested = administrator_tested = false
       RepositoryUser.all.each do |user|
         if user.is_enabled?
           allowed_abilities(user, Project, [:index] )
-          allowed_abilities(user, @project, [:show] )
           allowed_abilities(user, Project.new, [:new, :create] )
-          if @project.is_member?(user)
-            allowed_abilities(user, @project, [:edit, :update])
-          else
-            denied_abilities(user, @project, [:edit, :update])
-          end
+          Project.all.each do |project|
+            allowed_abilities(user, project, [:show] )
+            pm = user.project_memberships.where(project_id: project.id).first
+            if pm.nil?
+              cannot_update_tested = true
+              denied_abilities(user, project, [:edit, :update])
+            else
+             if (pm.is_administrator? || pm.is_data_producer?)
+               if pm.is_data_producer?
+                 producer_tested = true
+                 allowed_abilities(user, project, [:update])
+                 unless pm.is_administrator?
+                   producer_not_administrator_tested = true
+                   denied_abilities(user, project, [:edit])
+                 end
+               end
+               if pm.is_administrator?
+                 administrator_tested = true
+                allowed_abilities(user, project, [:edit, :update])
+               end
+             else
+                member_without_producer_or_administrator_tested = true
+                denied_abilities(user, project, [:edit, :update])
+             end
+            end
+         end
         else
           denied_abilities(user, Project, [:index] )
           denied_abilities(user, @project, [:show, :edit, :update])
           denied_abilities(user, Project.new, [:new, :create])
         end
       end
+      assert cannot_update_tested, 'user that cannot_update should have been tested'
+      assert member_without_producer_or_administrator_tested, 'member without producer or administrator role should have been tested'
+      assert producer_tested, 'data_prodcuer in project should have been tested'
+      assert producer_not_administrator_tested, 'data_prodcuer that is not an administrator in project should have been tested'
+      assert administrator_tested, 'project administrator should have been tested'
     end
   end #any RepositoryUser
 end

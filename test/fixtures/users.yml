@@ -126,4 +126,20 @@ p_m_member:
   is_enabled: true
   is_administrator: false
 
-  
+p_m_cu_producer:
+  name: p_m_cu_producer
+  type: CoreUser
+  core: :p_m_core
+  is_enabled: true
+
+p_m_pu_producer:
+  name: p_m_pu_producer
+  type: ProjectUser
+  project: :p_m_project
+  is_enabled: true
+
+p_m_project_user:
+  name: p_m_project_user
+  type: ProjectUser
+  project: :membership_test
+  is_enabled: true

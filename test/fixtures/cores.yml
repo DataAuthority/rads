@@ -9,3 +9,8 @@ two:
   name: two_core
   description: this is the second core
   creator: :admin
+
+p_m_core:
+  name: p_m_core
+  description: core for project_membership_test
+  creator: :p_m_cu_producer

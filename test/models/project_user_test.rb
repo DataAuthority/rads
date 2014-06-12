@@ -28,17 +28,31 @@ class ProjectUserTest < ActiveSupport::TestCase
 
   context 'repository user' do
     setup do
-      @user_in_project = users(:non_admin)
-      @user_not_in_project = users(:dm)
-      @project_user = users(:project_user)
+      @user_not_in_project = users(:non_admin)
+      @user_member_in_project = users(:p_m_member)
+      @user_dm_in_project = users(:p_m_dmanager)
+      @user_dc_in_project = users(:p_m_consumer)
+      @user_dp_in_project = users(:p_m_producer)
+      @user_admin_in_project = users(:p_m_administrator)
+      @project_user = users(:p_m_project_user)
     end
 
-    should 'be able to switch to a project_user if they are a member of the project of the project_user' do
-      allowed_abilities(@user_in_project, @project_user, [:switch_to])
+    should 'be able to switch to a project_user if they are a data_manager of the project of the project_user' do
+      pm = @user_dm_in_project.project_memberships.where(project_id: @project_user.project_id, is_data_manager: true).first
+      assert_not_nil pm
+      assert pm.is_data_manager?, 'user should be a data_manager in the project for the project_user'
+      allowed_abilities(@user_dm_in_project, @project_user, [:switch_to])
     end
 
-    should 'not be able to switch to a project_user if they are not a member of the project of the project_user' do
-      denied_abilities(@user_not_in_project, @project_user, [:switch_to])
+    should 'not be able to switch to a project_user if they are not a data_manager of the project of the project_user' do
+      [@user_not_in_project,
+       @user_member_in_project,
+       @user_dc_in_project,
+       @user_dp_in_project,
+       @user_admin_in_project].each do |tu|
+         assert tu.project_memberships.where(project_id: @project_user.project_id, is_data_manager: true).empty?, "user #{ tu.name } should not be a data_manager in #{ @project_user.project.name }"
+         denied_abilities(tu, @project_user, [:switch_to])
+       end
     end
 
     should 'pass general ability profile' do
