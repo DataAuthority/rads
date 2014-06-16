@@ -34,7 +34,7 @@ class Ability
         can :read, Core
         can [:new, :create], [Core, Project]
         cannot :edit, Project
-        can [:edit, :update], Project, :id => user.project_memberships.where(is_administrator: true).collect{|m| m.project_id}
+        can [:edit, :update, :update_attributes], Project, :id => user.project_memberships.where(is_administrator: true).collect{|m| m.project_id}
         can [:destroy], ProjectAffiliatedRecord, :project => {:project_memberships => {:user_id => user.id, :is_administrator => true}}
         can :switch_to, CoreUser, :core_id => user.cores.collect{|m| m.id}
         can :switch_to, ProjectUser, :project_id => user.project_memberships.where(is_data_manager: true).collect{|m| m.project_id}
@@ -42,14 +42,15 @@ class Ability
         can [:edit, :update, :new, :create, :destroy], ProjectMembership, :project_id => user.project_memberships.where(is_administrator: true).collect{|m| m.project_id}
         cannot :destroy, CoreMembership, :repository_user_id => user.id
         cannot [:edit, :update, :destroy], ProjectMembership, :user_id => user.id
-        cannot :create, ProjectMembership, user_id: User.all.reject{|u| u.type == 'RepositoryUser'}.collect{|u| u.id}
+        cannot :create, ProjectMembership, is_administrator: true, user_id: User.all.reject{|u| u.type == 'RepositoryUser'}.collect{|u| u.id}
+        cannot :create, ProjectMembership, is_data_manager: true, user_id: User.all.reject{|u| u.type == 'RepositoryUser'}.collect{|u| u.id}
       end
       if user.type == 'CoreUser'
         can :read, Core, id: user.core_id
-        cannot :edit, Project
+        cannot [:edit, :update_attributes], Project
       end
       if user.type == 'ProjectUser'
-        cannot :edit, Project
+        cannot [:edit, :update_attributes], Project
       end
     end
   end

@@ -1,6 +1,15 @@
 require 'test_helper'
 
 class RecordTest < ActiveSupport::TestCase
+  def self.should_pass_data_consumer_tests()
+    should "pass data_consumer tests" do
+    end
+  end
+
+  def self.should_pass_non_data_consumer_tests()
+    should "pass non-data_consumer tests" do
+    end
+  end
 
   should belong_to :creator
   should have_attached_file(:content)

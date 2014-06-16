@@ -35,7 +35,7 @@ class ProjectTest < ActiveSupport::TestCase
   context 'nil user' do
     should 'pass ability profile' do
       denied_abilities(nil, Project, [:index] )
-      denied_abilities(nil, @project, [:show, :edit, :update])
+      denied_abilities(nil, @project, [:show, :edit, :update, :update_attributes])
       denied_abilities(nil, Project.new, [:new, :create])
     end
   end #nil user
@@ -54,14 +54,15 @@ class ProjectTest < ActiveSupport::TestCase
             if core_user.project_memberships.where(project_id: project.id, is_data_producer: true).exists?
               producer_tested = true
               allowed_abilities(core_user, project, [:update])
+              denied_abilities(core_user, project, [:update_attributes])
             else
               cannot_update_tested = true
-              denied_abilities(core_user, project, [:update])
+              denied_abilities(core_user, project, [:update, :update_attributes])
             end
           end
         else
           denied_abilities(core_user, Project, [:index] )
-          denied_abilities(core_user, @project, [:show, :edit, :update])
+          denied_abilities(core_user, @project, [:show, :edit, :update, :update_attributes])
           denied_abilities(core_user, Project.new, [:new, :create])
         end
       end
@@ -83,14 +84,15 @@ class ProjectTest < ActiveSupport::TestCase
             if project_user.project_memberships.where(project_id: project.id, is_data_producer: true).exists?
               producer_tested = true
               allowed_abilities(project_user, project, [:update])
+              denied_abilities(project_user, project, [:update_attributes])
             else
               cannot_update_tested = true
-              denied_abilities(project_user, project, [:update])
+              denied_abilities(project_user, project, [:update, :update_attributes])
             end
           end
         else
           denied_abilities(project_user, Project, [:index] )
-          denied_abilities(project_user, @project, [:show, :edit, :update])
+          denied_abilities(project_user, @project, [:show, :edit, :update, :update_attributes])
           denied_abilities(project_user, Project.new, [:new, :create])
         end
       end
@@ -111,7 +113,7 @@ class ProjectTest < ActiveSupport::TestCase
             pm = user.project_memberships.where(project_id: project.id).first
             if pm.nil?
               cannot_update_tested = true
-              denied_abilities(user, project, [:edit, :update])
+              denied_abilities(user, project, [:edit, :update, :update_attributes])
             else
              if (pm.is_administrator? || pm.is_data_producer?)
                if pm.is_data_producer?
@@ -119,22 +121,22 @@ class ProjectTest < ActiveSupport::TestCase
                  allowed_abilities(user, project, [:update])
                  unless pm.is_administrator?
                    producer_not_administrator_tested = true
-                   denied_abilities(user, project, [:edit])
+                   denied_abilities(user, project, [:edit, :update_attributes])
                  end
                end
                if pm.is_administrator?
                  administrator_tested = true
-                allowed_abilities(user, project, [:edit, :update])
+                 allowed_abilities(user, project, [:edit, :update, :update_attributes])
                end
              else
                 member_without_producer_or_administrator_tested = true
-                denied_abilities(user, project, [:edit, :update])
+                denied_abilities(user, project, [:edit, :update, :update_attributes])
              end
             end
          end
         else
           denied_abilities(user, Project, [:index] )
-          denied_abilities(user, @project, [:show, :edit, :update])
+          denied_abilities(user, @project, [:show, :edit, :update, :update_attributes])
           denied_abilities(user, Project.new, [:new, :create])
         end
       end

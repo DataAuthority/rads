@@ -135,7 +135,7 @@ p_m_cu_producer:
 p_m_pu_producer:
   name: p_m_pu_producer
   type: ProjectUser
-  project: :p_m_project
+  project: :three
   is_enabled: true
 
 p_m_project_user:

@@ -198,7 +198,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
 
   end #CoreUser without membership in Project
 
-  context 'ProjectUser or ProjectUser without membership in Project' do
+  context 'ProjectUser without membership in Project' do
     setup do
       @actual_user = users(:non_admin)
       authenticate_existing_user(@actual_user, true)

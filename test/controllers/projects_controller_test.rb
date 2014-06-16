@@ -126,7 +126,7 @@ class ProjectsControllerTest < ActionController::TestCase
       @unaffiliated_records.each do |should_not_be_affiliated|
         assert !@project.is_affiliated_record?(should_not_be_affiliated), "#{ should_not_be_affiliated.id } should not be affiliated with #{ @project.id }"
       end
-      @create_params[:project][:project_affiliated_records_attributes] = [ @unaffiliated_records.collect{ |r| { record_id: r.id } } ]
+      @create_params[:project][:project_affiliated_records_attributes] = @unaffiliated_records.collect{ |r| { record_id: r.id } }
       assert_difference('Project.count') do
         assert_difference('ProjectUser.count') do
           assert_difference('ProjectAffiliatedRecord.count', @unaffiliated_records.count) do
@@ -157,7 +157,7 @@ class ProjectsControllerTest < ActionController::TestCase
         assert !@project.is_affiliated_record?(should_not_be_affiliated), "#{ should_not_be_affiliated.id } should not be affiliated with #{ @project.id }"
       end
       assert @unowned_record.creator_id != @user.id, 'record should not be owned by the user'
-      @create_params[:project][:project_affiliated_records_attributes] = [ @unaffiliated_records.collect{|r| { record_id: r.id } } ]
+      @create_params[:project][:project_affiliated_records_attributes] = @unaffiliated_records.collect{|r| { record_id: r.id } }
       assert_no_difference('Project.count') do
         assert_no_difference('ProjectUser.count') do
           assert_no_difference('ProjectAffiliatedRecord.count') do
@@ -316,7 +316,7 @@ class ProjectsControllerTest < ActionController::TestCase
       end
       assert_difference('ProjectAffiliatedRecord.count', @unaffiliated_records.length) do
         patch :update, id: @project, project: {
-          project_affiliated_records_attributes: @unaffiliated_records.map {|r|
+          project_affiliated_records_attributes: @unaffiliated_records.collect {|r|
             { record_id: r.id }
           }
         }
@@ -341,7 +341,7 @@ class ProjectsControllerTest < ActionController::TestCase
       end
       assert_no_difference('ProjectAffiliatedRecord.count') do
         patch :update, id: @project, project: {
-          project_affiliated_records_attributes: @unaffiliated_records.map {|r|
+          project_affiliated_records_attributes: @unaffiliated_records.collect {|r|
             { record_id: r.id }
           }
         }
@@ -366,7 +366,7 @@ class ProjectsControllerTest < ActionController::TestCase
       end
       assert_no_difference('ProjectAffiliatedRecord.count') do
         patch :update, id: @project, project: {
-          project_affiliated_records_attributes: @unaffiliated_records.map {|r|
+          project_affiliated_records_attributes: @unaffiliated_records.collect {|r|
             { record_id: r.id }
           }
         }

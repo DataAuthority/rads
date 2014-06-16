@@ -1,6 +1,8 @@
 class ProjectsController < ApplicationController
   load_and_authorize_resource
   before_action :authorize_affiliated_records, only: [:update, :create]
+  before_action :authorize_project_memberships, only: [:update, :create]
+  before_action :authorize_update_attributes, only: [:update]
 
   def index
   end
@@ -36,7 +38,7 @@ class ProjectsController < ApplicationController
 
   def create
     @project.creator_id = current_user.id
-    @project.project_memberships.build( user_id: current_user.id )
+    @project.project_memberships.build( user_id: current_user.id, is_administrator: true, is_data_producer: true, is_data_consumer: true, is_data_manager: true )
     @project.build_project_user(name: "Project #{ @project.name } User", is_enabled: true)
     respond_to do |format|
       if @project.save
@@ -74,6 +76,20 @@ class ProjectsController < ApplicationController
       params.require(:project).permit(permitted_params)
     end
 
+    def authorize_project_memberships
+      params = project_params
+      if params[:project_memberships_attributes]
+        params[:project_memberships_attributes].each do |par|
+          if @project.id.nil?
+            @project.creator_id = current_user.id
+            authorize! :create, ProjectMembership.new(par)
+          else
+            authorize! :create, ProjectMembership.new(par.merge(:project_id => @project.id))
+          end
+        end
+      end
+    end
+
     def authorize_affiliated_records
       params = project_params
       if params[:project_affiliated_records_attributes]
@@ -85,6 +101,12 @@ class ProjectsController < ApplicationController
           authorize! :create, ProjectAffiliatedRecord.new(par.merge(:project_id => @project.id))
         end
       end
+    end
+  end
+
+  def authorize_update_attributes
+    if @project.name_changed? || @project.description_changed?
+      authorize! :update_attributes, @project
     end
   end
 end
