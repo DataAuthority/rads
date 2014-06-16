@@ -21,6 +21,9 @@ core_user_two:
 project_user:
   creator: :project_user
 
+project_user2:
+  creator: :project_user
+
 project_one_affiliated:
   creator: :non_admin
 
@@ -55,10 +58,16 @@ pm_pu_producer_affiliated_record:
 pm_pu_producer_unaffiliated_record:
   creator: :p_m_pu_producer
 
+pm_pu_producer_unaffiliated_record2:
+  creator: :p_m_pu_producer
+
 pm_cu_producer_affiliated_record:
   creator: :p_m_cu_producer
 
 pm_cu_producer_unaffiliated_record:
+  creator: :p_m_cu_producer
+
+pm_cu_producer_unaffiliated_record2:
   creator: :p_m_cu_producer
 
 pm_producer_affiliated_record:
@@ -67,11 +76,29 @@ pm_producer_affiliated_record:
 pm_producer_unaffiliated_record:
   creator: :p_m_producer
 
+pm_producer_unaffiliated_record2:
+  creator: :p_m_producer
+
 pm_administrator_record:
+  creator: :p_m_administrator
+
+pm_administrator_record2:
   creator: :p_m_administrator
 
 pm_consumer_record:
   creator: :p_m_consumer
 
+pm_consumer_record2:
+  creator: :p_m_consumer
+
 pm_dmanager_record:
   creator: :p_m_dmanager
+
+pm_dmanager_record2:
+  creator: :p_m_dmanager
+
+pm_member:
+  creator: :p_m_member
+
+pm_member2:
+  creator: :p_m_member
