@@ -53,4 +53,13 @@ class ProjectAffiliatedRecordsController < ApplicationController
     def project_affiliated_record_params
       params.require(:project_affiliated_record).permit(:record_id)
     end
+
+    def action_denied
+      if %w{destroy}.include?(action_name)
+        flash[:alert] = 'You do not have access to perform that action.'
+        redirect_to @project
+      else
+        super
+      end
+    end
 end
