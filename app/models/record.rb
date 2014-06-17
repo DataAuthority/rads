@@ -7,6 +7,7 @@ class Record < ActiveRecord::Base
   accepts_nested_attributes_for :project_affiliated_records
 
   has_attached_file :content, path: ":interpolated_path"
+  do_not_validate_attachment_file_type :content
 
   scope :find_by_md5, ->(md5) {where(content_fingerprint: md5)}
 
