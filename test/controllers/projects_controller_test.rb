@@ -267,6 +267,55 @@ class ProjectsControllerTest < ActionController::TestCase
         assert t_p.is_member?(users(user_type.to_sym)), "#{ user_type } should now be affiliated with #{ t_p.id }"
       end
     end
+
+    should 'be able to update the project to destroy project_memberships_attributes' do
+      assert_not_nil @user
+      assert @project.is_member?(@user), 'user should be a member of the project'
+      assert @project.project_memberships.where(user_id: @user.id, is_administrator: true).exists?, 'user should be an administrator in the project'
+      update_params = {project_memberships_attributes: []}
+      @potential_members.each do |user_type|
+        new_member = users(user_type.to_sym)
+        new_membership = @project.project_memberships.create(user_id: new_member.id)
+        assert @project.is_member?(new_member), "#{ user_type } should now be affiliated with #{ @project.id }"
+        update_params[:project_memberships_attributes] << { id: new_membership.id, _destroy: 1 }
+      end
+
+      assert_difference('ProjectMembership.count', -@potential_members.length) do
+        patch :update, id: @project, project: update_params
+        assert_equal @user.id, @controller.current_user.id
+      end
+      assert_redirected_to project_path(@project)
+      t_p = Project.find(@project.id)
+      @potential_members.each do |user_type|
+        assert !t_p.is_member?(users(user_type.to_sym)), "#{ user_type } should now not be affiliated with #{ t_p.id }"
+      end
+    end
+
+    should 'be able to destroy any project affiliated records' do
+      assert_not_nil @user
+      record_not_owned_by_user = false
+      assert @project.project_memberships.where(user_id: @user.id, is_administrator: true).exists?, 'user should have the administrator role in the project'
+      affiliated_records = @project.project_affiliated_records.all.to_a
+      affiliated_records.each do |should_be_affiliated|
+        unless record_not_owned_by_user
+          record_not_owned_by_user = (@user.id != should_be_affiliated.affiliated_record.creator_id)
+        end
+      end
+      assert record_not_owned_by_user, 'there should be a record not owned by the user'
+      assert_difference('ProjectAffiliatedRecord.count', -affiliated_records.length) do
+        patch :update, id: @project, project: {
+          project_affiliated_records_attributes: affiliated_records.collect {|r|
+            { id: r.id, _destroy: 1 }
+          }
+        }
+        assert_equal @user.id, @controller.current_user.id
+      end
+      assert_redirected_to project_path(@project)
+      t_p = Project.find(@project.id)
+      affiliated_records.each do |should_be_affiliated|
+        assert !t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should now not be affiliated with #{ t_p.id }"
+      end
+    end
   end
 
   def self.should_pass_not_project_administrator_tests()
@@ -307,6 +356,51 @@ class ProjectsControllerTest < ActionController::TestCase
       t_p = Project.find(@project.id)
       @potential_members.each do |user_type|
         assert !t_p.is_member?(users(user_type.to_sym)), "#{ user_type } should still not be affiliated with #{ t_p.id }"
+      end
+    end
+
+    should 'not be able to update the project to destroy project_memberships_attributes' do
+      assert_not_nil @user
+      update_params = {project_memberships_attributes: []}
+      @potential_members.each do |user_type|
+        new_member = users(user_type.to_sym)
+        new_membership = @project.project_memberships.create(user_id: new_member.id)
+        assert @project.is_member?(new_member), "#{ user_type } should now be affiliated with #{ @project.id }"
+        update_params[:project_memberships_attributes] << { id: new_membership.id, _destroy: true }
+      end
+
+      assert_no_difference('ProjectMembership.count') do
+        patch :update, id: @project, project: update_params
+        assert_equal @user.id, @controller.current_user.id
+      end
+      assert_redirected_to root_path
+      t_p = Project.find(@project.id)
+      @potential_members.each do |user_type|
+        assert t_p.is_member?(users(user_type.to_sym)), "#{ user_type } should now be affiliated with #{ t_p.id }"
+      end
+    end
+
+    should 'not be able to destroy project affiliated records owned by other users' do
+      assert_not_nil @user
+      affiliated_records = []
+      @project.project_affiliated_records.all.each do |should_be_affiliated|
+        unless @user.id == should_be_affiliated.affiliated_record.creator_id
+          affiliated_records << should_be_affiliated
+        end
+      end
+      assert affiliated_records.length > 0, 'there should be a record owned by the user'
+      assert_no_difference('ProjectAffiliatedRecord.count') do
+        patch :update, id: @project, project: {
+          project_affiliated_records_attributes: affiliated_records.collect {|r|
+            { id: r.id, _destroy: 1 }
+          }
+        }
+        assert_equal @user.id, @controller.current_user.id
+      end
+      assert_redirected_to root_path
+      t_p = Project.find(@project.id)
+      affiliated_records.each do |should_be_affiliated|
+        assert t_p.is_affiliated_record?(should_be_affiliated.affiliated_record), "#{ should_be_affiliated.id } should still be affiliated with #{ t_p.id }"
       end
     end
   end
@@ -357,6 +451,30 @@ class ProjectsControllerTest < ActionController::TestCase
       t_p = Project.find(@project.id)
       @unaffiliated_records.each do |should_be_affiliated|
         assert !t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should not be affiliated with #{ t_p.id }"
+      end
+    end
+
+    should 'be able to destroy their own project affiliated records' do
+      assert_not_nil @user
+      assert_not_nil @unaffiliated_records
+      record_owned_by_user = record_not_owned_by_user = false
+      affiliated_records = []
+      @unaffiliated_records.each do |ur|
+        affiliated_records << @project.project_affiliated_records.create(record_id: ur.id)
+      end
+      assert affiliated_records.length > 0, 'there should be records owned by the user'
+      assert_difference('ProjectAffiliatedRecord.count', -affiliated_records.length) do
+        patch :update, id: @project, project: {
+          project_affiliated_records_attributes: affiliated_records.collect {|r|
+            { id: r.id, _destroy: 1 }
+          }
+        }
+        assert_equal @user.id, @controller.current_user.id
+      end
+      assert_redirected_to project_path(@project)
+      t_p = Project.find(@project.id)
+      affiliated_records.each do |should_be_affiliated|
+        assert !t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should now not be affiliated with #{ t_p.id }"
       end
     end
   end

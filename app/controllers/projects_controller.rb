@@ -83,7 +83,11 @@ class ProjectsController < ApplicationController
             @project.creator_id = current_user.id
             authorize! :create, ProjectMembership.new(par)
           else
-            authorize! :create, ProjectMembership.new(par.merge(:project_id => @project.id))
+            if par[:_destroy]
+              authorize! :destroy, @project.project_memberships.find(par[:id])
+            else
+              authorize! :create, ProjectMembership.new(par.merge(:project_id => @project.id))
+            end
           end
         end
       end
@@ -97,7 +101,11 @@ class ProjectsController < ApplicationController
             @project.creator_id = current_user.id
             authorize! :affiliate, Record.find(par[:record_id])
           else
-            authorize! :create, ProjectAffiliatedRecord.new(par.merge(:project_id => @project.id))
+            if par[:_destroy]
+              authorize! :destroy, @project.project_affiliated_records.find(par[:id])
+            else
+              authorize! :create, ProjectAffiliatedRecord.new(par.merge(:project_id => @project.id))
+            end
           end
         end
       end
