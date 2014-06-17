@@ -23,9 +23,9 @@ class ProjectAffiliatedRecordTest < ActiveSupport::TestCase
       assert_not_nil pm
       assert pm.update(is_data_producer: false), 'should update status'
       assert !@project.project_memberships.where(user_id: @user_with_dp_in_project.id, is_data_producer: true).exists?, 'user should no longer be data producer'
-      denied_abilities(@user_without_membership, @project.project_affiliated_records.build(), [:new])
-      denied_abilities(@user_without_membership, @project.project_affiliated_records.build(record_id: @unaffiliated_record.id), [:create])
-      denied_abilities(@user_without_membership, @project.project_affiliated_records.build(record_id: @unowned_record.id), [:create])
+      denied_abilities(@user_with_dp_in_project, @project.project_affiliated_records.build(), [:new])
+      denied_abilities(@user_with_dp_in_project, @project.project_affiliated_records.build(record_id: @unaffiliated_record.id), [:create])
+      denied_abilities(@user_with_dp_in_project, @project.project_affiliated_records.build(record_id: @unowned_record.id), [:create])
       [
         project_affiliated_records(:pm_pu_producer_affiliated),
         project_affiliated_records(:pm_cu_producer_affiliated),

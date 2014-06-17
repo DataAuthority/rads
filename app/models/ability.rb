@@ -14,6 +14,7 @@ class Ability
       can :manage, Record, :creator_id => user.id
       cannot :destroy, Record, :is_destroyed => true
       can :read, Record, :id => user.projects.collect{|p| p.project_affiliated_records.collect{|m| m.record_id}}.flatten
+      can :download, Record, :project_affiliated_records => {:project => {:project_memberships => {:user_id => user.id, :is_data_consumer => true}}}
       can :read, ProjectMembership, :project_id => user.projects.collect{|m| m.id}
       can :manage, CartRecord, :user_id => user.id, :record_id => user.projects.collect{|p| p.project_affiliated_records.collect{|m| m.record_id}}.flatten + user.records.collect{|r| r.id }
       can :update, Project, :id => user.project_memberships.where(is_data_producer: true).collect{|m| m.project_id}
@@ -39,7 +40,7 @@ class Ability
         can :switch_to, CoreUser, :core_id => user.cores.collect{|m| m.id}
         can :switch_to, ProjectUser, :project_id => user.project_memberships.where(is_data_manager: true).collect{|m| m.project_id}
         can :manage, CoreMembership, :core_id => user.cores.collect{|m| m.id}
-        can [:edit, :update, :new, :create, :destroy], ProjectMembership, :project_id => user.project_memberships.where(is_administrator: true).collect{|m| m.project_id}
+        can [:edit, :update, :new, :create, :destroy], ProjectMembership, :project_id => user.project_memberships.where(is_administrator: true).collect{|m| m.project_id}.append(nil)
         cannot :destroy, CoreMembership, :repository_user_id => user.id
         cannot [:edit, :update, :destroy], ProjectMembership, :user_id => user.id
         cannot :create, ProjectMembership, is_administrator: true, user_id: User.all.reject{|u| u.type == 'RepositoryUser'}.collect{|u| u.id}

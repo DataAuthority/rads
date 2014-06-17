@@ -181,6 +181,7 @@ class ProjectsControllerTest < ActionController::TestCase
       @potential_members.each do |user_type|
         assert !@project.is_member?(users(user_type.to_sym)), "#{ user_type } should not be affiliated with #{ @project.id }"
         @create_params[:project][:project_memberships_attributes] << { user_id: users(user_type.to_sym).id }
+        allowed_abilities(@user, ProjectMembership.new({user_id: users(user_type.to_sym).id}), [:create])
       end
 
       assert_difference('Project.count') do
@@ -236,11 +237,13 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_not_nil @user
       assert @project.is_member?(@user), 'user should be a member of the project'
       assert @project.project_memberships.where(user_id: @user.id, is_administrator: true).exists?, 'user should be an administrator in the project'
+      new_name = "new_proj_name_foo"
       new_description = "NEW DESCRIPTION"
-      patch :update, id: @project, project: {description: new_description }
+      patch :update, id: @project, project: {name: new_name, description: new_description }
       assert_equal @user.id, @controller.current_user.id
       assert_redirected_to project_path(@project)
       t_p = Project.find(@project.id)
+      assert_equal new_name, t_p.name
       assert_equal new_description, t_p.description
     end
 
@@ -276,13 +279,16 @@ class ProjectsControllerTest < ActionController::TestCase
 
     should 'not be able to update the project attributes' do
       assert_not_nil @user
+      orig_name = @project.name
+      new_name = "new_proj_name_foo"
       orig_description = @project.description
       new_description = "NEW DESCRIPTION"
-      patch :update, id: @project, project: {description: new_description }
+      patch :update, id: @project, project: {name: new_name, description: new_description }
       assert_equal @user.id, @controller.current_user.id
-      assert_redirected_to root_path
       t_p = Project.find(@project.id)
+      assert_equal orig_name, t_p.name
       assert_equal orig_description, t_p.description
+      assert_redirected_to root_path
     end
 
     should 'not be able to update the project to add project_memberships_attributes' do
@@ -306,7 +312,7 @@ class ProjectsControllerTest < ActionController::TestCase
   end
 
   def self.should_pass_data_producer_tests()
-    should 'be able to affiliate multiple records with a project if they are a member with the data_producer role' do
+    should 'be able to affiliate multiple records with a project' do
       assert_not_nil @user
       assert_not_nil @unaffiliated_records
       assert @unaffiliated_records.length > 0, 'there should be unaffiliated_records'
@@ -543,7 +549,7 @@ class ProjectsControllerTest < ActionController::TestCase
       authenticate_existing_user(@actual_user, true)
       @user = users(:p_m_pu_producer)
       session[:switch_to_user_id] = @user.id
-      @unaffiliated_records = [ records(:pm_cu_producer_unaffiliated_record), records(:pm_cu_producer_unaffiliated_record2) ]
+      @unaffiliated_records = [ records(:pm_pu_producer_unaffiliated_record), records(:pm_pu_producer_unaffiliated_record2) ]
     end
 
     should_be_a_data_producer_in_the_project

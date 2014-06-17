@@ -1,8 +1,8 @@
 class ProjectsController < ApplicationController
   load_and_authorize_resource
+  before_action :authorize_update_attributes, only: [:update]
   before_action :authorize_affiliated_records, only: [:update, :create]
   before_action :authorize_project_memberships, only: [:update, :create]
-  before_action :authorize_update_attributes, only: [:update]
 
   def index
   end
@@ -67,12 +67,11 @@ class ProjectsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def project_params
       permitted_params = [
+        :name,
+        :description,
         project_affiliated_records_attributes: [:id, :_destroy, :record_id],
         project_memberships_attributes: [:id, :_destroy, :user_id]
       ]
-      if current_user.type == 'RepositoryUser'
-        permitted_params = [:name, :description] + permitted_params
-      end
       params.require(:project).permit(permitted_params)
     end
 
@@ -94,19 +93,21 @@ class ProjectsController < ApplicationController
       params = project_params
       if params[:project_affiliated_records_attributes]
         params[:project_affiliated_records_attributes].each do |par|
-        if @project.id.nil?
-          @project.creator_id = current_user.id
-          authorize! :affiliate, Record.find(par[:record_id])
-        else
-          authorize! :create, ProjectAffiliatedRecord.new(par.merge(:project_id => @project.id))
+          if @project.id.nil?
+            @project.creator_id = current_user.id
+            authorize! :affiliate, Record.find(par[:record_id])
+          else
+            authorize! :create, ProjectAffiliatedRecord.new(par.merge(:project_id => @project.id))
+          end
         end
       end
     end
-  end
 
-  def authorize_update_attributes
-    if @project.name_changed? || @project.description_changed?
-      authorize! :update_attributes, @project
+    def authorize_update_attributes
+      params = project_params
+      if (project_params[:name] && project_params[:name] != @project.name) ||
+      (project_params[:description] && project_params[:description] != @project.description)
+        authorize! :update_attributes, @project
+      end
     end
-  end
 end
