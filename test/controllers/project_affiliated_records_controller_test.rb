@@ -61,7 +61,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
         post :create, {project_id: @project.id, project_affiliated_record: { record_id: @unowned_record.id }}
       end
       assert_not_nil assigns(:project_affiliated_record)
-      assert_redirected_to project_url(@project)
+      assert_redirected_to root_url
     end
 
     should "destroy project_affiliated_record that is owned by them" do
@@ -112,7 +112,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
       assert_no_difference('ProjectAffiliatedRecord.count') do
         delete :destroy, project_id: @project, id: @project_affiliated_record
       end
-      assert_redirected_to project_url(@project)
+      assert_redirected_to root_url
     end
   end
 
