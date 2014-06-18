@@ -1,5 +1,6 @@
 class RecordsController < ApplicationController
   load_and_authorize_resource except: [:index]
+  before_action :authorize_download, only: [:show]
   around_action :audit_activity, only: [:create, :destroy]
 
   def index
@@ -82,5 +83,9 @@ class RecordsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def record_params
       params.require(:record).permit(:content, project_affiliated_records_attributes: [:project_id])
+    end
+
+    def authorize_download
+      authorize! :download, @record if params[:download_content]
     end
 end

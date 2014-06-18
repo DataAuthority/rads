@@ -1,6 +1,57 @@
 require 'test_helper'
 
 class RecordsControllerTest < ActionController::TestCase
+  def self.non_member_tests
+    should "not have affiliated records in index" do
+      assert_not_nil @project_affiliated_record
+      assert_not_nil @project_affiliated_record.affiliated_record
+      get :index, record_filter: {affiliated_with_project: @project.id}
+      assert_response 404
+    end
+
+    should "not show affiliated record" do
+      assert_not_nil @project_affiliated_record
+      assert_not_nil @project_affiliated_record.affiliated_record
+      get :show, id: @project_affiliated_record.affiliated_record
+      assert_redirected_to root_url
+    end
+  end
+
+  def self.any_member_tests
+    should "have affiliated records in index" do
+      assert_not_nil @project_affiliated_record
+      assert_not_nil @project_affiliated_record.affiliated_record
+      get :index, record_filter: {affiliated_with_project: @project.id}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).include?(@project_affiliated_record.affiliated_record), "records does not include affiliated_record"
+    end
+
+    should "show affiliated record" do
+      assert_not_nil @project_affiliated_record
+      assert_not_nil @project_affiliated_record.affiliated_record
+      get :show, id: @project_affiliated_record.affiliated_record
+      assert_response :success
+    end
+  end
+
+  def self.data_consumer_tests
+    should 'download the content of affiliated record via show' do
+      assert_not_nil @project_affiliated_record
+      assert_not_nil @project_affiliated_record.affiliated_record
+      get :show, id: @project_affiliated_record.affiliated_record, download_content: true
+      assert_response :success
+   end
+ end
+
+  def self.not_data_consumer_tests
+    should 'not download the content of affiliated record via show' do
+      assert_not_nil @project_affiliated_record
+      assert_not_nil @project_affiliated_record.affiliated_record
+      get :show, id: @project_affiliated_record.affiliated_record, download_content: true
+      assert_redirected_to root_url
+   end
+  end
 
   setup do
     @test_content_path = Rails.root.to_s + '/test/fixtures/attachments/content.txt'
@@ -18,6 +69,9 @@ class RecordsControllerTest < ActionController::TestCase
     @admin_record.content = @test_content
     @admin_record.save
     @admin_project = projects(:two)
+
+    @project = projects(:membership_test)
+    @unowned_record = records(:admin)
   end
 
   teardown do
@@ -99,13 +153,6 @@ class RecordsControllerTest < ActionController::TestCase
       assert_response :success
       assert_not_nil assigns(:record)
       assert_equal @admin_record.id, assigns(:record).id
-    end
-
-    should "show someone elses record" do
-      get :show, id: @user_record
-      assert_response :success
-      assert_not_nil assigns(:record)
-      assert_equal @user_record.id, assigns(:record).id
     end
 
     should 'download the content with download_content=true parameter to show' do
@@ -388,4 +435,247 @@ class RecordsControllerTest < ActionController::TestCase
       assert_nil assigns(:records)
     end
   end #index
+
+  #Project membership role testing
+  context 'CoreUser with no membership in the project' do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:core_user)
+      session[:switch_to_user_id] = @user.id
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:core_user)
+    end
+
+    non_member_tests
+    not_data_consumer_tests
+  end #CoreUser with no membership in the project
+
+  context 'CoreUser with membership in the project but no roles' do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:core_user)
+      session[:switch_to_user_id] = @user.id
+      @project.project_memberships.create(user_id: @user.id)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:core_user)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #CoreUser with membership in the project but no roles
+
+  context 'CoreUser with the data_consumer role in the project' do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:core_user)
+      session[:switch_to_user_id] = @user.id
+      @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:core_user)
+    end
+
+    any_member_tests
+    data_consumer_tests
+  end #CoreUser with the data_consumer role in the project
+
+  context 'CoreUser with the data_producer role in the project' do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:p_m_cu_producer)
+      session[:switch_to_user_id] = @user.id
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:pm_cu_producer_unaffiliated_record)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #CoreUser with the data_producer role in the project
+
+  context 'ProjectUser with no membership in the project' do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:project_user)
+      session[:switch_to_user_id] = @user.id
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:project_user)
+    end
+
+    non_member_tests
+    not_data_consumer_tests
+  end #ProjectUser with no membership in the project
+
+  context 'ProjectUser with membership in the project but no roles' do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:project_user)
+      session[:switch_to_user_id] = @user.id
+      @project.project_memberships.create(user_id: @user.id)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:project_user)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #ProjectUser with membership in the project but no roles
+
+  context 'ProjectUser with the data_consumer role in the project' do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:project_user)
+      session[:switch_to_user_id] = @user.id
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
+      @unaffiliated_record = records(:project_user)
+    end
+
+    any_member_tests
+    data_consumer_tests
+  end #ProjectUser with the data_consumer role in the project
+
+  context 'ProjectUser with the data_producer role in the project' do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:p_m_pu_producer)
+      session[:switch_to_user_id] = @user.id
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:pm_pu_producer_unaffiliated_record)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #ProjectUser with the data_producer role in the project
+
+  context 'Admin RepositoryUser with no membership in the project' do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:admin)
+    end
+
+    non_member_tests
+    not_data_consumer_tests
+  end #Admin RepositoryUser with no membership in the project
+
+  context 'Admin RepositoryUser with membership in the project but no roles' do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project.project_memberships.create(user_id: @user.id)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:admin)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #Admin RepositoryUser with membership in the project but no roles
+
+  context 'Admin RepositoryUser with the data_consumer rolein the project' do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:admin)
+    end
+
+    any_member_tests
+    data_consumer_tests
+  end #Admin RepositoryUser with the data_consumer role in the project
+
+  context 'Admin RepositoryUser with the data_producer role in the project' do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project.project_memberships.create(user_id: @user.id, is_data_producer: true)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:admin)
+      @unowned_record = records(:user)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #Admin RepositoryUser with the data_producer role in the project
+
+  context 'Admin RepositoryUser with the administrator role in the project' do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project.project_memberships.create(user_id: @user.id, is_administrator: true)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:admin)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #Admin RepositoryUser with the administrator role in the project
+
+  context 'Non-Admin RepositoryUser with no membership in the project' do
+    setup do
+      @user = users(:non_admin)
+      authenticate_existing_user(@user, true)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:user)
+    end
+
+    non_member_tests
+    not_data_consumer_tests
+  end #Non-Admin RepositoryUser with no membership in the project
+
+  context 'Non-Admin RepositoryUser with membership in the project but no roles' do
+    setup do
+      @user = users(:p_m_member)
+      authenticate_existing_user(@user, true)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:pm_member)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #Non-Admin RepositoryUser with membership in the project but no roles
+
+  context 'Non-Admin RepositoryUser with the data_consumer rolein the project' do
+    setup do
+      @user = users(:p_m_consumer)
+      authenticate_existing_user(@user, true)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:pm_consumer_record)
+    end
+
+    any_member_tests
+    data_consumer_tests
+  end #Non-Admin RepositoryUser with the data_consumer role in the project
+
+  context 'Non-Admin RepositoryUser with the data_producer role in the project' do
+    setup do
+      @user = users(:p_m_producer)
+      authenticate_existing_user(@user, true)
+      @project_affiliated_record = project_affiliated_records(:pm_pu_producer_affiliated)
+      @unaffiliated_record = records(:pm_producer_unaffiliated_record)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #Non-Admin RepositoryUser with the data_producer role in the project
+
+  context 'Non-Admin RepositoryUser with the administrator role in the project' do
+    setup do
+      @user = users(:p_m_administrator)
+      authenticate_existing_user(@user, true)
+      @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
+      @unaffiliated_record = records(:pm_administrator_record)
+    end
+
+    any_member_tests
+    not_data_consumer_tests
+  end #Non-Admin RepositoryUser with the administrator role in the project
+  #Project membership role testing
 end
