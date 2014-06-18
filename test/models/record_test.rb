@@ -1,19 +1,24 @@
 require 'test_helper'
 
 class RecordTest < ActiveSupport::TestCase
-  def self.should_pass_admin_nonmember_tests()
-    should "pass nonmember tests" do
+
+  def self.should_pass_general_tests
+    should 'pass ability profile' do
       assert_not_nil @user
-      assert_not_nil @project
-      assert_not_nil @project_record
-      assert !@project.is_member?(@user), 'user should not be a member of the project'
-      assert @project.is_affiliated_record?(@project_record), 'record should be affiliated with project'
-      allowed_abilities(@user, @project_record, [:index, :show])
-      denied_abilities(@user, @project_record, [:download, :affiliate, :destroy])
+      assert_not_nil @unowned_record
+      assert_not_nil @other_user
+      assert_not_nil @user_is_destroyed_record
+
+      allowed_abilities(@user, Record, [:index] )
+      allowed_abilities(@user, @user_record, [:index, :show, :download, :affiliate, :destroy])
+      denied_abilities(@user, @unowned_record, [:index, :show, :download, :affiliate, :destroy])
+      denied_abilities(@user, @user_is_destroyed_record, [:destroy])
+      allowed_abilities(@user, @user.records.build, [:new, :create])
+      denied_abilities(@user, @other_user.records.build, [:new, :create])
     end
   end
 
-  def self.should_pass_nonadmin_nonmember_tests()
+  def self.should_pass_nonmember_tests()
     should "pass nonmember tests" do
       assert_not_nil @user
       assert_not_nil @project
@@ -124,46 +129,53 @@ class RecordTest < ActiveSupport::TestCase
   end #nil user
   
   context 'non_admin' do
-    should 'pass ability profile' do
-      allowed_abilities(@user, Record, [:index])
-      allowed_abilities(@user, @user_record, [:index, :show, :download, :affiliate, :destroy])
-      denied_abilities(@user, @user_is_destroyed_record, [:destroy])
-      denied_abilities(@user, @admin_record, [:index, :show, :download, :affiliate, :destroy])
-      allowed_abilities(@user, @user.records.build, [:new, :create])
+    setup do
+      @unowned_record = @admin_record
+      @other_user = @admin
     end
+
+    should_pass_general_tests
+
   end #non_admin
 
   context 'CoreUser' do
-    should 'pass ability profile' do
-      allowed_abilities(@core_user, Record, [:index])
-      allowed_abilities(@core_user, @core_user_record, [:index, :show, :download, :affiliate, :destroy])
-      denied_abilities(@core_user, @core_user_is_destroyed_record, [:destroy])
-      denied_abilities(@core_user, @admin_record, [:index, :show, :affiliate, :download, :destroy])
-      allowed_abilities(@core_user, @core_user.records.build, [:new, :create])
+    setup do
+      @user = @core_user
+      @user_record = @core_user_record
+      @unowned_record = @admin_record
+      @other_user = @admin
+      @user_is_destroyed_record = @core_user_is_destroyed_record
     end
+
+    should_pass_general_tests
+
   end #CoreUser
 
   context 'ProjectUser' do
-    should 'pass ability profile' do
-      allowed_abilities(@project_user, Record, [:index])
-      allowed_abilities(@project_user, @project_user_record, [:index, :show, :affiliate, :download, :destroy])
-      denied_abilities(@project_user, @project_user_is_destroyed_record, [:destroy])
-      denied_abilities(@project_user, @admin_record, [:index, :show, :affiliate, :download, :destroy])
-      allowed_abilities(@project_user, @project_user.records.build, [:new, :create])
+    setup do
+      @user = @project_user
+      @user_record = @project_user_record
+      @unowned_record = @admin_record
+      @other_user = @admin
+      @user_is_destroyed_record = @project_user_is_destroyed_record
     end
+
+    should_pass_general_tests
+
   end #ProjectUser
 
   context 'admin' do
-    should 'pass ability profile' do
-      allowed_abilities(@admin, Record, [:index] )
-      allowed_abilities(@admin, @user_record, [:show])
-      denied_abilities(@admin, @user_record, [:affiliate, :download])
-      allowed_abilities(@admin, @admin_record, [:index, :show, :download, :affiliate, :destroy])
-      denied_abilities(@admin, @admin_is_destroyed_record, [:destroy])
-      allowed_abilities(@admin, @admin.records.build, [:new, :create])
-      denied_abilities(@admin, @user.records.build, [:new, :create])
+    setup do
+      @user = @admin
+      @user_record = @admin_record
+      @unowned_record = records(:user)
+      @other_user = users(:non_admin)
+      @user_is_destroyed_record = @admin_is_destroyed_record
     end
-  end #non_admin
+
+    should_pass_general_tests
+
+  end #admin
 
   context 'CoreUser without membership in the project' do
     setup do
@@ -172,7 +184,7 @@ class RecordTest < ActiveSupport::TestCase
       @project_record = records(:pm_producer_affiliated_record)
     end
 
-    should_pass_nonadmin_nonmember_tests
+    should_pass_nonmember_tests
 
   end #CoreUser without membership in the project
 
@@ -218,7 +230,7 @@ class RecordTest < ActiveSupport::TestCase
       @project_record = records(:pm_producer_affiliated_record)
     end
 
-    should_pass_nonadmin_nonmember_tests
+    should_pass_nonmember_tests
 
   end #Projectuser without membership in the project
 
@@ -264,7 +276,7 @@ class RecordTest < ActiveSupport::TestCase
       @project_record = records(:pm_producer_affiliated_record)
     end
 
-    should_pass_nonadmin_nonmember_tests
+    should_pass_nonmember_tests
 
   end #Non-Admin RepositoryUser without membership in the project
 
@@ -308,7 +320,7 @@ class RecordTest < ActiveSupport::TestCase
       @project_record = records(:pm_producer_affiliated_record)
     end
 
-    should_pass_admin_nonmember_tests
+    should_pass_nonmember_tests
 
   end #Admin Repositoryuser without membership in the project
 
