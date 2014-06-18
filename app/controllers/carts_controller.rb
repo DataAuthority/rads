@@ -43,7 +43,13 @@ class CartsController < ApplicationController
         @records.each {|r| authorize! :destroy, r}
       elsif cart_params[:action] == 'affiliate_to_project'
         @project_affiliated_records = @records.collect {|r| ProjectAffiliatedRecord.new(record_id: r.id, project_id: cart_params[:project_id])}
-        @project_affiliated_records.each {|r| authorize! :create, r}
+        @project_affiliated_records.each {|r| 
+            logger.warn "CHECKING ability to affiliate"
+            authorize! :affiliate, r.affiliated_record
+            logger.warn "CHECKING ability to create project.project_affiliated_record"
+            authorize! :create, r
+            logger.warn "ALL SEEM OK"
+        }
       end
     end
 end

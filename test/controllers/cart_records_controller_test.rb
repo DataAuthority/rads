@@ -91,7 +91,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       @user_record = records(:admin_two)
       @user_cart_record = cart_records(:admin)
       @other_user_cart_record = cart_records(:user)
-      @readable_record = records(:project_one_affiliated_project_user)
+      @readable_record = records(:project_two_affiliated)
     end
     test_cart_management
     test_add_readable_record

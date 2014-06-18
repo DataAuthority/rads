@@ -15,3 +15,31 @@ admin:
 project_user:
   stored_record: :project_user
   user: :project_user
+
+pm_pu_producer:
+  stored_record: :pm_pu_producer_unaffiliated_record
+  user: :p_m_pu_producer
+
+pm_cu_producer:
+  stored_record: :pm_cu_producer_unaffiliated_record
+  user: :p_m_cu_producer
+
+pm_producer:
+  stored_record: :pm_producer_unaffiliated_record
+  user: :p_m_producer
+
+pm_dmanager:
+  stored_record: :pm_dmanager_record
+  user: :p_m_dmanager
+
+pm_consumer:
+  stored_record: :pm_consumer_record
+  user: :p_m_consumer
+
+pm_member:
+  stored_record: :pm_member
+  user: :p_m_member
+
+pm_administrator:
+  stored_record: :pm_administrator_record
+  user: :p_m_administrator

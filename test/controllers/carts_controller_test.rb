@@ -60,8 +60,11 @@ class CartsControllerTest < ActionController::TestCase
     end
   end
 
-  def self.test_project_affiliation()
-    should 'affiliate all cart_record records to a project if all cart_records are tied to records that the user owns and the user can affiliate to the project' do
+  def self.data_producer_project_affiliation()
+    should 'affiliate all cart_record records to a project if all cart_records are tied to records that the user owns' do
+      assert_not_nil @user
+      assert_not_nil @project
+      assert @project.project_memberships.where(user_id: @user.id, is_data_producer: true).exists?, 'user should be a data_producer in the project'
       user_cart_records = 0
       @user.cart_records.each do |cr|
         if @user.id == cr.stored_record.creator_id
@@ -77,8 +80,17 @@ class CartsControllerTest < ActionController::TestCase
       end
     end
 
-    should 'not affliate any records to a project if one or more cart_records are tied to records that the user does not own' do
+    should 'not affliate any records to the project if one or more cart_records are tied to records that the user does not own' do
+      assert_not_nil @user
+      assert_not_nil @project
+      assert_not_nil @readable_record_cart_record
       assert @readable_record_cart_record.stored_record.creator_id != @user.id, 'user should not own readable_record'
+      assert @project.project_memberships.where(user_id: @user.id, is_data_producer: true).exists?, 'user should be a data_producer in the project'
+      user_cart_records = 0
+      @user.cart_records.each do |cr|
+        assert !@project.is_affiliated_record?(cr.stored_record), 'record should not be affiliated with the project'
+        user_cart_records += 1
+      end
       user_cart_records = 0
       @user.cart_records.each do |cr|
         if @project.is_affiliated_record?(cr.stored_record)
@@ -97,21 +109,22 @@ class CartsControllerTest < ActionController::TestCase
       end
     end
 
-    should 'not affliate any records to a project if the user cannot affiliate to the project' do
-      assert !@other_project.is_member?(@user), 'user should not be a member'
+  end
+
+  def self.not_data_producer_project_affiliation()
+    should 'not affliate any records to the project' do
+      assert_not_nil @user
+      assert_not_nil @project
+      assert !@project.project_memberships.where(user_id: @user.id, is_data_producer: true).exists?, 'user should not be a data_producer in the project'
       user_cart_records = 0
       @user.cart_records.each do |cr|
-        if @user.id == cr.stored_record.creator_id
-          assert_equal @user.id, cr.stored_record.creator_id
-          assert !@other_project.is_affiliated_record?(cr.stored_record), 'record should not be affiliated with the project'
-          user_cart_records += 1
-        else
-          cr.destroy
-        end
+        assert_equal @user.id, cr.stored_record.creator_id
+        assert !@project.is_affiliated_record?(cr.stored_record), 'record should not be affiliated with the project'
+        user_cart_records += 1
       end
       assert user_cart_records > 0, 'there should be some cart_records'
       assert_no_difference('ProjectAffiliatedRecord.count') do
-        put :update, cart: {action: 'affiliate_to_project', project_id: @other_project.id}
+        put :update, cart: {action: 'affiliate_to_project', project_id: @project.id}
       end
     end
   end
@@ -134,7 +147,7 @@ class CartsControllerTest < ActionController::TestCase
     end
   end
 
-  context "authenticated RepositoryUser" do
+  context "RepositoryUser" do
     setup do
       @user = users(:non_admin)
       authenticate_existing_user(@user, true)
@@ -159,10 +172,9 @@ class CartsControllerTest < ActionController::TestCase
 
     test_cart_management
     test_destroy_records
-    test_project_affiliation
   end
 
-  context "authenticated Admin" do
+  context "Admin" do
     setup do
       @user = users(:admin)
       authenticate_existing_user(@user, true)
@@ -187,10 +199,9 @@ class CartsControllerTest < ActionController::TestCase
 
     test_cart_management
     test_destroy_records
-    test_project_affiliation
   end
 
-  context "authenticated ProjectUser" do
+  context "ProjectUser" do
     setup do
       @real_user = users(:non_admin)
       authenticate_existing_user(@real_user, true)
@@ -217,7 +228,7 @@ class CartsControllerTest < ActionController::TestCase
     test_destroy_records
   end
 
-  context "authenticated CoreUser" do
+  context "CoreUser" do
     setup do
       @real_user = users(:non_admin)
       authenticate_existing_user(@real_user, true)
@@ -244,6 +255,248 @@ class CartsControllerTest < ActionController::TestCase
 
     test_cart_management
     test_destroy_records
-    test_project_affiliation
   end
+
+  context "Admin RepositoryUser with no membership in a project" do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+    end
+
+    not_data_producer_project_affiliation
+  end
+
+  context "Admin RepositoryUser with membership in a project but no roles" do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+      @project.project_memberships.create(user_id: @user.id)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "Admin RepositoryUser with the administrator role in the project" do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)      
+      @project = projects(:membership_test)
+      @project.project_memberships.create(user_id: @user.id, is_administrator: true)
+    end
+
+    not_data_producer_project_affiliation
+  end
+
+  context "Admin RepositoryUser with data_producer role in the project" do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+      @project.project_memberships.create(user_id: @user.id, is_data_producer: true)
+      @readable_record_cart_record = @user.cart_records.create(record_id: records(:pm_producer_unaffiliated_record).id)
+    end
+
+    data_producer_project_affiliation
+
+  end
+
+  context "Admin RepositoryUser with data_consumer role in the project" do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+      @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "Admin RepositoryUser with data_manager role in the project" do
+    setup do
+      @user = users(:admin)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+      @project.project_memberships.create(user_id: @user.id, is_data_manager: true)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "Non-Admin RepositoryUser with no membership in a project" do
+    setup do
+      @user = users(:non_admin)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+    end
+
+    not_data_producer_project_affiliation
+  end
+
+  context "Non-Admin RepositoryUser with membership in a project but no roles" do
+    setup do
+      @user = users(:p_m_member)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "Non-Admin RepositoryUser with the administrator role in the project" do
+    setup do
+      @user = users(:p_m_administrator)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "Non-Admin RepositoryUser with data_producer role in the project" do
+    setup do
+      @user = users(:p_m_producer)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+      @readable_record_cart_record = @user.cart_records.create(record_id: records(:pm_pu_producer_unaffiliated_record).id)
+    end
+
+    data_producer_project_affiliation
+
+  end
+
+  context "Non-Admin RepositoryUser with data_consumer role in the project" do
+    setup do
+      @user = users(:p_m_consumer)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "Non-Admin RepositoryUser with data_manager role in the project" do
+    setup do
+      @user = users(:p_m_dmanager)
+      authenticate_existing_user(@user, true)
+      @project = projects(:membership_test)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "CoreUser with no membership in a project" do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:core_user)
+      session[:switch_to_user_id] = @user.id
+      @project = projects(:membership_test)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "CoreUser with membership in a project but no roles" do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:core_user)
+      session[:switch_to_user_id] = @user.id
+      @project = projects(:membership_test)
+      @project.project_memberships.create(user_id: @user.id)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "CoreUser with data_producer role in the project" do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:p_m_cu_producer)
+      session[:switch_to_user_id] = @user.id
+      @project = projects(:membership_test)
+      @readable_record_cart_record = @user.cart_records.create(record_id: records(:pm_producer_unaffiliated_record).id)
+    end
+
+    data_producer_project_affiliation
+  end
+
+  context "CoreUser with data_consumer role in the project" do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:core_user)
+      session[:switch_to_user_id] = @user.id
+      @project = projects(:membership_test)
+      @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
+    end
+
+    not_data_producer_project_affiliation
+  end
+
+  context "ProjectUser with no membership in the project" do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:project_user)
+      session[:switch_to_user_id] = @user.id
+      @project = projects(:membership_test)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "ProjectUser with membership in a project but no roles" do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:project_user)
+      session[:switch_to_user_id] = @user.id
+      @project = projects(:membership_test)
+      @project.project_memberships.create(user_id: @user.id)
+    end
+
+    not_data_producer_project_affiliation
+
+  end
+
+  context "ProjectUser with data_producer role in the project" do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:p_m_pu_producer)
+      session[:switch_to_user_id] = @user.id
+      @project = projects(:membership_test)
+      @readable_record_cart_record = @user.cart_records.create(record_id: records(:pm_producer_unaffiliated_record).id)
+    end
+
+    data_producer_project_affiliation
+  end
+
+  context "ProjectUser with data_consumer role in the project" do
+    setup do
+      @actual_user = users(:non_admin)
+      authenticate_existing_user(@actual_user, true)
+      @user = users(:project_user)
+      session[:switch_to_user_id] = @user.id
+      @project = projects(:membership_test)
+      @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
+    end
+
+    not_data_producer_project_affiliation
+  end
+
 end
