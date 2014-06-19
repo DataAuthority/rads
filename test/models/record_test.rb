@@ -124,8 +124,7 @@ class RecordTest < ActiveSupport::TestCase
       denied_abilities(nil, Record, [:index] )
       denied_abilities(nil, @user_record, [:show, :download, :destroy])
       denied_abilities(nil, @admin_record, [:show, :download, :destroy])
-#      denied_abilities(nil, Record.new, [:new, :create])
-      allowed_abilities(nil, Record.new, [:new, :create])
+      denied_abilities(nil, Record.new, [:new, :create])
     end
   end #nil user
   
