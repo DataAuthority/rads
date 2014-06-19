@@ -7,4 +7,25 @@
   <strong>User:</strong>
   <%= @project_membership.user %>
 </p>
+
+<p>
+  <strong>Project adminstrator</strong>
+  <%= 'X' if @project_membership.is_administrator? %>
+</p>
+
+<p>
+  <strong>Data consumer</strong>
+  <%= 'X' if @project_membership.is_data_consumer? %>
+</p>
+
+<p>
+  <strong>Data producer</strong>
+  <%= 'X' if @project_membership.is_data_producer? %>
+</p>
+
+<p>
+  <strong>Data manager</strong>
+  <%= 'X' if @project_membership.is_data_manager? %>
+</p>
+
 <%= link_to 'Back', @project %>

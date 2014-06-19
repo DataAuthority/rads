@@ -21,6 +21,10 @@
   <thead>
     <tr>
       <th>Members</th>
+      <th>Project adminstrator</th>
+      <th>Data consumer</th>
+      <th>Data producer</th>
+      <th>Data manager</th>
       <th></th>
     </tr>
   </thead>
@@ -29,6 +33,10 @@
     <% @project_memberships.each do |project_membership| %>
       <tr>
         <td><%= project_membership.user %></td>
+        <td><%= 'X' if project_membership.is_administrator? %></td>
+        <td><%= 'X' if project_membership.is_data_consumer? %></td>
+        <td><%= 'X' if project_membership.is_data_producer? %></td>
+        <td><%= 'X' if project_membership.is_data_manager? %></td>
         <td><%= link_to 'Revoke', [project_membership.project, project_membership], method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, project_membership %></td>
       </tr>
     <% end %>
