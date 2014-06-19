@@ -21,6 +21,28 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_redirected_to root_path()
     end
 
+    should "not edit project_membership for project" do
+      assert !@project.project_memberships.where(user_id: @user.id).exists?, "#{ @user.name } #{ @user.type } should not have a membership in project"
+      get :edit, project_id: @project, id: @project.project_memberships.first
+      assert_redirected_to root_path()
+    end
+
+    should "not update project_membership for project" do
+      assert !@project.project_memberships.where(user_id: @user.id).exists?, "#{ @user.name } #{ @user.type } should not have a membership in project"
+      pm = @project.project_memberships.first
+      assert_not_nil pm
+      was_data_consumer = pm.is_data_consumer
+      new_status = pm.is_data_consumer ? false : true
+      patch :update, project_id: @project, id: pm, project_membership: {is_data_consumer: new_status}
+      assert_redirected_to root_path()
+      t_pm = ProjectMembership.find(pm.id)
+      if was_data_consumer
+        assert pm.is_data_consumer, 'project_member should still be a data_consumer'
+      else
+        assert !pm.is_data_consumer, 'project_member should still not be a data_consumer'
+      end
+    end
+
     should "not create project_membership for project" do
       assert !@project.project_memberships.where(user_id: @user.id).exists?, "#{ @user.name } #{ @user.type } should not have a membership in project"
       assert !@project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should not have a membership in project'
@@ -65,6 +87,25 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       get :show, project_id: @project, id: @existing_member
       assert_response :success
       assert_equal @existing_member.id, assigns(:project_membership).id
+    end
+
+    should "not edit project_membership for project" do
+      assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
+      assert !@user_project_membership.is_administrator?, 'user should not be an admin'
+      assert_not_nil @existing_member
+      get :edit, project_id: @project, id: @existing_member
+      assert_redirected_to root_path()
+    end
+
+    should "not update project_membership for project" do
+      assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
+      assert !@user_project_membership.is_administrator?, 'user should not be an admin'
+      assert_not_nil @existing_member
+      @existing_member.update(is_data_consumer: false)
+      patch :update, project_id: @project, id: @existing_member, project_membership: {is_data_consumer: true}
+      assert_redirected_to root_path()
+      t_pm = ProjectMembership.find(@existing_member.id)
+      assert !t_pm.is_data_consumer, 'project_member should still not be a data_consumer'
     end
 
     should "not create project_membership for project" do
@@ -114,6 +155,55 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_equal @existing_member.id, assigns(:project_membership).id
     end
 
+    should "get edit project_membership for project" do
+      assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
+      assert @user_project_membership.is_administrator?, 'user should be an admin'
+      get :edit, project_id: @project, id: @existing_member
+      assert_response :success
+      assert_equal @existing_member.id, assigns(:project_membership).id
+    end
+
+    should "update existing project_membership roles" do
+      assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
+      assert @user_project_membership.is_administrator?, 'user should be an admin'
+      @existing_member.update(is_data_consumer: false, is_data_producer: false, is_data_manager: false, is_administrator: false)
+      assert !@existing_member.is_data_manager, 'existing_member should not be a data_manager'
+      assert !@existing_member.is_data_producer, 'existing_member should not be a data_producer'
+      assert !@existing_member.is_data_consumer, 'existing_member should not be a data_consumer'
+      assert !@existing_member.is_administrator, 'existing_member should not be administrator'
+      patch :update, project_id: @project, id: @existing_member, project_membership: {is_data_consumer: true, is_data_producer: true, is_data_manager: true, is_administrator: true}
+      assert_redirected_to project_path(@project)
+      t_pm = ProjectMembership.find(assigns(:project_membership).id)
+      assert t_pm.is_data_manager, 'project_member should now be a data_manager'
+      assert t_pm.is_data_producer, 'project_member should now be a data_producer'
+      assert t_pm.is_data_consumer, 'project_member should now be a data_consumer'
+      assert t_pm.is_administrator, 'project_member should now be an administrator'
+    end
+
+    should "not update a CoreUser to the administrator role" do
+      assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
+      assert @user_project_membership.is_administrator?, 'user should be an admin'
+      existing_member = project_memberships(:project_membership_cu)
+      assert !existing_member.is_administrator?, 'existing_member should not be administrator'
+      patch :update, project_id: @project, id: existing_member, project_membership: {is_data_producer: false, is_administrator: true}
+      assert_redirected_to root_path
+      t_pm = ProjectMembership.find(assigns(:project_membership).id)
+      assert !t_pm.is_administrator, 'project_member should still not be an administrator'
+      assert t_pm.is_data_producer, 'project_member should still be a data_producer'
+    end
+
+    should "not update a ProjectUser to the admin role" do
+      assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
+      assert @user_project_membership.is_administrator?, 'user should be an admin'
+      existing_member = project_memberships(:project_membership_pu)
+      assert !existing_member.is_administrator, 'existing_member should not be administrator'
+      patch :update, project_id: @project, id: existing_member, project_membership: {is_data_producer: false, is_administrator: true}
+      assert_redirected_to root_path
+      t_pm = ProjectMembership.find(assigns(:project_membership).id)
+      assert !t_pm.is_administrator, 'project_member should still not be an administrator'
+      assert t_pm.is_data_producer, 'project_member should still be a data_producer'
+    end
+
     should "create project_membership for project" do
       assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
       assert @user_project_membership.is_administrator?, 'user should be an admin'
@@ -123,6 +213,46 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       end
       assert_redirected_to project_path(@project)
       assert @project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should now have a membership in project'
+    end
+
+    should "create project_membership with roles for project" do
+      assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
+      assert @user_project_membership.is_administrator?, 'user should be an admin'
+      assert !@project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should not have a membership in project'
+      assert_difference('ProjectMembership.count') do
+        post :create, project_id: @project, project_membership: { user_id: users(:admin).id,is_data_consumer: true, is_data_producer: true, is_data_manager: true, is_administrator: true}
+      end
+      assert_redirected_to project_path(@project)
+      new_pm = @project.project_memberships.where(user_id: users(:admin).id).first
+      assert_not_nil new_pm, 'admin should now have a membership in project'
+      assert new_pm.is_administrator, 'admin should be an administrator'
+      assert new_pm.is_data_consumer, 'admin should be a data_consumer'
+      assert new_pm.is_data_producer, 'admin should be a data_producer'
+      assert new_pm.is_data_manager, 'admin should be a data_manager'
+    end
+
+    should 'not create a project_membership for a CoreUser with the administrator role' do
+      assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
+      assert @user_project_membership.is_administrator?, 'user should be an admin'
+      new_member = users(:core_user)
+      assert !@project.project_memberships.where(user_id: new_member.id).exists?, 'core_user should not have a membership in project'
+      assert_no_difference('ProjectMembership.count') do
+        post :create, project_id: @project, project_membership: { user_id: new_member.id,is_data_consumer: true, is_data_producer: true, is_data_manager: true, is_administrator: true}
+      end
+      assert_redirected_to root_path
+      assert !@project.project_memberships.where(user_id: new_member.id).exists?, 'core_user should still not have a membership'
+    end
+
+    should 'not create a project_membership for a ProjectUser with the administrator role' do
+      assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
+      assert @user_project_membership.is_administrator?, 'user should be an admin'
+      new_member = users(:project_user)
+      assert !@project.project_memberships.where(user_id: new_member.id).exists?, 'core_user should not have a membership in project'
+      assert_no_difference('ProjectMembership.count') do
+        post :create, project_id: @project, project_membership: { user_id: new_member.id,is_data_consumer: true, is_data_producer: true, is_data_manager: true, is_administrator: true}
+      end
+      assert_redirected_to root_path
+      assert !@project.project_memberships.where(user_id: new_member.id).exists?, 'core_user should still not have a membership'
     end
 
     should "destroy project_membership for project" do
@@ -290,4 +420,5 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
     should_pass_administrator_member_access_tests
 
   end #RepositoryUser with admin role in project
+
 end

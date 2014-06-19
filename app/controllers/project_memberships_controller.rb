@@ -1,11 +1,27 @@
 class ProjectMembershipsController < ApplicationController
   load_resource :project
   load_and_authorize_resource :project_membership, through: :project
+  before_action :check_administrator, only: [:update]
 
   def index
   end
 
   def show
+  end
+
+  def edit
+  end
+
+  def update
+    respond_to do |format|
+      if @project_membership.update(project_membership_params)
+        format.html { redirect_to @project, notice: 'ProjectMembership was successfully updated.' }
+        format.json { head :no_content }
+      else
+        format.html { render action: 'edit' }
+        format.json { render json: @project.errors, status: :unprocessable_entity }
+      end
+    end
   end
 
   def new
@@ -36,6 +52,12 @@ class ProjectMembershipsController < ApplicationController
   private
     # Never trust parameters from the scary internet, only allow the white list through.
     def project_membership_params
-      params.require(:project_membership).permit(:user_id)
+      params.require(:project_membership).permit(:user_id, :is_data_consumer, :is_data_manager, :is_data_producer, :is_administrator)
+    end
+
+    def check_administrator
+      if project_membership_params[:is_administrator]
+        authorize! :create, ProjectMembership.new(user_id: @project_membership.user_id, project_id: @project.id, is_administrator: project_membership_params[:is_administrator])
+      end
     end
 end
