@@ -1,4 +1,4 @@
-<% if @non_members.empty? %>
+<% if @non_members && @non_members.empty? %>
 <p>There are no potential members to add to this project</p>
 <% else %>
 <%= form_for [@project, @project_membership] do |f| %>
@@ -20,7 +20,7 @@
   </div>
   <div class="field">
     <%= f.label :user_id %><br>
-    <%= f.collection_select(:user_id, @non_members, :id, :to_s) %>
+    <%= @non_members ? f.collection_select(:user_id, @non_members, :id, :to_s) : @project_membership.user %>
   </div>
   <div class="field">
     <%= f.label :is_administrator, 'Project administrator' %>
