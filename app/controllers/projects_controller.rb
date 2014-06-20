@@ -13,27 +13,9 @@ class ProjectsController < ApplicationController
   end
 
   def new
-    @unaffiliated_records = current_user.records
-    @unaffiliated_records.each do |record|
-      @project.project_affiliated_records.build(record_id: record.id)
-    end
-
-    @potential_members = User.all - [current_user]
-    @potential_members.each do |user|
-      @project.project_memberships.build(user_id: user.id)
-    end
   end
 
   def edit
-    @unaffiliated_records = current_user.records.reject {|r| @project.is_affiliated_record? r}
-    @unaffiliated_records.each do |record|
-      @project.project_affiliated_records.build(record_id: record.id)
-    end
-
-    @potential_members = User.all.reject {|u| @project.is_member? u}
-    @potential_members.each do |user|
-      @project.project_memberships.build(user_id: user.id)
-    end
   end
 
   def create

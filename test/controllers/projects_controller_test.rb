@@ -930,19 +930,13 @@ class ProjectsControllerTest < ActionController::TestCase
       authenticate_existing_user(@user, true)
     end
 
-    should "be provided to RepositoryUser in get :new" do
+    should "be no longer be provided to RepositoryUser in get :new" do
       get :new
       assert_response :success
       assert_not_nil assigns(:project)
 
-      assert_not_nil assigns(:potential_members), 'potential_members should be set'
-      assert !assigns(:potential_members).empty?, 'should have potential_members'
-      %w{enabled disabled admin dm core_user project_user}.each do |user_type|
-        assert assigns(:potential_members).include?(users(user_type.to_sym)), "should include #{user_type} in potential_members"
-      end
-      assert !assigns(:potential_members).include?(@user), 'should not include current user in potential_members'
+      assert_nil assigns(:potential_members), 'potential_members should not be set'
     end
-
   end # Potential Members
 
   context 'Unaffiliated Records' do
@@ -951,16 +945,12 @@ class ProjectsControllerTest < ActionController::TestCase
       authenticate_existing_user(@user, true)
     end
 
-    should 'be provided to RepositoryUser in get :new' do
+    should 'be no longer be provided to RepositoryUser in get :new' do
       get :new
       assert_response :success
       assert_not_nil assigns(:project)
 
-      assert_not_nil assigns(:unaffiliated_records)
-      assert !assigns(:unaffiliated_records).empty?, 'should have unaffiliated_records'
-      assert assigns(:unaffiliated_records).include?(records(:user_unaffiliated)), 'should include user_unaffiliated in unaffiliated_records'
-      assert !assigns(:unaffiliated_records).include?(records(:admin)), 'should not include another users record in unaffiliated_records'
-
-      assert_equal assigns(:project).project_affiliated_records.length, assigns(:unaffiliated_records).length    end
+      assert_nil assigns(:unaffiliated_records), 'unaffiliated_records should not be set'
+    end
   end #Unaffiliated Records
 end
