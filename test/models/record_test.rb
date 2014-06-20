@@ -96,6 +96,20 @@ class RecordTest < ActiveSupport::TestCase
     @core_user_record.destroy
   end
 
+  should 'not get a spoofing error with ruby files' do
+    spoof_content_path = Rails.root.to_s + '/test/fixtures/attachments/spoof.rb'
+    spoof_content = File.new(spoof_content_path)
+    expected_md5 = `/usr/bin/md5sum #{ @test_content.path }`.split.first.chomp
+    user = users(:non_admin)
+    user_record = records(:user_spoof)
+    user_record.content = spoof_content
+    assert user_record.valid?, "record valid? did not return true: #{user_record.errors.inspect}"
+    assert user_record.save, 'record save did not return true'
+
+    user_record.content.destroy
+    user_record.destroy
+  end
+
   should 'support destroy_content method' do
     assert_respond_to @user_record, 'destroy_content'
     assert_not_nil @user_record.content

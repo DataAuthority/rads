@@ -6,6 +6,9 @@ user:
 user_unaffiliated:
   creator: :non_admin
 
+user_spoof:
+  creator: :non_admin
+
 admin:
   creator: :admin
 
