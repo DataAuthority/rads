@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Creator:</strong>
+  <%= @annotation.creator_id %>
+</p>
+
+<p>
+  <strong>Record:</strong>
+  <%= @annotation.record_id %>
+</p>
+
+<p>
+  <strong>Context:</strong>
+  <%= @annotation.context %>
+</p>
+
+<p>
+  <strong>Term:</strong>
+  <%= @annotation.term %>
+</p>
+
+<%= link_to 'Edit', edit_annotation_path(@annotation) %> |
+<%= link_to 'Back', annotations_path %>

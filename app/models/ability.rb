@@ -11,6 +11,10 @@ class Ability
       can :new, ProjectAffiliatedRecord, :project => {:project_memberships => {:user_id => user.id, :is_data_producer => true}}
       can [:create, :destroy], ProjectAffiliatedRecord, :project => {:project_memberships => {:user_id => user.id, :is_data_producer => true}}, :affiliated_record => {:creator_id => user.id}
       can :read, Project
+      can :index, Annotation
+      can [:new, :create], Annotation, :creator_id => user.id, :record => {:creator_id => user.id }
+      can [:new, :create], Annotation, :creator_id => user.id, :record => {:projects => {:project_memberships => {:user_id => user.id}}}
+      can :destroy, Annotation, :creator_id => user.id
       can :manage, Record, :creator_id => user.id
       cannot :destroy, Record, :is_destroyed => true
       can :read, Record, :id => user.projects.collect{|p| p.project_affiliated_records.collect{|m| m.record_id}}.flatten

@@ -1,0 +1,31 @@
+<h1>Listing annotations</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Creator</th>
+      <th>Record</th>
+      <th>Context</th>
+      <th>Term</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @annotations.each do |annotation| %>
+      <tr>
+        <td><%= annotation.creator_id %></td>
+        <td><%= annotation.record_id %></td>
+        <td><%= annotation.context %></td>
+        <td><%= annotation.term %></td>
+        <td><%= link_to 'Show', annotation %></td>
+        <td><%= link_to 'Edit', edit_annotation_path(annotation) %></td>
+        <td><%= link_to 'Destroy', annotation, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Annotation', new_annotation_path %>

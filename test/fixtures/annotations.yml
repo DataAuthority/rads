@@ -1,0 +1,35 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+non_admin:
+  creator: :non_admin
+  record: :user_unaffiliated
+  term: user_tagged_record
+
+core_user:
+  creator: :core_user
+  record: :core_user_two
+  term: core_tagged_record
+
+admin:
+  creator: :admin
+  record: :admin_two
+  term: admin_tagged_record
+
+project_user:
+  creator: :project_user
+  record: :project_user_two
+  term: project_tagged_record
+
+membership_project_annotated_record_with_context:
+  creator: :p_m_producer
+  record: :pm_producer_unaffiliated_record
+  term: membership_annotated_with_context
+  context: context
+
+membership_project_annotated_record:
+  creator: :p_m_producer
+  record: :pm_producer_affiliated_record
+  term: membership_annotated
+  context:
+
+

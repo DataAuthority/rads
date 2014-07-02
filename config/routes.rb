@@ -1,4 +1,6 @@
 Rads::Application.routes.draw do
+  resources :annotations
+
   resources :cart_records, only: [:create, :destroy]
 
   get "record_provenance/show"
