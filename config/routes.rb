@@ -1,5 +1,5 @@
 Rads::Application.routes.draw do
-  resources :annotations
+  resources :annotations, only: [:index, :destroy]
 
   resources :cart_records, only: [:create, :destroy]
 
@@ -18,7 +18,10 @@ Rads::Application.routes.draw do
     resources :core_memberships, except: [:edit, :update]
   end
 
-  resources :records, only: [:index, :show, :new, :create, :destroy]
+  resources :records, only: [:index, :show, :new, :create, :destroy] do
+    resources :annotations, only: [:new, :create]
+  end
+
   resource :cart, only: [:show, :update, :destroy]
   resources :repository_users
 

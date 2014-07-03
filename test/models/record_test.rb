@@ -60,6 +60,7 @@ class RecordTest < ActiveSupport::TestCase
   should have_many :project_affiliated_records
   should have_many(:projects).through(:project_affiliated_records)
   should have_many :audited_activities
+  should have_many :annotations
   should accept_nested_attributes_for :project_affiliated_records
 
   setup do

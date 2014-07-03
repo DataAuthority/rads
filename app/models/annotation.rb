@@ -1,6 +1,6 @@
 class Annotation < ActiveRecord::Base
   belongs_to :creator, class_name: 'User'
-  belongs_to :record
+  belongs_to :annotated_record, class_name: 'Record', foreign_key: 'record_id'
   validates_presence_of :creator_id
   validates_presence_of :record_id
   validates_presence_of :term
