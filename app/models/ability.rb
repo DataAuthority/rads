@@ -19,8 +19,7 @@ class Ability
       cannot :destroy, Record, :is_destroyed => true
       can :read, Record, :project_affiliated_records => {:project => {:project_memberships => {:user_id => user.id}}}
       can :download, Record, :project_affiliated_records => {:project => {:project_memberships => {:user_id => user.id, :is_data_consumer => true}}}
-      can :read, ProjectMembership, :project_id => user.projects.collect{|m| m.id}
-#      can :read, ProjectMembership, :project => {:project_memberships => {:user_id => user.id}} # does not work, index wants success with empty list
+      can :read, ProjectMembership, :project => {:project_memberships => {:user => {:id => user.id}}}
       can :manage, CartRecord, :user_id => user.id, :stored_record => {:project_affiliated_records => {:project => {:project_memberships => {:user_id => user.id}}}}
       can :manage, CartRecord, :user_id => user.id, :stored_record => {:creator_id => user.id }
       can :update, Project, :project_memberships => {:user_id => user.id, :is_data_producer => true}
