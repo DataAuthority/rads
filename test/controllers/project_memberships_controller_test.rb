@@ -5,8 +5,7 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
     should "not get :index to project/project_memberships with empty list of project_memberships" do
       assert !@project.project_memberships.where(user_id: @user.id).exists?, "#{ @user.name } #{ @user.type } should not have a membership in project"
       get :index, project_id: @project
-      assert_response :success
-      assert assigns(:project_memberships).empty?, 'project_memberships should be empty'
+      assert_redirected_to root_path()
     end
 
     should "not get :new for project/project_membership" do
