@@ -9,6 +9,7 @@ class Ability
     else
       can [:index, :show], ProjectAffiliatedRecord, :project => {:project_memberships => {:user_id => user.id}}
       can :new, ProjectAffiliatedRecord, :project => {:project_memberships => {:user_id => user.id, :is_data_producer => true}}
+      can :affiliate_record_with, Project, :project_memberships => {:user_id => user.id, :is_data_producer => true}
       can [:create, :destroy], ProjectAffiliatedRecord, :project => {:project_memberships => {:user_id => user.id, :is_data_producer => true}}, :affiliated_record => {:creator_id => user.id}
       can :read, Project
       can :index, Annotation

@@ -6,6 +6,7 @@ class Record < ActiveRecord::Base
   has_many :annotations
 
   accepts_nested_attributes_for :project_affiliated_records
+  accepts_nested_attributes_for :annotations
 
   has_attached_file :content, path: ":interpolated_path"
   do_not_validate_attachment_file_type :content

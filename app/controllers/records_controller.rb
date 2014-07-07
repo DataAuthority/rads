@@ -2,6 +2,7 @@ class RecordsController < ApplicationController
   load_and_authorize_resource except: [:index]
   before_action :authorize_download, only: [:show]
   around_action :audit_activity, only: [:create, :destroy]
+  before_action :authorize_project_affiliation, only: [:create]
 
   def index
     unless current_user.nil?
@@ -87,5 +88,14 @@ class RecordsController < ApplicationController
 
     def authorize_download
       authorize! :download, @record if params[:download_content]
+    end
+
+    def authorize_project_affiliation
+      params = record_params
+      if params[:project_affiliated_records_attributes]
+        params[:project_affiliated_records_attributes].each do |par|
+          authorize! :affiliate_record_with, Project.find(par[:project_id])
+        end
+      end
     end
 end
