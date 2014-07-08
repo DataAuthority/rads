@@ -6,6 +6,7 @@ class User < ActiveRecord::Base
   has_many :projects, through: :project_memberships
   has_many :audited_activities, foreign_key: :authenticated_user_id
   has_many :cart_records
+  has_many :annotations, foreign_key: :creator_id
 
   def to_s
     name
