@@ -46,7 +46,7 @@ class AnnotationTest < ActiveSupport::TestCase
   should belong_to :creator
   should belong_to :annotated_record
   should validate_presence_of :creator_id
-  should validate_presence_of :record_id
+  should validate_presence_of :annotated_record
   should validate_presence_of :term
   should_respond_to(:to_s)
 

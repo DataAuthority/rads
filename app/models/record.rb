@@ -3,7 +3,7 @@ class Record < ActiveRecord::Base
   has_many :project_affiliated_records, inverse_of: :affiliated_record
   has_many :projects, through: :project_affiliated_records
   has_many :audited_activities
-  has_many :annotations
+  has_many :annotations, inverse_of: :annotated_record
 
   accepts_nested_attributes_for :project_affiliated_records
   accepts_nested_attributes_for :annotations

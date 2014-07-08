@@ -46,6 +46,41 @@ class RecordsControllerTest < ActionController::TestCase
       assigns(:record).destroy
     end
 
+    should "post create with annotations_attributes to create annotations" do
+      assert_not_nil @user
+      assert_not_nil @expected_md5
+      assert_audited_activity(@user, @user, 'post','create','records') do
+        assert_difference('Record.count') do
+          assert_difference('Annotation.count', 2) do
+            post :create, record: {
+              content: fixture_file_upload('attachments/content.txt', 'text/plain'),
+              annotations_attributes: [
+                {term: 'tag_term'},
+                {term: 'context_term', context: 'context_context'}
+              ]
+            }
+            assert_not_nil assigns(:record)
+          end
+        end
+      end
+      assert_equal assigns(:record).id, assigns(:audited_activity).record_id
+      assert_not_nil assigns(:record)
+      assert_redirected_to record_path(assigns(:record))
+      assert_equal @user.id, assigns(:record).creator_id
+      assert_equal @expected_md5, assigns(:record).content_fingerprint
+      @expected_record_path = [ @user.storage_path,  assigns(:record).id, assigns(:record).content_file_name ].join('/')
+      assert_equal @expected_record_path, assigns(:record).content.path
+      assert File.exists? assigns(:record).content.path
+      tag_annotation = Annotation.where(record_id: assigns(:record).id, term: 'tag_term').first
+      assert_not_nil tag_annotation
+      assert_equal @user.id, tag_annotation.creator_id
+      context_annotation = Annotation.where(record_id: assigns(:record).id, term: 'context_term', context: 'context_context').first
+      assert_not_nil context_annotation
+      assert_equal @user.id, context_annotation.creator_id
+      assigns(:record).content.destroy
+      assigns(:record).destroy
+    end
+
     should "show their record" do
       assert_not_nil @user
       assert_not_nil @user_record
