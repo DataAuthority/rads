@@ -47,10 +47,11 @@ class Ability
         can :switch_to, ProjectUser, :project => {:project_memberships => {:user_id => user.id, :is_data_manager => true}}
         can [:create, :read, :edit, :update, :new, :destroy], CoreMembership, :core => {:core_memberships => { :repository_user => {:id => user.id }}}
         cannot :create, CoreMembership, :repository_user_id => user.id
-        can [:edit, :update, :new, :create, :destroy], ProjectMembership, :project_id => user.project_memberships.where(is_administrator: true).collect{|m| m.project_id}.append(nil)
-        # this one is made difficult by the use of an authorize :create in the projects_controller
         cannot :destroy, CoreMembership, :repository_user_id => user.id
-        cannot [:edit, :update, :destroy], ProjectMembership, :user_id => user.id
+        can [:new, :edit, :update, :destroy], ProjectMembership, project: {project_memberships: {user: {id: user.id}, is_administrator: true}}
+        can :create, ProjectMembership, project: {project_memberships: {user: {id: user.id}, is_administrator: true}}
+        can :create, ProjectMembership, project_id: [nil]
+        cannot [:create, :edit, :update, :destroy], ProjectMembership, :user_id => user.id
         cannot :create, ProjectMembership, is_administrator: true, user: {type: 'CoreUser'}
         cannot :create, ProjectMembership, is_administrator: true, user: {type: 'ProjectUser'}
         cannot :create, ProjectMembership, is_data_manager: true, user: {type: 'CoreUser'}

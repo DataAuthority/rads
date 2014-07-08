@@ -367,6 +367,7 @@ class ProjectsControllerTest < ActionController::TestCase
         new_membership = @project.project_memberships.create(user_id: new_member.id)
         assert @project.is_member?(new_member), "#{ user_type } should now be affiliated with #{ @project.id }"
         update_params[:project_memberships_attributes] << { id: new_membership.id, _destroy: true }
+        denied_abilities(@user, new_membership, [:destroy])
       end
 
       assert_no_difference('ProjectMembership.count') do

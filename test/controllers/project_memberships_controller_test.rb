@@ -218,8 +218,9 @@ class ProjectMembershipsControllerTest < ActionController::TestCase
       assert_not_nil @user_project_membership, "#{ @user.name } #{ @user.type } should have a membership in project"
       assert @user_project_membership.is_administrator?, 'user should be an admin'
       assert !@project.project_memberships.where(user_id: users(:admin).id).exists?, 'admin should not have a membership in project'
+      assert_not_equal @user.id, users(:admin).id
       assert_difference('ProjectMembership.count') do
-        post :create, project_id: @project, project_membership: { user_id: users(:admin).id,is_data_consumer: true, is_data_producer: true, is_data_manager: true, is_administrator: true}
+        post :create, project_id: @project, project_membership: { user_id: users(:admin).id, is_data_consumer: true, is_data_producer: true, is_data_manager: true, is_administrator: true}
       end
       assert_redirected_to project_path(@project)
       new_pm = @project.project_memberships.where(user_id: users(:admin).id).first

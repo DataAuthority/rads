@@ -33,7 +33,7 @@ class ProjectMembershipTest < ActiveSupport::TestCase
     end
   end #nil user
 
-  context 'user without membership project' do
+  context 'user without membership in project' do
     setup do
       @user = users(:admin)
       @project = projects(:one)
@@ -45,6 +45,11 @@ class ProjectMembershipTest < ActiveSupport::TestCase
       denied_abilities(@user, @project.project_memberships, [:index] )
       denied_abilities(@user, @project_membership, [:show, :edit, :update, :destroy])
       denied_abilities(@user, @project.project_memberships.build, [:new, :create])
+      #denied_abilities(@user, @project.project_memberships.build(repository_user_id: @user.id), [:create])
+    end
+    should 'not have a "race" condition' do
+      new_membership = @project.project_memberships.build(user_id: @user.id, is_administrator: true)
+      denied_abilities(@user, new_membership, [:create])
     end
   end #non project member
 
