@@ -123,8 +123,7 @@ class CoreMembershipsControllerTest < ActionController::TestCase
 
     should "not get :index" do
       get :index, core_id: @core
-      assert_response :success
-      assert assigns(:core_memberships).empty?, 'core_memberships should be empty'
+      assert_redirected_to root_path()
     end
 
     should "not get :new" do
@@ -138,6 +137,7 @@ class CoreMembershipsControllerTest < ActionController::TestCase
     end
 
     should "not create core_membership" do
+      assert !@core.is_member?(@user), 'user is a member of the core'
       assert_no_difference('CoreMembership.count') do
         post :create, @create_params
       end

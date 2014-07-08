@@ -44,8 +44,8 @@ class Ability
         can [:destroy], ProjectAffiliatedRecord, :project => {:project_memberships => {:user_id => user.id, :is_administrator => true}}
         can :switch_to, CoreUser, :core => {:core_memberships => { :repository_user_id => user.id }}
         can :switch_to, ProjectUser, :project => {:project_memberships => {:user_id => user.id, :is_data_manager => true}}
-        can :manage, CoreMembership, :core_id => user.cores.collect{|m| m.id}
-#        can :manage, CoreMembership, :core => {:core_memberships => { :repository_user_id => user.id }} does not work, index wants success with empty list
+        can [:create, :read, :edit, :update, :new, :destroy], CoreMembership, :core => {:core_memberships => { :repository_user => {:id => user.id }}}
+        cannot :create, CoreMembership, :repository_user_id => user.id
         can [:edit, :update, :new, :create, :destroy], ProjectMembership, :project_id => user.project_memberships.where(is_administrator: true).collect{|m| m.project_id}.append(nil)
         # this one is made difficult by the use of an authorize :create in the projects_controller
         cannot :destroy, CoreMembership, :repository_user_id => user.id
