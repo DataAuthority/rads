@@ -16,12 +16,14 @@ class AnnotationTest < ActiveSupport::TestCase
 
       allowed_abilities(@user, Annotation, [:index] )
       denied_abilities(@user, @other_users_record, [:show])
-      allowed_abilities(@user, Annotation.new(creator_id: @user.id, record_id: @users_record.id, term: 'general_annotation'), [:new, :create])
+      allowed_abilities(@user, @users_record.annotations.build(term: 'general_annotation'), [:new])
+      allowed_abilities(@user, @users_record.annotations.build(creator_id: @user.id, term: 'general_annotation'), [:create])
       allowed_abilities(@user, @users_annotation, [:destroy])
       denied_abilities(@user, @other_users_annotation, [:destroy])
       denied_abilities(@user, @other_users_record, [:show])
-      denied_abilities(@user, Annotation.new(creator_id: @other_user.id, record_id: @users_record.id, term: 'general_annotation'), [:new, :create])
-      denied_abilities(@user, Annotation.new(creator_id: @user.id, record_id: @other_users_record.id, term: 'general_annotation'), [:new, :create])
+      denied_abilities(@user, @other_users_record.annotations.build(term: 'general_annotation'), [:new])
+      denied_abilities(@user, @users_record.annotations.build(creator_id: @other_user.id, term: 'general_annotation'), [:create])
+      denied_abilities(@user, @other_users_record.annotations.build(creator_id: @user.id, term: 'general_annotation'), [:create])
     end
   end
 
@@ -30,7 +32,8 @@ class AnnotationTest < ActiveSupport::TestCase
       assert_not_nil @user
       assert_not_nil @project_affiliated_record
       assert @project_affiliated_record.project.is_member?(@user), 'user should be a member of the project_affiliated_record project'
-      allowed_abilities(@user, Annotation.new(creator_id: @user.id, record_id: @project_affiliated_record.record_id, term: 'annotation'), [:new, :create])
+      allowed_abilities(@user, @project_affiliated_record.affiliated_record.annotations.build(term: 'annotation'), [:new])
+      allowed_abilities(@user, @project_affiliated_record.affiliated_record.annotations.build(creator_id: @user.id, term: 'annotation'), [:create])
     end
   end
 
@@ -39,7 +42,8 @@ class AnnotationTest < ActiveSupport::TestCase
       assert_not_nil @user
       assert_not_nil @project_affiliated_record
       assert !@project_affiliated_record.project.is_member?(@user), 'user should not be a member of the project_affiliated_record project'
-      denied_abilities(@user, Annotation.new(creator_id: @user.id, record_id: @project_affiliated_record.record_id, term: 'annotation'), [:new, :create])
+      denied_abilities(@user, @project_affiliated_record.affiliated_record.annotations.build(term: 'annotation'), [:new])
+      denied_abilities(@user, @project_affiliated_record.affiliated_record.annotations.build(creator_id: @user.id, term: 'annotation'), [:create])
     end
   end
 
