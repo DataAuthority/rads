@@ -14,8 +14,8 @@
   <tbody>
     <% @annotations.each do |annotation| %>
       <tr>
-        <td><%= annotation.creator_id %></td>
-        <td><%= annotation.record_id %></td>
+        <td><%= annotation.creator %></td>
+        <td><%= annotation.annotated_record %></td>
         <td><%= annotation.context %></td>
         <td><%= annotation.term %></td>
         <td><%= link_to 'Destroy', annotation, method: :delete, data: { confirm: 'Are you sure?' } %></td>

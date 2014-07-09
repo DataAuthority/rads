@@ -8,4 +8,5 @@
   <%= link_to 'users', repository_users_url if can? :index, RepositoryUser %>
   <%= link_to 'records', records_url if can? :index, Record %>
   <%= link_to 'cart', cart_url %>
+  <%= link_to 'annotations', annotations_url if can? :index, Annotation %>
 </div>

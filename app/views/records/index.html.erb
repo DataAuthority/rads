@@ -75,6 +75,8 @@ $(function(){
       <th>md5 Hash</th>
       <th>created</th>
       <th>projects</th>
+      <th>annotations</th>
+      <th></th>
       <th></th>
       <th></th>
       <th></th>
@@ -94,11 +96,13 @@ $(function(){
         <td><%= record.content_fingerprint %></td>
         <td><%= record.created_at.httpdate %></td>
         <td><%= record.projects.collect {|p| link_to(p.name, p) }.join(', ').html_safe %>
+        <td><%= record.annotations.collect {|a| a.to_s }.join(', ').html_safe %>
         <td><%= download_link(record) if can?(:download, record) && !record.is_destroyed? %></td>
         <td><%= link_to 'Show', record if can? :show, record %></td>
         <td><%= link_to 'Provenance', record_provenance_show_path(record_id: record.id, format: 'xml') %></td>
         <td><%= link_to 'Destroy', record, method: :delete, data: { confirm: 'Are you sure?' } if can?(:destroy, record) && !record.is_destroyed? %></td>
         <td><%= link_to 'Add to cart', cart_records_url(cart_record: {record_id: record.id}), method: :post %></td>
+        <td><%= link_to 'Add annotation', new_record_annotation_path(record) if can? :new, record.annotations.build() %></td>
       </tr>
     <% end %>
   </tbody>

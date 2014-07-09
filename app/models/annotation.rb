@@ -7,6 +7,6 @@ class Annotation < ActiveRecord::Base
   validates_uniqueness_of :term, scope: [:creator_id, :record_id, :context], allow_nil: true
 
   def to_s
-    [creator_id, record_id, context, term].join(' ')
+    context && !context.empty? ? "#{term}(#{context})" : term
   end
 end

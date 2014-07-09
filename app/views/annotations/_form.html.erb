@@ -1,4 +1,4 @@
-<%= form_for(@annotation) do |f| %>
+<%= form_for([@record, @annotation]) do |f| %>
   <% if @annotation.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@annotation.errors.count, "error") %> prohibited this annotation from being saved:</h2>
@@ -11,14 +11,6 @@
     </div>
   <% end %>
 
-  <div class="field">
-    <%= f.label :creator_id %><br>
-    <%= f.number_field :creator_id %>
-  </div>
-  <div class="field">
-    <%= f.label :record_id %><br>
-    <%= f.number_field :record_id %>
-  </div>
   <div class="field">
     <%= f.label :context %><br>
     <%= f.text_field :context %>
