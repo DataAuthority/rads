@@ -23,6 +23,24 @@ class CartsControllerTest < ActionController::TestCase
     end
   end
 
+  def self.test_add_record_annotation()
+    should 'create annotations for all cart_record records if all cart_records are tied to records that the user can show' do
+      assert @user.cart_records.count > 0, 'there should be some cart_records'
+      @user.cart_records.each do |cr|
+        allowed_abilities(@user, cr.stored_record, [:show])
+      end
+      stored_records = @user.cart_records.collect {|r| r.stored_record}
+      assert_equal stored_records.count, stored_records.uniq.count
+      assert_difference('Annotation.count', stored_records.count) do
+        put :update, cart: {action: 'add_record_annotation', term: 'Foo', context: 'Bar'}
+        assert_not_nil assigns(:cart_records)
+      end
+      assigns(:cart_records).each do |cr|
+        assert cr.stored_record.annotations.where(term: 'Foo', context: 'Bar', creator_id: @user.id).exists?, 'record should now be annotated'
+      end
+    end
+  end
+
   def self.test_destroy_records()
     should 'destroy all cart_record records if all cart_records are tied to records that the user owns' do
       assert @user.cart_records.count > 0, 'there should be some cart_records'
@@ -172,6 +190,7 @@ class CartsControllerTest < ActionController::TestCase
 
     test_cart_management
     test_destroy_records
+    test_add_record_annotation
   end
 
   context "Admin" do
@@ -199,6 +218,7 @@ class CartsControllerTest < ActionController::TestCase
 
     test_cart_management
     test_destroy_records
+    test_add_record_annotation
   end
 
   context "ProjectUser" do
@@ -226,6 +246,7 @@ class CartsControllerTest < ActionController::TestCase
 
     test_cart_management
     test_destroy_records
+    test_add_record_annotation
   end
 
   context "CoreUser" do
@@ -255,6 +276,7 @@ class CartsControllerTest < ActionController::TestCase
 
     test_cart_management
     test_destroy_records
+    test_add_record_annotation
   end
 
   context "Admin RepositoryUser with no membership in a project" do
