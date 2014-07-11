@@ -4,6 +4,10 @@ user:
   stored_record: :user
   user: :non_admin
 
+non_admin_project_member:
+  stored_record: :project_one_affiliated_project_user
+  user: :non_admin
+
 core_user:
   stored_record: :core_user
   user: :core_user
@@ -12,20 +16,44 @@ admin:
   stored_record: :admin
   user: :admin
 
+admin_project_member:
+  stored_record: :project_three_affiliated_project_user
+  user: :admin
+
 project_user:
   stored_record: :project_user
   user: :project_user
 
+project_user_project_member:
+  stored_record: :project_three_affiliated
+  user: :project_user
+
+core_user_project_member:
+  stored_record: :project_three_affiliated_project_user
+  user: :core_user
+
 pm_pu_producer:
   stored_record: :pm_pu_producer_unaffiliated_record
+  user: :p_m_pu_producer
+
+pm_pu_producer_unowned:
+  stored_record: :pm_producer_unaffiliated_record
   user: :p_m_pu_producer
 
 pm_cu_producer:
   stored_record: :pm_cu_producer_unaffiliated_record
   user: :p_m_cu_producer
 
+pm_cu_producer_unowned:
+  stored_record: :pm_producer_unaffiliated_record
+  user: :p_m_cu_producer
+
 pm_producer:
   stored_record: :pm_producer_unaffiliated_record
+  user: :p_m_producer
+
+pm_producer_unowned:
+  stored_record: :pm_pu_producer_unaffiliated_record
   user: :p_m_producer
 
 pm_dmanager:

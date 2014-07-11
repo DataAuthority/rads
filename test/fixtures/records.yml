@@ -33,6 +33,9 @@ project_one_affiliated:
 project_one_affiliated_project_user:
   creator: :project_user
 
+project_three_affiliated:
+  creator: :core_user
+
 project_three_affiliated_project_user:
   creator: :project_user
 

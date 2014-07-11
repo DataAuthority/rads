@@ -38,15 +38,28 @@ class CartsController < ApplicationController
     end
 
     def load_and_authorize_records
-      @records = @cart_records.collect {|cr| cr.stored_record}
+      @cart_errors = {}
       if cart_params[:action] == 'destroy_records'
-        @records.each {|r| authorize! :destroy, r}
+        @records = []
+        @cart_records.each do |cr|
+          if can? :destroy, cr.stored_record
+            @records << cr.stored_record
+          else
+            @cart_errors[cr.id] = 'you are not allowed to destroy this record'
+          end
+        end
       elsif cart_params[:action] == 'affiliate_to_project'
-        @project_affiliated_records = @records.collect {|r| ProjectAffiliatedRecord.new(record_id: r.id, project_id: cart_params[:project_id])}
-        @project_affiliated_records.each {|r| 
-            authorize! :affiliate, r.affiliated_record
-            authorize! :create, r
-        }
+        @project_affiliated_records = []
+        @cart_records.each do |cr|
+          par =  ProjectAffiliatedRecord.new(record_id: cr.stored_record.id, project_id: cart_params[:project_id])
+          if cannot? :affiliate, par.affiliated_record
+            @cart_errors[cr.id] = 'You are not allowed to affiliate this record with projects'
+          elsif cannot? :create, par
+            @cart_errors[cr.id] = 'You are not allowed to affiliate records with this project'
+          else
+            @project_affiliated_records << par
+          end
+        end
       elsif cart_params[:action] == 'create_record_annotation'
       end
     end

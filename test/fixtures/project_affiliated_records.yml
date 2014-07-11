@@ -16,6 +16,10 @@ four:
   project: :three
   affiliated_record: :project_three_affiliated_project_user
 
+five:
+  project: :three
+  affiliated_record: :project_three_affiliated
+
 pm_pu_producer_affiliated:
   project: :membership_test
   affiliated_record: :pm_pu_producer_affiliated_record

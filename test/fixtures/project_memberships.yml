@@ -20,6 +20,10 @@ five:
   project: :three
   user: :project_user
 
+six:
+  project: :three
+  user: :core_user
+
 project_membership_creator:
   project: :membership_test
   user: :p_m_creator
