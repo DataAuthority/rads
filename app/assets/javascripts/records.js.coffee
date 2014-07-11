@@ -5,12 +5,14 @@ onLoad ->
   $("#records_nav select").change ->
     $(this).parent("form").submit()
   $("#records_nav input[type='submit']").hide()
+
   $('div.dropzone:first').each ->
     dropzone_params = {}
     dropzone_params[$('meta[name=csrf-param]').attr("content")] = $('meta[name=csrf-token]').attr("content")
     selected_project = $('#record_filter_affiliated_with_project option[selected=selected]').val()
     if selected_project
       dropzone_params['record[project_affiliated_records_attributes][][project_id]'] = selected_project
+
     $('#record_filter_affiliated_with_project').change () ->
       selected_project = $('#record_filter_affiliated_with_project option[selected=selected]').val()
       if selected_project
@@ -42,7 +44,7 @@ onLoad ->
           true
         true
       params: dropzone_params
-      url: '/records',
+      url: window.location.pathname
       method: 'POST',
       paramName: 'record[content]',
       forceFallback: false,
