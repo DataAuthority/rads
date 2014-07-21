@@ -17,7 +17,7 @@ admin:
   user: :admin
 
 admin_project_member:
-  stored_record: :project_three_affiliated_project_user
+  stored_record: :project_two_affiliated
   user: :admin
 
 project_user:

@@ -33,6 +33,9 @@ class CartRecordsControllerTest < ActionController::TestCase
     should 'create a cart_record with a record that they can read but do not own' do
       allowed_abilities(@user, @readable_record, [:read])
       assert @readable_record.creator_id != @user.id, 'user should not own readable_record'
+      if @user.cart_records.where(record_id: @readable_record.id).exists?
+        @user.cart_records.where(record_id: @readable_record.id).first.destroy
+      end
       assert_difference('CartRecord.count') do
         post :create, cart_record: { record_id: @readable_record.id }
       end

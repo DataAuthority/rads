@@ -12,10 +12,20 @@ class CartsController < ApplicationController
       @records.each {|r| r.destroy_content}
     elsif cart_params[:action] == 'affiliate_to_project'
       @project_affiliated_records.each {|r| r.save}
+    elsif cart_params[:action] = 'create_record_annotation'
+      @annotations.each {|a| a.save}
     end
+
     respond_to do |format|
-      format.html { redirect_to cart_url }
-      format.json { head :no_content }
+      if @cart_errors.empty?
+        format.html { redirect_to cart_url }
+        format.json { head :no_content }
+      else
+        @cart = Cart.new(params[:cart])
+        @projects = current_user.projects
+        format.html { render action: 'show' }
+        format.json { render json: @cart_errors, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -30,7 +40,7 @@ class CartsController < ApplicationController
   private
     # Never trust parameters from the scary internet, only allow the white list through.
     def cart_params
-      params.require(:cart).permit(:action, :project_id)
+      params.require(:cart).permit(:action, :project_id, :term, :context)
     end
 
     def load_cart_records
@@ -60,7 +70,20 @@ class CartsController < ApplicationController
             @project_affiliated_records << par
           end
         end
-      elsif cart_params[:action] == 'create_record_annotation'
+      elsif cart_params[:action] == 'annotate'
+        @annotations = []
+        @cart_records.each do |cr|
+          if can? :show, cr.stored_record
+            annotation = current_user.annotations.build(record_id: cr.stored_record.id, term: cart_params[:term], context: cart_params[:context])
+            if annotation.valid?
+              @annotations << annotation
+            else
+              @cart_errors[cr.id] = "Annotation not valid: #{ annotation.errors.full_messages.join(" ") }"
+            end
+          else
+            @cart_errors[cr.id] = 'You cannot annotate this record'
+          end
+        end
       end
     end
 end

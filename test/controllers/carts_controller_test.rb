@@ -34,10 +34,11 @@ class CartsControllerTest < ActionController::TestCase
       assert_not_nil @user_cart_records
       assert @user_cart_records.length > 0, 'there should be some cart_records'
       expected_cart_errors = {}
+      user_ability = Ability.new(@user)
       @user_cart_records.each do |cr|
         assert File.exists?(cr.stored_record.content.path), 'file should exist before destroy'
         assert !cr.stored_record.is_destroyed?, 'record should not be destroyed'
-        expected_cart_errors[cr.id] = @controller.current_ability.cannot?(:destroy, cr.stored_record.creator_id)
+        expected_cart_errors[cr.id] = user_ability.cannot?(:destroy, cr.stored_record)
       end
       assert expected_cart_errors.keys.length > 0, 'there should be some cart_records that would produce errors with destroy'
       stored_records = @user.cart_records.collect {|r| r.stored_record}
@@ -59,8 +60,9 @@ class CartsControllerTest < ActionController::TestCase
   end
 
   def self.data_producer_project_affiliation()
-    should 'affiliate any cart_record records that a can :affiliate to the project but leave other records unaffiliated' do
+    should 'affiliate any cart_record records that they can :affiliate to the project but leave other records unaffiliated' do
       assert_not_nil @user
+      user_ability = Ability.new(@user)
       assert_not_nil @project
       assert @project.project_memberships.where(user_id: @user.id, is_data_producer: true).exists?, 'user should be a data_producer in the project'
       assert @user_cart_records.length > 0, 'there should be some cart_records'
@@ -68,7 +70,8 @@ class CartsControllerTest < ActionController::TestCase
       expected_affiliated_records = @user_cart_records.length
       @user_cart_records.each do |cr|
         assert !@project.is_affiliated_record?(cr.stored_record), 'record should not be affiliated with the project'
-        if @controller.current_ability.cannot?(:affiliate, cr.stored_record)
+        if user_ability.cannot?(:affiliate, cr.stored_record)
+          assert cr.stored_record.creator_id != @user.id, 'User has record that they own but cannot affiliate!?'
           expected_cart_errors[cr.id] = true
           expected_affiliated_records = expected_affiliated_records - 1;
         end
@@ -115,15 +118,16 @@ class CartsControllerTest < ActionController::TestCase
   def self.test_add_record_annotation()
     should 'create annotations for all cart_record records the user can show but skip records that the user cannot show' do
       assert_not_nil @user
+      user_ability = Ability.new(@user)
       assert_not_nil @user_cart_records
       assert @user_cart_records.length > 0, 'there should be some cart_records'
       @user_cart_records.each do |cr|
-        assert @controller.current_ability.can?(:show, cr.stored_record), 'there is a record in the users cart that they cannot show, which should not happen'
+        assert user_ability.can?(:show, cr.stored_record), 'there is a record in the users cart that they cannot show, which should not happen'
       end
       stored_records = @user_cart_records.collect {|r| r.stored_record}
       assert_equal stored_records.length, stored_records.uniq.length
       assert_difference('Annotation.count', stored_records.length) do
-        put :update, cart: {action: 'add_record_annotation', term: 'Foo', context: 'Bar'}
+        put :update, cart: {action: 'annotate', term: 'Foo', context: 'Bar'}
       end
       assert_not_nil assigns(:cart_records)
       assigns(:cart_records).each do |cr|
