@@ -1,0 +1,15 @@
+<%= form_for(@annotation_filter, {url: annotations_path, method: :get}) do |f| %>
+    <%= f.label :creator_id %>
+    <%= f.collection_select :creator_id, @creators, :id, :to_s, include_blank: true %> |
+
+    <%= f.label :record_id %>
+    <%= f.collection_select :record_id, @records, :id, :to_s, include_blank: true %> |
+
+    <%= f.label :context %>
+    <%= f.collection_select :context, @contexts, :to_s, :to_s, include_blank: true %> |
+
+    <%= f.label :term %>
+    <%= f.collection_select :term, @terms, :to_s, :to_s, include_blank: true %> |
+
+    <%= f.submit 'Filter results' %>
+<% end %>

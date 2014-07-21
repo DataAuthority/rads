@@ -20,7 +20,7 @@ admin:
 
 project_user:
   creator: :project_user
-  annotated_record: :project_user_two
+  annotated_record: :project_two_affiliated
   term: project_tagged_record
   context: project_context
 

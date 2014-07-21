@@ -11,7 +11,7 @@ class AnnotationsControllerTest < ActionController::TestCase
     should 'be able to index annotatons by creator_id' do
       assert_not_nil @user
       assert_not_nil @other_user_annotation
-      get :index, creator_id: @other_user_annotation.creator_id
+      get :index, annotation_filter: { creator_id: @other_user_annotation.creator_id }
       assert_response :success
       assert_not_nil assigns(:annotations)
       assert assigns(:annotations).include?(@other_user_annotation), 'assigned annotations should include the existing annotation'
@@ -23,7 +23,7 @@ class AnnotationsControllerTest < ActionController::TestCase
     should 'be able to index annotatons by record_id' do
       assert_not_nil @user
       assert_not_nil @other_user_annotation
-      get :index, record_id: @other_user_annotation.record_id
+      get :index, annotation_filter: { record_id: @other_user_annotation.record_id }
       assert_response :success
       assert_not_nil assigns(:annotations)
       assert assigns(:annotations).include?(@other_user_annotation), 'assigned annotations should include the existing annotation'
@@ -36,7 +36,7 @@ class AnnotationsControllerTest < ActionController::TestCase
       assert_not_nil @user
       assert_not_nil @other_user_annotation
       assert_not_nil @other_user_annotation.context
-      get :index, context: @other_user_annotation.context
+      get :index, annotation_filter: { context: @other_user_annotation.context }
       assert_response :success
       assert_not_nil assigns(:annotations)
       assert assigns(:annotations).include?(@other_user_annotation), 'assigned annotations should include the existing annotation'
@@ -49,7 +49,7 @@ class AnnotationsControllerTest < ActionController::TestCase
       assert_not_nil @user
       assert_not_nil @other_user_annotation
       assert_not_nil @other_user_annotation.term
-      get :index, term: @other_user_annotation.term
+      get :index, annotation_filter: { term: @other_user_annotation.term }
       assert_response :success
       assert_not_nil assigns(:annotations)
       assert assigns(:annotations).include?(@other_user_annotation), 'assigned annotations should include the existing annotation'
@@ -64,7 +64,7 @@ class AnnotationsControllerTest < ActionController::TestCase
       assert_not_nil @other_user_annotation.context
       assert_not_nil @other_user_annotation.term
 
-      get :index, {
+      get :index, annotation_filter: {
         creator_id: @other_user_annotation.creator_id,
         record_id: @other_user_annotation.record_id,
         context: @other_user_annotation.context,

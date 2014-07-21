@@ -5,17 +5,31 @@ class AnnotationsController < ApplicationController
 
   def index
     @annotations = Annotation.accessible_by(current_ability)
-    if params[:creator_id]
-      @annotations = @annotations.where(creator_id: params[:creator_id])
+    @creators = []
+    @contexts = []
+    @terms = []
+    @records = []
+    @annotations.each do |a|
+      @creators << a.creator
+      @records << a.annotated_record
+      unless a.context.nil?
+        @contexts << a.context
+      end
+      @terms << a.term
     end
-    if params[:record_id]
-      @annotations = @annotations.where(record_id: params[:record_id])
+
+    @annotation_filter = AnnotationFilter.new(params[:annotation_filter])
+    if @annotation_filter.creator_id?
+      @annotations = @annotations.where(creator_id: @annotation_filter.creator_id)
     end
-    if params[:context]
-      @annotations = @annotations.where(context: params[:context])
+    if @annotation_filter.record_id?
+      @annotations = @annotations.where(record_id: @annotation_filter.record_id)
     end
-    if params[:term]
-      @annotations = @annotations.where(term: params[:term])
+    if @annotation_filter.context?
+      @annotations = @annotations.where(context: @annotation_filter.context)
+    end
+    if @annotation_filter.term?
+      @annotations = @annotations.where(term: @annotation_filter.term)
     end
   end
 
