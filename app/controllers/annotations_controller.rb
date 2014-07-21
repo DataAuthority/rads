@@ -10,12 +10,12 @@ class AnnotationsController < ApplicationController
     @terms = []
     @records = []
     @annotations.each do |a|
-      @creators << a.creator
-      @records << a.annotated_record
-      unless a.context.nil?
+      @creators << a.creator unless @creators.include? a.creator
+      @records << a.annotated_record unless @records.include? a.annotated_record
+      unless a.context.nil? || @contexts.include?(a.context)
         @contexts << a.context
       end
-      @terms << a.term
+      @terms << a.term unless @terms.include? a.term
     end
 
     @annotation_filter = AnnotationFilter.new(params[:annotation_filter])

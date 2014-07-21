@@ -9,7 +9,7 @@
       <th>Record</th>
       <th>Context</th>
       <th>Term</th>
-      <th colspan="3"></th>
+      <th colspan="4"></th>
     </tr>
   </thead>
 
@@ -20,7 +20,14 @@
         <td><%= annotation.annotated_record %></td>
         <td><%= annotation.context %></td>
         <td><%= annotation.term %></td>
-        <td><%= link_to 'Destroy', annotation, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td>
+           <% if can? :show, annotation.annotated_record %>
+              <%= link_to 'Show Record', annotation.annotated_record %>
+          <% end %>
+          <% if can? :destroy, annotation %>
+              <%= link_to 'Destroy', annotation, method: :delete, data: { confirm: 'Are you sure?' } %>
+          <% end %>
+        </td>
       </tr>
     <% end %>
   </tbody>
