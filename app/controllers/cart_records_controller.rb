@@ -6,7 +6,7 @@ class CartRecordsController < ApplicationController
     respond_to do |format|
       if @cart_record.save
         format.html { redirect_to cart_url, notice: 'Cart record was successfully created.' }
-        format.json { render action: 'show', status: :created, location: @cart_record }
+        format.json { render json: {message: "record #{ @cart_record.record_id } added"} }
       else
         format.html { redirect_to cart_url, alert: 'Cart record was not successfully created.' }
         format.json { render json: @cart_record.errors, status: :unprocessable_entity }

@@ -5,6 +5,13 @@ onLoad ->
   $("#records_nav select").change ->
     $(this).parent("form").submit()
   $("#records_nav input[type='submit']").hide()
+  $("a.add_to_cart").click ->
+    button = $(this)
+    $.post $(this).attr('href'), (data) ->
+      button.replaceWith "<p>"+data.message+"</p>"
+      true
+    , "json"
+    false
 
   $('div.dropzone:first').each ->
     dropzone_params = {}
