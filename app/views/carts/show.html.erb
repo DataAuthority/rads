@@ -2,7 +2,7 @@
 
 <%= render 'form' %>
 
-<%= link_to 'Empty', cart_url, method: :delete, data: { confirm: 'Are you sure?' } %>
+<%= link_to 'Empty', cart_url, method: :delete, data: { confirm: 'Are you sure?' }, class: "empty_cart" %>
 <table>
   <thead>
     <tr>
@@ -14,10 +14,10 @@
 
   <tbody>
     <% @cart_records.each do |cart_record| %>
-      <tr>
+      <tr class="cart_entry">
         <td><%= cart_record.stored_record %></td>
         <td><%= cart_record.user %></td>
-        <td><%= link_to 'Remove', cart_record, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= link_to 'Remove', cart_record, id: cart_record.id, method: :delete, data: { confirm: 'Are you sure?' }, class: "remove_cart_record" %></td>
       </tr>
     <% end %>
   </tbody>

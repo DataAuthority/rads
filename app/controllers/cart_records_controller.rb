@@ -18,7 +18,8 @@ class CartRecordsController < ApplicationController
     @cart_record.destroy
     respond_to do |format|
       format.html { redirect_to cart_url }
-      format.json { head :no_content }
+      format.js { render json: 'delete' }
+      format.json { render json: 'delete' }
     end
   end
 
