@@ -16,8 +16,21 @@
 //= require_self
 //= require_tree .
 
+$.override_remote_link = function(link, event, complete) {
+    $.rails.stopEverything(event);
+    $.ajax({
+      type: "DELETE",
+      url: link.attr('href'),
+      dataType: "json",
+      complete: complete
+    });
+    event.preventDefault();
+    return false;
+};
+
 window.onLoad = function(callback) {
   // binds ready event and turbolink page:load event
   $(document).ready(callback);
   $(document).on('page:load',callback);
 };
+

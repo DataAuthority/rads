@@ -4,24 +4,10 @@
 onLoad ->
   $("a.remove_cart_record").click (event) ->
     link = $(this)
-    $.rails.stopEverything(event)
-    $.ajax
-      type: "DELETE",
-      url: link.attr('href'),
-      dataType: "json",
-      complete: () ->
+    $.override_remote_link link, event, () ->
         link.parent().parent().remove()
-    event.preventDefault()
-    false
 
   $("a.empty_cart").click (event) ->
     link = $(this)
-    $.rails.stopEverything(event)
-    $.ajax
-      type: "DELETE",
-      url: link.attr('href'),
-      dataType: "json",
-      complete: () ->
+    $.override_remote_link link, event, () ->
         $('tr.cart_entry').remove()
-    event.preventDefault()
-    false
