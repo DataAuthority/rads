@@ -7,5 +7,12 @@
   <%= f.label :project_id %>
   <%= f.collection_select :project_id, @projects, :id, :to_s %>
 
+  <%= f.radio_button :action, :annotate %>
+  <%= f.label "action_annotate", "Annotate" %>
+  <%= f.label :context %>
+  <%= f.text_field :context %>
+  <%= f.label :term %>
+  <%= f.text_field :term %>
+
   <%= f.submit 'Apply' %>
 <% end %>
