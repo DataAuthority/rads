@@ -1,0 +1,64 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @record_filter.name %>
+</p>
+
+<p>
+  <strong>Created by user:</strong>
+  <%= @record_filter.record_created_by %>
+</p>
+
+<p>
+  <strong>Is destroyed:</strong>
+  <%= @record_filter.is_destroyed %>
+</p>
+
+<p>
+  <strong>Created on:</strong>
+  <%= @record_filter.created_on %>
+</p>
+
+<p>
+  <strong>Created after:</strong>
+  <%= @record_filter.created_after %>
+</p>
+
+<p>
+  <strong>Created before:</strong>
+  <%= @record_filter.created_before %>
+</p>
+
+<p>
+  <strong>Filename:</strong>
+  <%= @record_filter.filename %>
+</p>
+
+<p>
+  <strong>File content type:</strong>
+  <%= @record_filter.file_content_type %>
+</p>
+
+<p>
+  <strong>File size:</strong>
+  <%= @record_filter.file_size %>
+</p>
+
+<p>
+  <strong>File size less than:</strong>
+  <%= @record_filter.file_size_less_than %>
+</p>
+
+<p>
+  <strong>File size greater than:</strong>
+  <%= @record_filter.file_size_greater_than %>
+</p>
+
+<p>
+  <strong>File md5hashsum:</strong>
+  <%= @record_filter.file_md5hashsum %>
+</p>
+
+<%= link_to 'Edit', edit_record_filter_path(@record_filter) %> |
+<%= link_to 'Back', record_filters_path %>

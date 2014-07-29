@@ -1,0 +1,18 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+model_test_one:
+  record_filter: :model_test
+  created_by: 1
+  term: Foo
+  context: Bar
+
+model_test_two:
+  record_filter: :model_test
+  created_by: 1
+  term: Foo
+  context: BLAZ
+
+model_test_no_context:
+  record_filter: :model_test
+  created_by: 1
+  term: TERM

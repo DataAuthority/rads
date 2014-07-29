@@ -1,0 +1,47 @@
+<h1>Listing record_filters</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Created by user</th>
+      <th>Is destroyed</th>
+      <th>Created on</th>
+      <th>Created after</th>
+      <th>Created before</th>
+      <th>Filename</th>
+      <th>File content type</th>
+      <th>File size</th>
+      <th>File size less than</th>
+      <th>File size greater than</th>
+      <th>File md5hashsum</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @record_filters.each do |record_filter| %>
+      <tr>
+        <td><%= record_filter.name %></td>
+        <td><%= record_filter.record_created_by %></td>
+        <td><%= record_filter.is_destroyed %></td>
+        <td><%= record_filter.created_on %></td>
+        <td><%= record_filter.created_after %></td>
+        <td><%= record_filter.created_before %></td>
+        <td><%= record_filter.filename %></td>
+        <td><%= record_filter.file_content_type %></td>
+        <td><%= record_filter.file_size %></td>
+        <td><%= record_filter.file_size_less_than %></td>
+        <td><%= record_filter.file_size_greater_than %></td>
+        <td><%= record_filter.file_md5hashsum %></td>
+        <td><%= link_to 'Show', record_filter %></td>
+        <td><%= link_to 'Edit', edit_record_filter_path(record_filter) %></td>
+        <td><%= link_to 'Destroy', record_filter, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Record filter', new_record_filter_path %>

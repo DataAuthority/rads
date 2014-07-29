@@ -1,0 +1,65 @@
+<%= form_for(@record_filter) do |f| %>
+  <% if @record_filter.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@record_filter.errors.count, "error") %> prohibited this record_filter from being saved:</h2>
+
+      <ul>
+      <% @record_filter.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :created_by_user %><br>
+    <%= f.number_field :record_created_by %>
+  </div>
+  <div class="field">
+    <%= f.label :is_destroyed %><br>
+    <%= f.check_box :is_destroyed %>
+  </div>
+  <div class="field">
+    <%= f.label :created_on %><br>
+    <%= f.date_select :created_on %>
+  </div>
+  <div class="field">
+    <%= f.label :created_after %><br>
+    <%= f.date_select :created_after %>
+  </div>
+  <div class="field">
+    <%= f.label :created_before %><br>
+    <%= f.date_select :created_before %>
+  </div>
+  <div class="field">
+    <%= f.label :filename %><br>
+    <%= f.text_field :filename %>
+  </div>
+  <div class="field">
+    <%= f.label :file_content_type %><br>
+    <%= f.text_field :file_content_type %>
+  </div>
+  <div class="field">
+    <%= f.label :file_size %><br>
+    <%= f.number_field :file_size %>
+  </div>
+  <div class="field">
+    <%= f.label :file_size_less_than %><br>
+    <%= f.number_field :file_size_less_than %>
+  </div>
+  <div class="field">
+    <%= f.label :file_size_greater_than %><br>
+    <%= f.number_field :file_size_greater_than %>
+  </div>
+  <div class="field">
+    <%= f.label :file_md5hashsum %><br>
+    <%= f.text_field :file_md5hashsum %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
