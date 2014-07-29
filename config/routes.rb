@@ -1,4 +1,6 @@
 Rads::Application.routes.draw do
+  resources :record_filters
+
   resources :annotations, only: [:index, :destroy]
 
   resources :cart_records, only: [:create, :destroy]

@@ -7,6 +7,7 @@ class UserTest < ActiveSupport::TestCase
   should have_many :audited_activities
   should have_many :cart_records
   should have_many :annotations
+  should have_many :record_filters
 
   should 'have a name' do
     assert_respond_to User.new, 'name'

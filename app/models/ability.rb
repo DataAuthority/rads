@@ -7,6 +7,7 @@ class Ability
     elsif !user.is_enabled?
       can :show, RepositoryUser, :id => user.id
     else
+      can :manage, RecordFilter, :user_id => user.id
       can [:index, :show], ProjectAffiliatedRecord, :project => {:project_memberships => {:user_id => user.id}}
       can :new, ProjectAffiliatedRecord, :project => {:project_memberships => {:user_id => user.id, :is_data_producer => true}}
       can :affiliate_record_with, Project, :project_memberships => {:user_id => user.id, :is_data_producer => true}
