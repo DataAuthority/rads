@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class RecordFilter < ActiveRecord::Base
   belongs_to :user
   validates_presence_of :user_id
@@ -15,23 +16,23 @@ class RecordFilter < ActiveRecord::Base
     end
 
     unless is_destroyed.nil?
-      relation = relation.where(is_destroyed: is_destroyed)
+      relation = relation.where(is_destroyed: is_destroyed?)
     end
 
-    if created_on.nil?
-      #created_on takes precendence over these
-      if created_after && created_before
+    if record_created_on.nil?
+      #record_created_on takes precendence over these
+      if record_created_after && record_created_before
         #range query = BETWEEN
-        relation = relation.where(created_at: created_before.to_time.end_of_day..created_after.to_time.beginning_of_day)
-      elsif created_after
-        relation = relation.where('created_at > ?', created_after.to_time.end_of_day)
-      elsif created_before
-        relation = relation.where('created_at < ?', created_before.to_time.beginning_of_day)
+        relation = relation.where(created_at: record_created_after.to_time.end_of_day..record_created_before.to_time.beginning_of_day)
+      elsif record_created_after
+        relation = relation.where('records.created_at > ?', record_created_after.to_time.end_of_day)
+      elsif record_created_before
+        relation = relation.where('records.created_at < ?', record_created_before.to_time.beginning_of_day)
       else
         # do nothing
       end
     else
-      relation = relation.where(created_at: created_on.to_time.beginning_of_day..created_on.to_time.end_of_day)
+      relation = relation.where(created_at: record_created_on.to_time.beginning_of_day..record_created_on.to_time.end_of_day)
     end
 
     unless filename.nil?
@@ -50,11 +51,11 @@ class RecordFilter < ActiveRecord::Base
     if file_size.nil?
       #file_size takes precedence over these
       if file_size_greater_than && file_size_less_than
-        relation = relation.where(content_file_size: file_size_greater_than..file_size_less_than)
+        relation = relation.where(content_file_size: file_size_greater_than+1..file_size_less_than-1)
       elsif file_size_greater_than
-        relation = relation.where(content_file_size: file_size_greater_than)
+        relation = relation.where('records.content_file_size > ?', file_size_greater_than)
       elsif file_size_less_than
-        relation = relation.where(content_file_size: file_size_less_than)
+        relation = relation.where('records.content_file_size < ?', file_size_less_than)
       else
         # do nothing
       end
@@ -67,11 +68,11 @@ class RecordFilter < ActiveRecord::Base
     end
 
     unless project_affiliation_filter_term.nil?
-      relation = project_affiliation_filter_term.query(relation)
+      relation = project_affiliation_filter_term.query(relation, 'par')
     end
 
-    annotation_filter_terms.each do |aft|
-      relation = aft.query(relation)
+    annotation_filter_terms.each_with_index do |aft, i|
+      relation = aft.query(relation, "aft_#{ i }")
     end
 
     relation
@@ -88,16 +89,16 @@ class RecordFilter < ActiveRecord::Base
       qp[:is_destroyed] = is_destroyed
     end
 
-    unless created_on.nil?
-      qp[:created_on] = created_on
+    unless record_created_on.nil?
+      qp[:record_created_on] = record_created_on
     end
 
-    unless created_after.nil?
-      qp[:created_after] = created_after
+    unless record_created_after.nil?
+      qp[:record_created_after] = record_created_after
     end
       
-    unless created_before.nil?
-      qp[:created_before] = created_before
+    unless record_created_before.nil?
+      qp[:record_created_before] = record_created_before
     end
     
     unless filename.nil?

@@ -5,9 +5,9 @@ class CreateRecordFilters < ActiveRecord::Migration
       t.string :name
       t.integer :record_created_by
       t.boolean :is_destroyed
-      t.date :created_on
-      t.date :created_after
-      t.date :created_before
+      t.date :record_created_on
+      t.date :record_created_after
+      t.date :record_created_before
       t.string :filename
       t.string :file_content_type
       t.integer :file_size

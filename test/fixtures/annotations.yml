@@ -36,4 +36,43 @@ membership_project_annotated_record:
   term: membership_annotated
   context:
 
+query_test1:
+  creator: :p_m_creator
+  annotated_record: :pm_creator3
+  term: foo
 
+query_test2:
+  creator: :p_m_creator
+  annotated_record: :pm_creator2
+  context: bar
+  term: foo
+
+query_test3:
+  creator: :p_m_creator
+  annotated_record: :pm_creator3
+  context: bar
+  term: float
+
+query_test4:
+  creator: :p_m_creator
+  annotated_record: :pm_producer_affiliated_record
+  context: technology
+  term: DNaseHS
+
+query_test5:
+  creator: :p_m_producer
+  annotated_record: :pm_producer_affiliated_record
+  context: cell_line
+  term: NHEK
+
+query_test6:
+  creator: :p_m_producer
+  annotated_record: :pm_creator1
+  context: bar
+  term: foo
+
+query_test7:
+  creator: :p_m_producer
+  annotated_record: :pm_producer_affiliated_record
+  context: bar
+  term: foo

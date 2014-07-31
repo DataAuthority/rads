@@ -14,13 +14,14 @@ class ProjectAffiliationFilterTermTest < ActiveSupport::TestCase
     assert_kind_of Integer, @project_affiliation_filter_term.project_id
   end
 
-  should 'support query method which takes an Record::ActiveRecord_Relation, updates it based on its state, and returns the updated Record::ActiveRecord_Relation' do
+  should 'support query method which takes an Record::ActiveRecord_Relation and a join_name, updates it based on its state to join projects on the join_name, and returns the updated Record::ActiveRecord_Relation' do
     assert_respond_to @project_affiliation_filter_term, 'query'
     q = Record.all
     assert_instance_of Record::ActiveRecord_Relation, q
-    new_q = @project_affiliation_filter_term.query(q)
+    join_name = "project_1"
+    new_q = @project_affiliation_filter_term.query(q, join_name)
     assert_instance_of Record::ActiveRecord_Relation, new_q
-    assert q != new_q, 'q and new_q shuold be different'
+    assert new_q.to_sql.match(join_name), "#{ new_q.to_sql } does not contain the #{ join_name }"
   end
 
   should 'support query_parameters method which returns a Hash of URL query parameters' do

@@ -2,7 +2,7 @@
 
 <div id='records_nav'>
   <%= form_for(@record_filter, {url: records_path, method: :get}) do |f| %>
-    <%= f.collection_select :affiliated_with_project, current_user.projects, :id, :to_s, {include_blank: '--Select a project--'} %>
+<p class="alert">TODO</p>
     <%= f.submit 'Filter records' %>
   <% end %>
 </div>

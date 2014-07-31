@@ -6,16 +6,20 @@ class RecordsController < ApplicationController
 
   def index
     unless current_user.nil?
-      @record_filter = RecordFilter.new(params[:record_filter])
-      if @record_filter.affiliated_with_project?
-        @project = current_user.projects.find(@record_filter.affiliated_with_project)
-        @records = @project.records
+      # TODO allow record_filters in unauthenticated searches with limited parameters
+      if params[:record_filter] || params[:record_filter_id]
+        if params[:record_filter]
+         @record_filter = current_user.record_filters.build(record_filter_params)
+        else
+          @record_filter = current_user.record_filters.find(params[:record_filter_id])
+        end
+         @records = @record_filter.query(Record.all).accessible_by(current_ability)
       else
+        @record_filter = current_user.record_filters.build(record_created_by: current_user.id)
         @records = current_user.records
       end
     end
-
-    @records = @records.order('created_at desc') if @records
+    @records = @records.order('records.created_at desc') if @records
 
     respond_to do |format|
       format.html do
@@ -90,6 +94,26 @@ class RecordsController < ApplicationController
                                      annotations_attributes: [:term, :context],
                                      project_affiliated_records_attributes: [:project_id]
                                     )
+    end
+
+    def record_filter_params
+      permitted_params = [
+        :name,
+        :record_created_by,
+        :is_destroyed,
+        :record_created_on,
+        :record_created_after,
+        :record_created_before,
+        :filename,
+        :file_content_type,
+        :file_size,
+        :file_size_less_than,
+        :file_size_greater_than,
+        :file_md5hashsum,
+        project_affiliation_filter_term_attributes: [:project_id],
+        annotation_filter_terms_attributes: [:created_by, :term, :context]
+      ]
+      params.require(:record_filter).permit(permitted_params)
     end
 
     def authorize_download

@@ -1,1 +1,1 @@
-json.extract! @record_filter, :id, :name, :record_created_by, :is_destroyed, :created_on, :created_after, :created_before, :filename, :file_content_type, :file_size, :file_size_less_than, :file_size_greater_than, :file_md5hashsum, :created_at, :updated_at
+json.extract! @record_filter, :id, :name, :record_created_by, :is_destroyed, :record_created_on, :record_created_after, :record_created_before, :filename, :file_content_type, :file_size, :file_size_less_than, :file_size_greater_than, :file_md5hashsum, :created_at, :updated_at

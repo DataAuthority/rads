@@ -58,7 +58,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       change = {
         record_created_by: 33,
         is_destroyed: !user_record_filter.is_destroyed,
-        created_on: Date.today - 10,
+        record_created_on: Date.today - 10,
         filename: "random_test_filename.tpg"
       }
       patch :update, id: user_record_filter, record_filter: change
@@ -80,8 +80,8 @@ class RecordFiltersControllerTest < ActionController::TestCase
       assert_not_nil @user
       new_record_filter = {
         name: "TEST_#{@user.to_s}_FILTER",
-        created_before: (Date.today - 10).strftime("%Y-%m-%d"),
-        created_after: (Date.today + 10).strftime("%Y-%m-%d"),
+        record_created_before: (Date.today - 10).strftime("%Y-%m-%d"),
+        record_created_after: (Date.today + 10).strftime("%Y-%m-%d"),
         is_destroyed: true,
         file_size_less_than: 100,
         file_size_greater_than: 10,
@@ -161,15 +161,15 @@ class RecordFiltersControllerTest < ActionController::TestCase
     should 'be able to update a record_filter to remove a parameter' do
       assert_not_nil @user
       assert_not_nil @user_record_filter
-      assert_not_nil @user_record_filter.created_on
+      assert_not_nil @user_record_filter.record_created_on
       change = {
-        created_on: nil
+        record_created_on: nil
       }
       patch :update, id: @user_record_filter, record_filter: change
       assert_not_nil assigns(:record_filter)
       assert_equal @user_record_filter.id, assigns(:record_filter).id
       trf = RecordFilter.find(@user_record_filter.id)
-      assert trf.created_on.nil?, 'created_on should now be nil after update'
+      assert trf.record_created_on.nil?, 'record_created_on should now be nil after update'
     end
 
     should 'be able to update a record_filter to add a project_affiliation_filter_term' do

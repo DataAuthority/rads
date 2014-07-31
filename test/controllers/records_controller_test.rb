@@ -151,8 +151,9 @@ class RecordsControllerTest < ActionController::TestCase
       assert_not_nil @project_affiliated_record
       assert !@project_affiliated_record.project.project_memberships.where(user_id: @user.id).exists?, 'user should not be a member in the project'
       assert_not_nil @project_affiliated_record.affiliated_record
-      get :index, record_filter: {affiliated_with_project: @project.id}
-      assert_response 404
+      get :index, record_filter: {project_affiliation_filter_term_attributes: {project_id: @project.id} }
+      assert_response :success
+      assert assigns(:records).empty?, 'no records should have been returned'
     end
 
     should "not show affiliated record" do
@@ -169,11 +170,13 @@ class RecordsControllerTest < ActionController::TestCase
     should "get affiliated records index" do
       assert_not_nil @user
       assert_not_nil @project_affiliated_record
+      assert @project.is_affiliated_record?( @project_affiliated_record.affiliated_record), 'record should be afilliated with the project'
       assert @project_affiliated_record.project.project_memberships.where(user_id: @user.id).exists?, 'user should be a member in the project'
       assert_not_nil @project_affiliated_record.affiliated_record
-      get :index, record_filter: {affiliated_with_project: @project.id}
+      get :index, record_filter: {project_affiliation_filter_term_attributes: { project_id: @project.id} }
       assert_response :success
       assert_not_nil assigns(:records)
+      assert !assigns(:records).empty?, 'there were records returned'
       assert assigns(:records).include?(@project_affiliated_record.affiliated_record), "records does not include affiliated_record"
     end
 
@@ -629,4 +632,567 @@ class RecordsControllerTest < ActionController::TestCase
     not_data_producer_tests
   end #Non-Admin RepositoryUser with the administrator role in the project
   #Project membership role testing
+
+  context 'Query interface' do
+    setup do
+      @user_records = {
+        pm_creator1: 'p_m_creator.txt',
+        pm_creator2: 'nice_p_m_creator_file.txt',
+        pm_creator3: 'created_by_p_m_creator.jpg'
+      }
+      @user_records.each do |record_name, target_file|
+        this_record = records(record_name)
+        this_path = Rails.root.to_s + "/test/fixtures/attachments/#{target_file}"
+        this_record.content = File.new this_path
+        this_record.save
+        @user_records[record_name] = this_record
+      end
+      @user_records[:pm_creator1].created_at = @user_records[:pm_creator2].created_at - 10.days
+      @user_records[:pm_creator3].created_at = @user_records[:pm_creator2].created_at + 10.days
+      @user_records[:pm_creator1].save
+      @user_records[:pm_creator3].destroy_content
+      @other_user_record = records(:pm_producer_affiliated_record)
+      @other_user_record.content = @test_content
+      @other_user_record.save
+      @project = projects(:membership_test)
+      @user = users(:p_m_creator)
+      authenticate_existing_user(@user, true)
+    end
+
+    teardown do
+      @user_records.each do |name, to_destroy|
+        unless to_destroy.is_destroyed?
+          to_destroy.content.destroy
+          to_destroy.destroy
+        end
+      end
+    end
+
+    should 'support query by record_created_by' do
+      get :index, record_filter: {record_created_by: @other_user_record.creator_id}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      found = false
+      assigns(:records).each do |rr|
+        assert_equal @other_user_record.creator_id, rr.creator_id
+        unless found
+          found = (rr.id == @other_user_record.id)
+        end
+      end
+      assert found, 'other_user_record should have been found'
+    end
+
+    should 'support query by :is_destroyed' do
+      @other_user_record.is_destroyed = true
+      @other_user_record.save
+      found = {}
+
+      assert @other_user_record.is_destroyed?, 'other_user_record should be destroyed'
+      found[@other_user_record.id] = false
+
+      assert @user_records[:pm_creator3].is_destroyed?, 'pm_creator3 should be destroyed'
+      found[@user_records[:pm_creator3].id] = false
+
+      get :index, record_filter: {is_destroyed: 'true'}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.is_destroyed?, 'record should be destroyed'
+        if found.has_key? rr.id
+          unless found[rr.id]
+            found[rr.id] = true
+          end
+        end
+      end
+      found.keys.each do |expected_id|
+        assert found[expected_id], "expected record #{ expected_id } is missing"
+      end
+    end
+
+    should 'support query by :record_created_on' do
+      @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
+      get :index, record_filter: {record_created_on: @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d")}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert_equal @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d"), rr.created_at.strftime("%Y-%m-%d")
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?(@user_records[:pm_creator1]), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?(@user_records[:pm_creator3]), 'returned records should not include pm_creator3'
+    end
+
+    should 'support query by :record_created_after' do
+      @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
+      get :index, record_filter: {record_created_after: @user_records[:pm_creator1].created_at.strftime("%Y-%m-%d")}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0, 'there should be some records'
+      assigns(:records).each do |rr|
+        assert rr.created_at > @user_records[:pm_creator1].created_at
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?(@user_records[:pm_creator1]), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'support query by :record_created_before' do
+      @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
+      get :index, record_filter: {record_created_before: @user_records[:pm_creator3].created_at.strftime("%Y-%m-%d")}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.created_at < @user_records[:pm_creator3].created_at
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?(@user_records[:pm_creator3]), 'returned records should not include pm_creator3'
+    end
+
+    should 'allow record_created_before and record_created_after to be used together' do
+      @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
+      [@other_user_record, @user_records[:pm_creator2]].each do |er|
+        assert er.created_at > @user_records[:pm_creator1].created_at
+        assert er.created_at < @user_records[:pm_creator3].created_at
+      end
+      get :index, record_filter: {
+        record_created_after: @user_records[:pm_creator1].created_at.strftime("%Y-%m-%d"),
+        record_created_before: @user_records[:pm_creator3].created_at.strftime("%Y-%m-%d")
+      }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0, 'there should be some records returned'
+      assigns(:records).each do |rr|
+        assert rr.created_at > @user_records[:pm_creator1].created_at
+        assert rr.created_at < @user_records[:pm_creator3].created_at
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'make record_created_on take precedence over record_created_before' do
+      @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
+      get :index, record_filter: {
+        record_created_on: @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d"),
+        record_created_before: @user_records[:pm_creator3].created_at.strftime("%Y-%m-%d")
+      }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert_equal @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d"), rr.created_at.strftime("%Y-%m-%d")
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'make record_created_on take precedence over record_created_after' do
+      @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
+      get :index, record_filter: {
+        record_created_on: @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d"),
+        record_created_after: @user_records[:pm_creator1].created_at.strftime("%Y-%m-%d")
+      }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert_equal @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d"), rr.created_at.strftime("%Y-%m-%d")
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'make record_created_on take precedence over record_created_before and record_created_after' do
+      @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
+      get :index, record_filter: {
+        record_created_on: @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d"),
+        record_created_before: @user_records[:pm_creator3].created_at.strftime("%Y-%m-%d"),
+        record_created_after: @user_records[:pm_creator1].created_at.strftime("%Y-%m-%d")
+      }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert_equal @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d"), rr.created_at.strftime("%Y-%m-%d")
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support query by :filename' do
+      get :index, record_filter: {filename: @user_records[:pm_creator1].content_file_name}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert_equal @user_records[:pm_creator1].content_file_name, rr.content_file_name
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+    end
+
+    should 'support query by :filename with *suffix' do
+      get :index, record_filter: {filename: '*.txt'}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_name.match(/.txt$/)
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'support query by :filename with prefix*' do
+      get :index, record_filter: {filename: 'nice*'}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_name.match(/nice.*/)
+      end
+      returned_records = assigns(:records).to_a
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support query by :filename with prefix*suffix' do
+      get :index, record_filter: {filename: '*p_m_creator*'}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_name.match(/.*p\_m\_creator.*/)
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'support query by :file_content_type' do
+      [@other_user_record, @user_records[:pm_creator1]].each do |f|
+        f.content_content_type = 'application/pdf'
+        f.save
+      end
+      get :index, record_filter: {file_content_type: 'application/pdf'}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert_equal 'application/pdf', rr.content_content_type
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support query by :file_size' do
+      get :index, record_filter: {file_size: @user_records[:pm_creator2].content_file_size}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_size == @user_records[:pm_creator2].content_file_size
+      end
+      returned_records = assigns(:records).to_a
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support query by :file_size_less_than' do
+      get :index, record_filter: {file_size_less_than: @user_records[:pm_creator3].content_file_size}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_size < @user_records[:pm_creator3].content_file_size
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support query by :file_size_greater_than' do
+      get :index, record_filter: {file_size_greater_than: @user_records[:pm_creator1].content_file_size}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_size > @user_records[:pm_creator1].content_file_size
+      end
+      returned_records = assigns(:records).to_a
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'allow file_size_less_than and file_size_greater_than to be used together' do
+      get :index, record_filter: {
+        file_size_greater_than: @user_records[:pm_creator1].content_file_size,
+        file_size_less_than: @user_records[:pm_creator3].content_file_size,
+      }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_size > @user_records[:pm_creator1].content_file_size, "#{rr.content_file_size} should be greater than #{ @user_records[:pm_creator1].content_file_size }"
+        assert rr.content_file_size < @user_records[:pm_creator3].content_file_size, "#{rr.content_file_size} should be less than #{ @user_records[:pm_creator3].content_file_size }"
+      end
+      returned_records = assigns(:records).to_a
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'make file_size take precedence over file_size_less_than' do
+      get :index, record_filter: {
+        file_size: @user_records[:pm_creator3].content_file_size,
+        file_size_less_than: @user_records[:pm_creator3].content_file_size
+      }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_size == @user_records[:pm_creator3].content_file_size
+      end
+      returned_records = assigns(:records).to_a
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'make file_size take precedence over file_size_greater_than' do
+      get :index, record_filter: {
+        file_size: @user_records[:pm_creator1].content_file_size,
+        file_size_greater_than: @user_records[:pm_creator1].content_file_size,
+      }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_size == @user_records[:pm_creator1].content_file_size
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'make file_size take precedence over file_size_greather_than and file_size_less_than' do
+      get :index, record_filter: {
+        file_size: @user_records[:pm_creator3].content_file_size,
+        file_size_greater_than: @user_records[:pm_creator1].content_file_size,
+        file_size_less_than: @user_records[:pm_creator3].content_file_size,
+      }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_size == @user_records[:pm_creator3].content_file_size
+      end
+      returned_records = assigns(:records).to_a
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'support query by :file_md5hashsum' do
+      assert_equal @user_records[:pm_creator1].content_fingerprint, @other_user_record.content_fingerprint
+      get :index, record_filter: { file_md5hashsum: @user_records[:pm_creator1].content_fingerprint }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert_equal @user_records[:pm_creator1].content_fingerprint, rr.content_fingerprint
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support query by :project_affiliation_filter_term' do
+      assert @project.is_affiliated_record?(@other_user_record), 'other_user_record should be affiliated with membership_project'
+      assert @project.is_affiliated_record?(@user_records[:pm_creator1]), 'pm_creator1 should be affiliated with membership_project'
+      get :index, record_filter: {project_affiliation_filter_term_attributes: {project_id: @project.id}}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert @project.is_affiliated_record?( rr ), 'file should be affiliated with the project'
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support query by :annotation_filter_term' do
+      get :index, record_filter: {annotation_filter_terms_attributes: [{created_by: @user.id, context: 'bar', term: 'foo'}]}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.annotations.where(creator_id: @user.id, context: 'bar', term: 'foo').exists?, 'record should have been annotated with the requested annotation'
+      end
+      returned_records = assigns(:records).to_a
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert !returned_records.include?( @other_user_record ), 'returned records should not include other_user_record'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support query by :annotation_filter_term context: _ALL_ and return all contexts for given term' do
+      get :index, record_filter: {annotation_filter_terms_attributes: [{context: '_ALL_', term: 'foo'}]}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.annotations.where(term: 'foo').exists?, 'record should have been annotated with the requested annotation'
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'support query by :annotation_filter_term with context and no term and return records with that context and any term' do
+      get :index, record_filter: {annotation_filter_terms_attributes: [{context: 'bar'}]}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.annotations.where(context: 'bar').exists?, 'record should have been annotated with the requested annotation'
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert returned_records.include?( @other_user_record ), 'returned records should not include other_user_record'
+      assert returned_records.include?( @user_records[:pm_creator2] ), 'returned records should include pm_creator2'
+      assert returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'support query by :annotation_filter_term without a context and return only the given term and nil context' do
+      get :index, record_filter: {annotation_filter_terms_attributes: [{term: 'foo'}]}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.annotations.where(context: nil, term: 'foo').exists?, 'record should have been annotated with the requested annotation'
+      end
+      returned_records = assigns(:records).to_a
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert !returned_records.include?( @other_user_record ), 'returned records should not include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert returned_records.include?( @user_records[:pm_creator3] ), 'returned records should include pm_creator3'
+    end
+
+    should 'support query by multiple :annotation_filter_terms' do
+      get :index, record_filter: {annotation_filter_terms_attributes: [
+          {context: 'cell_line', term: 'NHEK'},
+          {context: 'technology', term: 'DNaseHS'}
+      ]}
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0, 'there should be some records'
+      assigns(:records).each do |rr|
+        assert rr.annotations.where(context: 'cell_line', term: 'NHEK').exists?, 'record should have been annotated with the requested first annotation'
+        assert rr.annotations.where(context: 'technology', term: 'DNaseHS').exists?, 'record should have been annotated with the requested second annotation'
+      end
+      returned_records = assigns(:records).to_a
+      assert !returned_records.include?( @user_records[:pm_creator1] ), 'returned records should not include pm_creator1'
+      assert returned_records.include?( @other_user_record ), 'returned records should include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support combinations' do
+      get :index, record_filter: {
+        filename: 'p_m_creator*',
+        annotation_filter_terms_attributes: [
+          {context: 'bar', term: 'foo'},
+        ],
+        project_affiliation_filter_term_attributes: { project_id: @project.id }
+      }
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_name.match(/p\_m\_creator.*/)
+        assert rr.annotations.where(context: 'bar', term: 'foo').exists?, 'record should have been annotated with the requested annotation'
+        assert @project.is_affiliated_record?( rr ), 'file should be affiliated with the project'
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert !returned_records.include?( @other_user_record ), 'returned records should not include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'support record_filter_id for record_filter owned by user' do
+      user_record_filter = RecordFilter.new(
+                             name: "query_test_#{@user.id}",
+                             user_id: @user.id, 
+                             filename: '*.txt', 
+                             project_affiliation_filter_term_attributes: {project_id: @project.id}, 
+                             annotation_filter_terms_attributes: [{context: 'bar', term: 'foo'}]
+                           )
+      assert user_record_filter.valid?, "user_record_filter not valid #{ user_record_filter.errors.inspect }"
+      assert user_record_filter.save
+      get :index, record_filter_id: user_record_filter.id
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0, 'there should be some records'
+      assigns(:records).each do |rr|
+        assert rr.content_file_name.match(/.*\.txt/)
+        assert rr.annotations.where(context: 'bar', term: 'foo').exists?, 'record should have been annotated with the requested annotation'
+        assert @project.is_affiliated_record?( rr ), 'file should be affiliated with the project'
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert returned_records.include?( @other_user_record ), 'returned records should not include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'not allow record_filter_id query for record_filter not owned by user' do
+      other_user_record_filter = record_filters(:project_user)
+      assert other_user_record_filter.user_id != @user.id
+      get :index, record_filter_id: other_user_record_filter
+      assert_response 404
+    end
+
+  end #Query interface
 end

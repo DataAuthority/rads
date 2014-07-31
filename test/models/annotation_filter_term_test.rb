@@ -3,7 +3,6 @@ require 'test_helper'
 class AnnotationFilterTermTest < ActiveSupport::TestCase
   should belong_to :record_filter
   should validate_presence_of :record_filter
-  should validate_presence_of :term
 
   setup do
     @annotation_filter_term = annotation_filter_terms(:model_test_one)
@@ -24,13 +23,14 @@ class AnnotationFilterTermTest < ActiveSupport::TestCase
     assert_instance_of String, @annotation_filter_term.context
   end
 
-  should 'support query method which takes an Record::ActiveRecord_Relation, updates it based on its state, and returns the updated Record::ActiveRecord_Relation' do
+  should 'support query method which takes an Record::ActiveRecord_Relation and a join_name, updates it based on its state to join annotations on the join_name, and returns the updated Record::ActiveRecord_Relation' do
     assert_respond_to @annotation_filter_term, 'query'
     q = Record.all
     assert_instance_of Record::ActiveRecord_Relation, q
-    new_q = @annotation_filter_term.query(q)
+    join_name = "annotation_1"
+    new_q = @annotation_filter_term.query(q, join_name)
     assert_instance_of Record::ActiveRecord_Relation, new_q
-    assert q != new_q, 'q and new_q shuold be different'
+    assert new_q.to_sql.match(join_name), "#{ new_q.to_sql } does not contain the #{ join_name }"
   end
 
   should 'support query_parameters method which returns a Hash of URL query parameters' do

@@ -31,3 +31,7 @@ pm_cu_producer_affiliated:
 pm_producer_affiliated:
   project: :membership_test
   affiliated_record: :pm_producer_affiliated_record
+
+pm_creator_affiliated:
+  project: :membership_test
+  affiliated_record: :pm_creator1

@@ -108,3 +108,12 @@ pm_member:
 
 pm_member2:
   creator: :p_m_member
+
+pm_creator1:
+  creator: :p_m_creator
+
+pm_creator2:
+  creator: :p_m_creator
+
+pm_creator3:
+  creator: :p_m_creator

@@ -5,9 +5,9 @@ model_test:
   user: :non_admin
   record_created_by: 1
   is_destroyed: false
-  created_on: 2014-07-25
-  created_after: 2014-07-25
-  created_before: 2014-07-25
+  record_created_on: 2014-07-25
+  record_created_after: 2014-07-25
+  record_created_before: 2014-07-25
   filename: MyString
   file_content_type: MyString
   file_size: 200
@@ -30,5 +30,3 @@ core_user:
 project_user:
   name: project_user_filter
   user: :project_user
-
-

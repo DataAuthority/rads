@@ -46,19 +46,19 @@ class RecordFilterTest < ActiveSupport::TestCase
     assert_respond_to @record_filter, 'is_destroyed'
   end
 
-  should 'have a created_on attribute' do
-    assert_respond_to @record_filter, 'created_on'
-    assert_instance_of Date, @record_filter.created_on
+  should 'have a record_created_on attribute' do
+    assert_respond_to @record_filter, 'record_created_on'
+    assert_instance_of Date, @record_filter.record_created_on
   end
 
-  should 'have a created_after attribute' do
-    assert_respond_to @record_filter, 'created_after'
-    assert_instance_of Date, @record_filter.created_after
+  should 'have a record_created_after attribute' do
+    assert_respond_to @record_filter, 'record_created_after'
+    assert_instance_of Date, @record_filter.record_created_after
   end
 
-  should 'have a created_before attribute' do
-    assert_respond_to @record_filter, 'created_before'
-    assert_instance_of Date, @record_filter.created_before
+  should 'have a record_created_before attribute' do
+    assert_respond_to @record_filter, 'record_created_before'
+    assert_instance_of Date, @record_filter.record_created_before
   end
 
   should 'have a filename attribute' do
@@ -113,12 +113,12 @@ class RecordFilterTest < ActiveSupport::TestCase
     assert_equal @record_filter.record_created_by, record_filter_params[:record_created_by]
     assert_includes record_filter_params.keys, :is_destroyed
     assert_equal @record_filter.is_destroyed, record_filter_params[:is_destroyed]
-    assert_includes record_filter_params.keys, :created_on
-    assert_equal @record_filter.created_on, record_filter_params[:created_on]
-    assert_includes record_filter_params.keys, :created_after
-    assert_equal @record_filter.created_after, record_filter_params[:created_after]
-    assert_includes record_filter_params.keys, :created_before
-    assert_equal @record_filter.created_before, record_filter_params[:created_before]
+    assert_includes record_filter_params.keys, :record_created_on
+    assert_equal @record_filter.record_created_on, record_filter_params[:record_created_on]
+    assert_includes record_filter_params.keys, :record_created_after
+    assert_equal @record_filter.record_created_after, record_filter_params[:record_created_after]
+    assert_includes record_filter_params.keys, :record_created_before
+    assert_equal @record_filter.record_created_before, record_filter_params[:record_created_before]
     assert_includes record_filter_params.keys, :filename
     assert_equal @record_filter.filename, record_filter_params[:filename]
     assert_includes record_filter_params.keys, :file_content_type
