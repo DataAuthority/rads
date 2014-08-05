@@ -2,9 +2,6 @@
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 onLoad ->
-  $("#records_nav select").change ->
-    $(this).parent("form").submit()
-  $("#records_nav input[type='submit']").hide()
   $("a.add_to_cart").click ->
     button = $(this)
     $.post $(this).attr('href'), (data) ->

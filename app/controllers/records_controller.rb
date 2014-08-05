@@ -6,6 +6,14 @@ class RecordsController < ApplicationController
 
   def index
     unless current_user.nil?
+      @record_creators = []
+      @content_types = []
+      Record.accessible_by(current_ability).each do |r|
+        @record_creators << r.creator unless @record_creators.include? r.creator
+        @content_types << r.content_content_type unless @content_types.include? r.content_content_type
+      end
+      @annotation_creators = Annotation.all.collect{|a| a.creator }.uniq
+      @accessible_projects = current_user.projects
       # TODO allow record_filters in unauthenticated searches with limited parameters
       if params[:record_filter] || params[:record_filter_id]
         if params[:record_filter]
@@ -19,6 +27,16 @@ class RecordsController < ApplicationController
         @records = current_user.records
       end
     end
+    if @record_filter.project_affiliation_filter_term.nil?
+      @record_filter.build_project_affiliation_filter_term
+    end
+    if params[:add_annotation_filter]
+      @record_filter.annotation_filter_terms.build
+    end
+    if params[:remove_annotation_filters]
+      @record_filter.annotation_filter_terms = AnnotationFilterTerm.none
+    end
+    
     @records = @records.order('records.created_at desc') if @records
 
     respond_to do |format|
@@ -111,7 +129,7 @@ class RecordsController < ApplicationController
         :file_size_greater_than,
         :file_md5hashsum,
         project_affiliation_filter_term_attributes: [:project_id],
-        annotation_filter_terms_attributes: [:created_by, :term, :context]
+        annotation_filter_terms_attributes: [:created_by, :term, :context],
       ]
       params.require(:record_filter).permit(permitted_params)
     end

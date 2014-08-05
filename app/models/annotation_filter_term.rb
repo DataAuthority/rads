@@ -3,8 +3,11 @@ class AnnotationFilterTerm < ActiveRecord::Base
   validates_presence_of :record_filter
 
   def query(relation, join_name)
+    if (term.nil? || term.empty?) && (context.nil? or context.empty?) && created_by.nil?
+      return relation
+    end
     where_clause = {}
-    unless term.nil?
+    unless term.nil? || term.empty?
       where_clause[:term] = term
     end
 

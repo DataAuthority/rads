@@ -15,7 +15,7 @@ class RecordFilter < ActiveRecord::Base
       relation = relation.where(creator_id: record_created_by)
     end
 
-    unless is_destroyed.nil?
+    if is_destroyed
       relation = relation.where(is_destroyed: is_destroyed?)
     end
 
@@ -35,7 +35,7 @@ class RecordFilter < ActiveRecord::Base
       relation = relation.where(created_at: record_created_on.to_time.beginning_of_day..record_created_on.to_time.end_of_day)
     end
 
-    unless filename.nil?
+    unless filename.nil? || filename.empty?
       # support glob searches
       if filename.match '\*'
         relation = relation.where('content_file_name like ?', filename.gsub('*','%'))
@@ -44,7 +44,7 @@ class RecordFilter < ActiveRecord::Base
       end
     end
 
-    unless file_content_type.nil?
+    unless file_content_type.nil? || file_content_type.empty?
       relation = relation.where(content_content_type: file_content_type)
     end
 
@@ -63,7 +63,7 @@ class RecordFilter < ActiveRecord::Base
       relation = relation.where(content_file_size: file_size)
     end
 
-    unless file_md5hashsum.nil?
+    unless file_md5hashsum.nil? || file_md5hashsum.empty?
       relation = relation.where(content_fingerprint: file_md5hashsum)
     end
 

@@ -1,17 +1,18 @@
 <h1>Listing records</h1>
 
-<div id='records_nav'>
-  <%= form_for(@record_filter, {url: records_path, method: :get}) do |f| %>
-<p class="alert">TODO</p>
-    <%= f.submit 'Filter records' %>
-  <% end %>
-</div>
+<%= render 'record_filter_form' %>
+<% can_add_records = false %>
+<% if @record_filter.project_affiliation_filter_term.nil? || @record_filter.project_affiliation_filter_term.project_id.nil? %>
+<% can_add_records = can? :new, Record %>
+<% else %>
+<% can_add_records = can? :affiliate_record_with, Project.find(@record_filter.project_affiliation_filter_term.project_id) %>
+<% end %>
 <%= 
   content_tag :div, class: 'dropzone' do
     content_tag :div, class: 'fallback' do
       link_to 'New Record', new_record_path
     end
-  end if can? :new, Record 
+  end if can_add_records
 %>
 <div id='records'>
 <% if @records.empty? %>

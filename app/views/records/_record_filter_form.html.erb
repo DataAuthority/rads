@@ -1,0 +1,46 @@
+<div id='records_nav'>
+  <%= form_for(@record_filter, {url: records_path, method: :get}) do |f| %>
+    <% if @record_filter.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@record_filter.errors.count, "error") %> prohibited this record_filter from being saved:</h2>
+
+      <ul>
+      <% @record_filter.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+    <% end %>
+
+    <%= f.fields_for :project_affiliation_filter_term do |paf| %>
+      <%= paf.label :project_id %><%= paf.collection_select :project_id, @accessible_projects, :id, :to_s, {include_blank: true}, {class: 'record_filter_input', id: 'record_filter_affiliated_with_project' } %>
+    <% end %>
+    <%= f.label :record_created_by %><%= f.collection_select :record_created_by, @record_creators, :id, :to_s, {include_blank: true}, {class: 'record_filter_input'} %> 
+    <% if @record_filter.is_destroyed %>
+    <%= f.label 'is destroyed' %><%= f.radio_button :is_destroyed, 1, checked: 'checked', class: 'record_filter_input' %>
+    <%= f.label 'is not destroyed' %><%= f.radio_button :is_destroyed, 'f', class: 'record_filter_input' %>
+    <% else %>
+    <%= f.label 'is destroyed' %><%= f.radio_button :is_destroyed, 1, class: 'record_filter_input' %>
+    <%= f.label 'is not destroyed' %><%= f.radio_button :is_destroyed, 'f', checked: 'checked', class: 'record_filter_input' %>
+    <% end %>
+    <%= f.label :record_created_on %> <%= f.text_field :record_created_on, class: 'record_filter_input' %>
+    <%= f.label :record_created_after %>    <%= f.text_field :record_created_after, class: 'record_filter_input' %>
+    <%= f.label :record_created_before %><%= f.text_field :record_created_before, class: 'record_filter_input' %>
+    <%= f.label :filename %><%= f.text_field :filename, class: 'record_filter_input' %>
+    <%= f.label :file_content_type %><%= f.text_field :file_content_type, class: 'record_filter_input' %>
+    <%= f.label :file_size %><%= f.number_field :file_size, class: 'record_filter_input' %>
+    <%= f.label :file_size_less_than %><%= f.number_field :file_size_less_than, class: 'record_filter_input' %>
+    <%= f.label :file_size_greater_than %><%= f.number_field :file_size_greater_than, class: 'record_filter_input' %>
+    <%= f.label :file_md5hashsum %><%= f.text_field :file_md5hashsum, class: 'record_filter_input' %>
+    <%= f.fields_for :annotation_filter_terms do |aft| %>
+      <%= aft.label 'annotated by' %><%= aft.collection_select :created_by, @annotation_creators, :id, :to_s, {include_blank: true}, {class: 'record_filter_input'} %> 
+      <%= aft.label :context %><%= aft.text_field :context, class: 'record_filter_input' %>
+      <%= aft.label :term %><%= aft.text_field :term, class: 'record_filter_input' %>
+    <% end %>
+    <%= f.submit 'Filter records' %>
+  <% end %>
+  <%= link_to 'add annotation filter', url_for(params.merge({ add_annotation_filter: 1, remove_annotation_filters: nil} )) %>
+  <% unless @record_filter.annotation_filter_terms.empty? %>
+  <%= link_to 'remove annotation filters', url_for(params.merge({ add_annotation_filter: nil, remove_annotation_filters: 1} )) %>
+  <% end %>
+</div>
