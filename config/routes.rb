@@ -13,6 +13,7 @@ Rads::Application.routes.draw do
   resources :projects, except: [:destroy] do
     resources :project_memberships
     resources :project_affiliated_records, except: [:edit, :update]
+    get 'can_affiliate_to', to: 'projects#can_affiliate_to'
   end
 
   resources :core_users, except: [:new, :create, :edit]

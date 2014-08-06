@@ -1,6 +1,14 @@
 # Place all the behaviors and hooks related to the matching controller here.
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
+$.toggle_div_for_project = (project_id) ->
+  if project_id
+    $.get "projects/"+project_id+"/can_affiliate_to", (can_affiliate) ->
+      if can_affiliate == 'true'
+        $('div.dropzone').show()
+      else
+        $('div.dropzone').hide()
+
 onLoad ->
   $("a.add_annotation_filter").click ->
     new_filter = $('div#annotation_filters .annotation_filter_fields:last').clone(true)
@@ -24,17 +32,19 @@ onLoad ->
   $('div.dropzone:first').each ->
     dropzone_params = {}
     dropzone_params[$('meta[name=csrf-param]').attr("content")] = $('meta[name=csrf-token]').attr("content")
-    selected_project = $('#record_filter_affiliated_with_project option[selected=selected]').val()
+    selected_project = $('#record_filter_affiliated_with_project option:selected').val()
     if selected_project
       dropzone_params['record[project_affiliated_records_attributes][][project_id]'] = selected_project
+      $.toggle_div_for_project(selected_project)
 
     $('#record_filter_affiliated_with_project').change () ->
-      selected_project = $('#record_filter_affiliated_with_project option[selected=selected]').val()
+      selected_project = $('#record_filter_affiliated_with_project option:selected').val()
       if selected_project
         dropzone_params['record[project_affiliated_records_attributes][][project_id]'] = selected_project
+        $.toggle_div_for_project(selected_project)
       else
         delete dropzone_params['record[project_affiliated_records_attributes][][project_id]']
-
+      
     $(".dropzone").dropzone
       autoProcessQueue: false
       init: () ->

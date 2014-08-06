@@ -478,6 +478,17 @@ class ProjectsControllerTest < ActionController::TestCase
         assert !t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should now not be affiliated with #{ t_p.id }"
       end
     end
+
+    should 'get true for can_affiliate_to?project_id=id js method' do
+      assert_not_nil @user
+      assert @project.project_memberships.where(user_id: @user.id, is_data_producer: true).exists?, 'user should have the data_producer role in the project'
+      allowed_abilities(@user, @project, [:affiliate_record_with])
+      xhr :get, :can_affiliate_to, project_id: @project.id, format: 'js'
+      assert_response :success
+      assert_not_nil assigns(:project)
+      assert_equal @project.id, assigns(:project).id
+      assert_equal 'true', @response.body
+    end
   end
 
   def self.should_pass_not_data_producer_tests()
@@ -502,6 +513,14 @@ class ProjectsControllerTest < ActionController::TestCase
       @unaffiliated_records.each do |should_be_affiliated|
         assert !t_p.is_affiliated_record?(should_be_affiliated), "#{ should_be_affiliated.id } should still not be affiliated with #{ t_p.id }"
       end
+    end
+
+    should 'get false for can_affiliate_to?project_id=id js method' do
+      assert_not_nil @user
+      assert @project.project_memberships.where(user_id: @user.id, is_data_producer: true).empty?, 'user should not have the data_producer role in the project'
+      xhr :get, :can_affiliate_to, project_id: @project.id, format: 'js'
+      assert_response :success
+      assert_equal 'false', @response.body
     end
   end
 
@@ -931,7 +950,7 @@ class ProjectsControllerTest < ActionController::TestCase
       authenticate_existing_user(@user, true)
     end
 
-    should "be no longer be provided to RepositoryUser in get :new" do
+    should "no longer be provided to RepositoryUser in get :new" do
       get :new
       assert_response :success
       assert_not_nil assigns(:project)
@@ -954,4 +973,5 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_nil assigns(:unaffiliated_records), 'unaffiliated_records should not be set'
     end
   end #Unaffiliated Records
+
 end

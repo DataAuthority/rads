@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  load_and_authorize_resource
+  load_and_authorize_resource except: [:can_affiliate_to]
   before_action :authorize_update_attributes, only: [:update]
   before_action :authorize_affiliated_records, only: [:update, :create]
   before_action :authorize_project_memberships, only: [:update, :create]
@@ -42,6 +42,18 @@ class ProjectsController < ApplicationController
         format.html { render action: 'edit' }
         format.json { render json: @project.errors, status: :unprocessable_entity }
       end
+    end
+  end
+
+  def can_affiliate_to
+    @project = Project.find(params[:project_id])
+    if can? :affiliate_record_with, @project
+      @json_resp = true
+    else
+      @json_resp = false
+    end
+    respond_to do |format|
+      format.js { render json: @json_resp }
     end
   end
 
