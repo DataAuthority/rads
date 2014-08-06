@@ -21,9 +21,16 @@ class RecordsController < ApplicationController
         else
           @record_filter = current_user.record_filters.find(params[:record_filter_id])
         end
+        if params[:remove_annotation_filters]
+          @record_filter.annotation_filter_terms = AnnotationFilterTerm.none
+        end
+        if @record_filter.annotation_filter_terms.empty?
+          @record_filter.annotation_filter_terms.build
+        end
          @records = @record_filter.query(Record.all).accessible_by(current_ability)
       else
         @record_filter = current_user.record_filters.build(record_created_by: current_user.id)
+        @record_filter.annotation_filter_terms.build
         @records = current_user.records
       end
     end
@@ -33,10 +40,7 @@ class RecordsController < ApplicationController
     if params[:add_annotation_filter]
       @record_filter.annotation_filter_terms.build
     end
-    if params[:remove_annotation_filters]
-      @record_filter.annotation_filter_terms = AnnotationFilterTerm.none
-    end
-    
+
     @records = @records.order('records.created_at desc') if @records
 
     respond_to do |format|

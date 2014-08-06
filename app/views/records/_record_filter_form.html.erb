@@ -32,15 +32,19 @@
     <%= f.label :file_size_less_than %><%= f.number_field :file_size_less_than, class: 'record_filter_input' %>
     <%= f.label :file_size_greater_than %><%= f.number_field :file_size_greater_than, class: 'record_filter_input' %>
     <%= f.label :file_md5hashsum %><%= f.text_field :file_md5hashsum, class: 'record_filter_input' %>
+    <div id="annotation_filters">
     <%= f.fields_for :annotation_filter_terms do |aft| %>
-      <%= aft.label 'annotated by' %><%= aft.collection_select :created_by, @annotation_creators, :id, :to_s, {include_blank: true}, {class: 'record_filter_input'} %> 
-      <%= aft.label :context %><%= aft.text_field :context, class: 'record_filter_input' %>
-      <%= aft.label :term %><%= aft.text_field :term, class: 'record_filter_input' %>
+      <fieldset class="annotation_filter_fields">
+        <%= aft.label 'annotated by' %><%= aft.collection_select :created_by, @annotation_creators, :id, :to_s, {include_blank: true}, {class: 'record_filter_input'} %> 
+        <%= aft.label :context %><%= aft.text_field :context, class: 'record_filter_input' %>
+        <%= aft.label :term %><%= aft.text_field :term, class: 'record_filter_input' %>
+      </fieldset>
     <% end %>
+    </div>
     <%= f.submit 'Filter records' %>
   <% end %>
-  <%= link_to 'add annotation filter', url_for(params.merge({ add_annotation_filter: 1, remove_annotation_filters: nil} )) %>
+  <%= link_to 'add annotation filter', url_for(params.merge({ add_annotation_filter: 1, remove_annotation_filters: nil} )), class: 'add_annotation_filter' %>
   <% unless @record_filter.annotation_filter_terms.empty? %>
-  <%= link_to 'remove annotation filters', url_for(params.merge({ add_annotation_filter: nil, remove_annotation_filters: 1} )) %>
+  <%= link_to 'remove annotation filters', url_for(params.merge({ add_annotation_filter: nil, remove_annotation_filters: 1} )), class: 'remove_annotation_filters' %>
   <% end %>
 </div>

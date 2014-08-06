@@ -2,6 +2,17 @@
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 onLoad ->
+  $("a.add_annotation_filter").click ->
+    new_filter = $('div#annotation_filters .annotation_filter_fields:last').clone(true)
+    new_filter.find('.record_filter_input').each ->
+      elem_id = $(this).attr('id')
+      elem_num = parseInt(elem_id.replace(/record_filter_annotation_filter_terms_attributes_(\d+).*/m, '$1')) + 1;
+      new_id = elem_id.replace('_' + (elem_num - 1) + '_', '_' + elem_num + '_')
+      new_name = $(this).attr('name').replace('[' + (elem_num - 1) + ']', '[' + elem_num + ']');
+      $(this).attr({'name': new_name, 'id': new_id}).val('')
+    $('div#annotation_filters .annotation_filter_fields:last').after(new_filter)
+    false
+
   $("a.add_to_cart").click ->
     button = $(this)
     $.post $(this).attr('href'), (data) ->
