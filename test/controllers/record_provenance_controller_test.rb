@@ -9,8 +9,10 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     @record = records(:user)
     @record.content = @test_content
     @record.save
+    @expected_filename = @record.content_file_name
 
     @unexpected_md5 = 'foobarbaz'
+    @unexpected_filename = 'fl#@i3bbityjibbits.txt'
   end
 
   teardown do
@@ -106,4 +108,57 @@ class RecordProvenanceControllerTest < ActionController::TestCase
       assert (assigns(:records).count == 0), 'records should be empty'
     end
   end #unexpected md5
+
+  context 'filename' do
+    should "get show without authentication" do
+      get :show, filename: @expected_filename
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
+    end
+
+    should "get show with authentication" do
+      authenticate_existing_user(users(:non_admin), true)
+      get :show, filename: @expected_filename
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
+    end
+
+    should "get show with switch_user" do
+      authenticate_existing_user(users(:non_admin), true)
+      @puppet = users(:project_user)
+      session[:switch_to_user_id] = @puppet.id
+      get :show, filename: @expected_filename
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
+    end
+  end #filename
+
+  context 'filename md5 combinations' do
+    should "return prov with valid md5-filename combination" do
+      get :show, md5: @expected_md5, filename: @expected_filename
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert (assigns(:records).count > 0), 'records should not be empty'
+      assert_equal @record.id, assigns(:records).first.id
+    end
+
+    should "return 404 with valid md5, invalid filename combination" do
+      get :show, md5: @expected_md5, filename: @unexpected_filename
+      assert_response 404
+      assert (assigns(:records).count == 0), 'records should be empty'
+    end
+
+    should "return 404 with invalid md5, valid filename combination" do
+      get :show, md5: @unexpected_md5, filename: @expected_filename
+      assert_response 404
+      assert (assigns(:records).count == 0), 'records should be empty'
+    end
+  end #filename
+
 end

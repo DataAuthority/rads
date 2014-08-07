@@ -5,6 +5,8 @@
     form_tag(record_provenance_show_path(format: 'xml'), method: :get) do
       label_tag(:md5, 'find provenance for a record with an md5') +
       text_field_tag(:md5) +
+      label_tag(:filename, ' and/or filename') +
+      text_field_tag(:filename) +
       submit_tag('find record provenance')
     end 
   %>
