@@ -3,7 +3,6 @@ require 'test_helper'
 class ProjectAffiliationFilterTermTest < ActiveSupport::TestCase
   should belong_to :record_filter
   should validate_presence_of :record_filter
-  should validate_presence_of :project_id
 
   setup do
     @project_affiliation_filter_term = project_affiliation_filter_terms(:model_test)

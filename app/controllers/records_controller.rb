@@ -21,6 +21,10 @@ class RecordsController < ApplicationController
          if params[:remove_annotation_filters]
            @record_filter.annotation_filter_terms = AnnotationFilterTerm.none
          end
+         if params[:commit] && params[:commit] == 'Save Query and filter'
+           #this may fail, and the errors will be presented to the user, but the query will run
+           @record_filter.save
+         end
         else
           @record_filter = current_user.record_filters.find(params[:record_filter_id])
         end

@@ -12,6 +12,11 @@ $.toggle_dropzone_for_project = (project_id) ->
     $('div.dropzone').show()
 
 onLoad ->
+  $("a.remove_stored_query").click (event) ->
+    link = $(this)
+    $.override_remote_link link, event, () ->
+        link.parent().remove()
+
   $('#finished_uploading').click ->
     $('#records_nav form').submit()
     false

@@ -669,7 +669,9 @@ class RecordsControllerTest < ActionController::TestCase
     end
 
     should 'support query by record_created_by' do
-      get :index, record_filter: {record_created_by: @other_user_record.creator_id}
+      assert_no_difference('RecordFilter.count') do
+        get :index, record_filter: {record_created_by: @other_user_record.creator_id}
+      end
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -694,7 +696,9 @@ class RecordsControllerTest < ActionController::TestCase
       assert @user_records[:pm_creator3].is_destroyed?, 'pm_creator3 should be destroyed'
       found[@user_records[:pm_creator3].id] = false
 
-      get :index, record_filter: {is_destroyed: 'true'}
+      assert_no_difference('RecordFilter.count') do
+        get :index, record_filter: {is_destroyed: 'true'}, commit: 'Filter records'
+      end
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1148,6 +1152,64 @@ class RecordsControllerTest < ActionController::TestCase
       }
       assert_response :success
       assert_not_nil assigns(:records)
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_name.match(/p\_m\_creator.*/)
+        assert rr.annotations.where(context: 'bar', term: 'foo').exists?, 'record should have been annotated with the requested annotation'
+        assert @project.is_affiliated_record?( rr ), 'file should be affiliated with the project'
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert !returned_records.include?( @other_user_record ), 'returned records should not include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'allow a named query to be saved and submitted' do
+      test_name = 'a_test_saved_query'
+      assert_difference('RecordFilter.count') do
+        get :index, record_filter: {
+          name: test_name,
+          filename: 'p_m_creator*',
+          annotation_filter_terms_attributes: [
+            {context: 'bar', term: 'foo'},
+          ],
+          project_affiliation_filter_term_attributes: { project_id: @project.id }
+        }, commit: 'Save Query and filter'
+      end
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert_not_nil assigns(:record_filter)
+      assert_equal test_name, assigns(:record_filter).name
+      assert assigns(:record_filter).persisted?, 'new record_filter should be persisted'
+      assert assigns(:records).count > 0
+      assigns(:records).each do |rr|
+        assert rr.content_file_name.match(/p\_m\_creator.*/)
+        assert rr.annotations.where(context: 'bar', term: 'foo').exists?, 'record should have been annotated with the requested annotation'
+        assert @project.is_affiliated_record?( rr ), 'file should be affiliated with the project'
+      end
+      returned_records = assigns(:records).to_a
+      assert returned_records.include?( @user_records[:pm_creator1] ), 'returned records should include pm_creator1'
+      assert !returned_records.include?( @other_user_record ), 'returned records should not include other_user_record'
+      assert !returned_records.include?( @user_records[:pm_creator2] ), 'returned records should not include pm_creator2'
+      assert !returned_records.include?( @user_records[:pm_creator3] ), 'returned records should not include pm_creator3'
+    end
+
+    should 'allow an un-named query to be sumitted with save, filter the results, but not save the query, instead render with errors' do
+      assert_no_difference('RecordFilter.count') do
+        get :index, record_filter: {
+          filename: 'p_m_creator*',
+          annotation_filter_terms_attributes: [
+            {context: 'bar', term: 'foo'},
+          ],
+          project_affiliation_filter_term_attributes: { project_id: @project.id }
+        }, commit: 'Save Query and filter'
+      end
+      assert_response :success
+      assert_not_nil assigns(:records)
+      assert_not_nil assigns(:record_filter)
+      assert !assigns(:record_filter).persisted?, 'new record_filter should not be persisted'
+      assert !assigns(:record_filter).valid?, 'new record_filter should not be valid'
       assert assigns(:records).count > 0
       assigns(:records).each do |rr|
         assert rr.content_file_name.match(/p\_m\_creator.*/)

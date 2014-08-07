@@ -1,7 +1,6 @@
 class ProjectAffiliationFilterTerm < ActiveRecord::Base
   belongs_to :record_filter
   validates_presence_of :record_filter
-  validates_presence_of :project_id
 
   def query(relation, join_name)
     unless project_id.nil?
