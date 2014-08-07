@@ -18,16 +18,16 @@ class RecordsController < ApplicationController
       if params[:record_filter] || params[:record_filter_id]
         if params[:record_filter]
          @record_filter = current_user.record_filters.build(record_filter_params)
+         if params[:remove_annotation_filters]
+           @record_filter.annotation_filter_terms = AnnotationFilterTerm.none
+         end
         else
           @record_filter = current_user.record_filters.find(params[:record_filter_id])
         end
-        if params[:remove_annotation_filters]
-          @record_filter.annotation_filter_terms = AnnotationFilterTerm.none
-        end
+        @records = @record_filter.query(Record.all).accessible_by(current_ability)
         if @record_filter.annotation_filter_terms.empty?
           @record_filter.annotation_filter_terms.build
         end
-         @records = @record_filter.query(Record.all).accessible_by(current_ability)
       else
         @record_filter = current_user.record_filters.build(record_created_by: current_user.id)
         @record_filter.annotation_filter_terms.build
@@ -133,7 +133,7 @@ class RecordsController < ApplicationController
         :file_size_greater_than,
         :file_md5hashsum,
         project_affiliation_filter_term_attributes: [:project_id],
-        annotation_filter_terms_attributes: [:created_by, :term, :context],
+        annotation_filter_terms_attributes: [:created_by, :term, :context]
       ]
       params.require(:record_filter).permit(permitted_params)
     end

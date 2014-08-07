@@ -7,23 +7,18 @@
 <% else %>
 <% can_add_records = can? :affiliate_record_with, Project.find(@record_filter.project_affiliation_filter_term.project_id) %>
 <% end %>
-<% if can_add_records %>
-<%= 
-  content_tag :div, class: 'dropzone' do
-    content_tag :div, class: 'fallback' do
-      link_to 'New Record', new_record_path
-    end
-  end
-%>
-<% else %>
-<%= 
-  content_tag :div, class: 'dropzone', style: 'display:none;'  do
-    content_tag :div, class: 'fallback' do
-      link_to 'New Record', new_record_path
-    end
-  end
-%>
+<% dropzone_div_params = { class: 'dropzone' } -%>
+<% unless can_add_records %>
+<%   dropzone_div_params[:style] = 'display:none' -%>
 <% end %>
+<%= 
+  content_tag :div, dropzone_div_params do
+    content_tag :div, class: 'fallback' do
+      link_to 'New Record', new_record_path
+    end
+    link_to 'Finished', '#', id: 'finished_uploading', style: 'display:none'
+  end
+%>
 <div id='records'>
 <% if @records.empty? %>
 <p>There are no records to display.</p>
