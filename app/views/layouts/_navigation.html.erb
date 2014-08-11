@@ -9,4 +9,5 @@
   <%= link_to 'records', records_url if can? :index, Record %>
   <%= link_to 'cart', cart_url %>
   <%= link_to 'annotations', annotations_url if can? :index, Annotation %>
+  <%= link_to 'stored_queries', record_filters_url if can? :index, RecordFilter %>
 </div>
