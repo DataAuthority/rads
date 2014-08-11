@@ -3,22 +3,29 @@ class CartsController < ApplicationController
   before_action :load_and_authorize_records, only: :update
 
   def show
+    @cart_context = 'manage'
+    if params[:cart_context]
+      @cart_context = params[:cart_context]
+    end
     @cart = Cart.new(params[:cart])
     @projects = current_user.projects
   end
 
   def update
     if cart_params[:action] == 'destroy_records'
+      @cart_context = 'manage'
       @records.each {|r| r.destroy_content}
     elsif cart_params[:action] == 'affiliate_to_project'
+      @cart_context = 'affiliate'
       @project_affiliated_records.each {|r| r.save}
     elsif cart_params[:action] = 'create_record_annotation'
+      @cart_context = 'annotate'
       @annotations.each {|a| a.save}
     end
 
     respond_to do |format|
       if @cart_errors.empty?
-        format.html { redirect_to cart_url }
+        format.html { redirect_to cart_url(cart_context: @cart_context) }
         format.json { head :no_content }
       else
         @cart = Cart.new(params[:cart])
