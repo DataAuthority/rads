@@ -1,7 +1,8 @@
 class RecordFiltersController < ApplicationController
   load_and_authorize_resource
   def index
-    @record_filters = current_user.record_filters.all
+    @record_filters = current_user.record_filters.all.order('record_filters.created_at desc')
+    @record_filters = @record_filters.page(params[:page]).per_page(30) if @record_filters 
   end
 
   def show
