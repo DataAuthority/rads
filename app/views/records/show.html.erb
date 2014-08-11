@@ -21,11 +21,26 @@
 
 <p>
   <strong>Annotations:</strong>
-  <ul>
+  <table>
+    <thead>
+      <tr>
+        <th>Context</th>
+        <th>Term</th>
+        <th>Annotated By</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
   <% @record.annotations.each do |annotation| %>
-    <li><%= annotation %> <%= link_to 'remove', annotation, method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, annotation %></li>
+      <tr>
+        <td><%= annotation.context %></td>
+        <td><%= annotation.term %></td>
+        <td><%= annotation.creator %></td>
+        <td><%= link_to 'remove', annotation, method: :delete, data: { confirm: 'Are you sure?' } if can? :destroy, annotation %></td>
+     </tr>
   <% end %>
-  </ul>
+    </tbody>
+  </table>
   <%= link_to 'Add annotation', new_record_annotation_path(@record) if can? :new, @record.annotations.build() %>
 </p>
 
