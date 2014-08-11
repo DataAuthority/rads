@@ -4,6 +4,7 @@ class CartsController < ApplicationController
 
   def show
     @cart_context = 'manage'
+    @cart_errors = {}
     if params[:cart_context]
       @cart_context = params[:cart_context]
     end
@@ -59,10 +60,14 @@ class CartsController < ApplicationController
       if cart_params[:action] == 'destroy_records'
         @records = []
         @cart_records.each do |cr|
-          if can? :destroy, cr.stored_record
-            @records << cr.stored_record
+          if cr.stored_record.is_destroyed?
+            @cart_errors[cr.id] = 'this record is already destroyed'
           else
-            @cart_errors[cr.id] = 'you are not allowed to destroy this record'
+            if can? :destroy, cr.stored_record
+              @records << cr.stored_record
+            else
+              @cart_errors[cr.id] = 'you are not allowed to destroy this record'
+            end
           end
         end
       elsif cart_params[:action] == 'affiliate_to_project'
@@ -74,7 +79,11 @@ class CartsController < ApplicationController
           elsif cannot? :create, par
             @cart_errors[cr.id] = 'You are not allowed to affiliate records with this project'
           else
-            @project_affiliated_records << par
+            if par.valid?
+              @project_affiliated_records << par
+            else
+              @cart_errors[cr.id] = "Affiliation not valid #{ par.errors.full_messages.join(' ') }"
+            end
           end
         end
       elsif cart_params[:action] == 'annotate'

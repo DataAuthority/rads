@@ -62,7 +62,7 @@ class ProjectAffiliatedRecordTest < ActiveSupport::TestCase
   should belong_to :affiliated_record
   should validate_presence_of :project
   should validate_presence_of :affiliated_record
-  should validate_uniqueness_of(:project_id).scoped_to(:record_id)
+  should validate_uniqueness_of(:project_id).scoped_to(:record_id).with_message("record is already affiliated with this project")
 
   setup do
     @project = projects(:membership_test)

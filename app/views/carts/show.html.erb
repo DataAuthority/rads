@@ -9,14 +9,21 @@
       <th>Record</th>
       <th>User</th>
       <th></th>
+      <th></th>
     </tr>
   </thead>
 
   <tbody>
     <% @cart_records.each do |cart_record| %>
-      <tr class="cart_entry">
+      <% if @cart_errors[cart_record.id] -%>
+      <%    trclass = ' alert' -%>
+      <% else -%>
+      <%    trclass = '' -%>
+      <% end -%>
+      <tr class="cart_entry<%= trclass.html_safe %>" >
         <td><%= cart_record.stored_record %></td>
         <td><%= cart_record.user %></td>
+        <td><%= @cart_errors[cart_record.id] %></td>
         <td><%= link_to 'Remove', cart_record, id: cart_record.id, method: :delete, data: { confirm: 'Are you sure?' }, class: "remove_cart_record" %></td>
       </tr>
     <% end %>
