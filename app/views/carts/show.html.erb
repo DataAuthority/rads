@@ -15,15 +15,13 @@
 
   <tbody>
     <% @cart_records.each do |cart_record| %>
-      <% if @cart_errors[cart_record.id] -%>
-      <%    trclass = ' alert' -%>
-      <% else -%>
-      <%    trclass = '' -%>
-      <% end -%>
-      <tr class="cart_entry<%= trclass.html_safe %>" >
+      <tr class="cart_entry" >
         <td><%= cart_record.stored_record %></td>
         <td><%= cart_record.user %></td>
-        <td><%= @cart_errors[cart_record.id] %></td>
+        <td>
+          <p class="alert"><%= @cart_errors[cart_record.id] %></p>
+          <p class="notice"><%= @cart_messages[cart_record.record_id] %></p>
+        </td>
         <td><%= link_to 'Remove', cart_record, id: cart_record.id, method: :delete, data: { confirm: 'Are you sure?' }, class: "remove_cart_record" %></td>
       </tr>
     <% end %>

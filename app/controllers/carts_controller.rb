@@ -5,6 +5,12 @@ class CartsController < ApplicationController
   def show
     @cart_context = 'manage'
     @cart_errors = {}
+    if flash[:cart_messages]
+      @cart_messages = flash[:cart_messages]
+    else
+      @cart_messages = {}
+    end
+
     if params[:cart_context]
       @cart_context = params[:cart_context]
     end
@@ -13,20 +19,33 @@ class CartsController < ApplicationController
   end
 
   def update
+    @cart_messages = {}
     if cart_params[:action] == 'destroy_records'
       @cart_context = 'manage'
-      @records.each {|r| r.destroy_content}
+      @records.each {|r| 
+        if r.destroy_content
+          @cart_messages[r.id] = 'record destroyed'
+        end
+      }
     elsif cart_params[:action] == 'affiliate_to_project'
       @cart_context = 'affiliate'
-      @project_affiliated_records.each {|r| r.save}
+      @project_affiliated_records.each {|r| 
+          if r.save
+            @cart_messages[r.record_id] = "record affiliated with project #{ r.project }".html_safe
+          end
+        }
     elsif cart_params[:action] = 'create_record_annotation'
       @cart_context = 'annotate'
-      @annotations.each {|a| a.save}
+      @annotations.each {|a| 
+        if a.save
+          @cart_messages[a.record_id] = "record annotated with #{ a }".html_safe
+        end
+      }
     end
 
     respond_to do |format|
       if @cart_errors.empty?
-        format.html { redirect_to cart_url(cart_context: @cart_context) }
+        format.html { redirect_to cart_url(cart_context: @cart_context), flash: {cart_messages: @cart_messages } }
         format.json { head :no_content }
       else
         @cart = Cart.new(params[:cart])
@@ -82,7 +101,7 @@ class CartsController < ApplicationController
             if par.valid?
               @project_affiliated_records << par
             else
-              @cart_errors[cr.id] = "Affiliation not valid #{ par.errors.full_messages.join(' ') }"
+              @cart_errors[cr.id] = "#{ par.errors.full_messages.join(' ') }"
             end
           end
         end
@@ -94,7 +113,7 @@ class CartsController < ApplicationController
             if annotation.valid?
               @annotations << annotation
             else
-              @cart_errors[cr.id] = "Annotation not valid: #{ annotation.errors.full_messages.join(" ") }"
+              @cart_errors[cr.id] = "#{ annotation.errors.full_messages.join(" ") }"
             end
           else
             @cart_errors[cr.id] = 'You cannot annotate this record'

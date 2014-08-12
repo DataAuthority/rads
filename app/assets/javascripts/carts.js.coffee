@@ -2,19 +2,21 @@
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 $.toggle_cart_context = (context) ->
-  $(".context_"+context).show()
-  $(".context_"+context+":radio").attr('checked':'checked')
   $(".cart_context").each ->
     unless $(this).attr('class').match(new RegExp(context))
+      $(this).find("input:radio:first").removeAttr('checked')
+      $(this).find("input:radio:first").prop('checked':false)
       $(this).hide()
-      if $(this).attr('type') == 'radio'
-        $(this).removeAttr('checked')
+  $(".context_"+context).find("input:radio:first").attr('checked':'checked')
+  $(".context_"+context).find("input:radio:first").prop('checked':'checked')
+  $(".context_"+context).show()
   false
 
 onLoad ->
-  $("div#cart_context").show()
-  context = $("div#cart_context").attr('class').replace(/\_selected/m, '')
-  $.toggle_cart_context(context)
+  $("div#cart_context").each ->
+    $(this).show()
+    context = $(this).attr('class').replace(/\_selected/m, '')
+    $.toggle_cart_context(context)
 
   $("a.switch_cart_context").click ->
     context = $(this).attr('id')

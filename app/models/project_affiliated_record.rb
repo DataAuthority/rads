@@ -4,7 +4,7 @@ class ProjectAffiliatedRecord < ActiveRecord::Base
   validates_presence_of :project
   validates_presence_of :affiliated_record
   validates_uniqueness_of :project_id, scope: :record_id,
-                          message: "record is already affiliated with this project"
+                          message: "already has record affiliated"
 
   def to_s
     affiliated_record.to_s

@@ -4,20 +4,23 @@
     <%= link_to 'annotate records', cart_path(cart_context: 'annotate'), id: 'annotate', class: 'switch_cart_context' %>
 </div>
 <%= form_for(@cart, url: cart_path, method: :patch) do |f| %>
-  <%= f.radio_button :action, :destroy_records, class: 'cart_context context_manage' %>
-  <%= f.label "action_destroy_records", 'Destroy content', class: 'cart_context context_manage' %>
-
-  <%= f.radio_button :action, :affiliate_to_project, class: 'cart_context context_affiliate' %>
-  <%= f.label "action_affiliate_to_project", "Affiliate to", class: 'cart_context context_affiliate' %>
-  <%= f.label :project_id, class: 'cart_context context_affiliate' %>
-  <%= f.collection_select :project_id, @projects, :id, :to_s, {}, {class: 'cart_context context_affiliate'} %>
-
-  <%= f.radio_button :action, :annotate, class: 'cart_context context_annotate' %>
-  <%= f.label "action_annotate", "Annotate", class: 'cart_context context_annotate' %>
-  <%= f.label :context, class: 'cart_context context_annotate' %>
-  <%= f.text_field :context, class: 'cart_context context_annotate' %>
-  <%= f.label :term, class: 'cart_context context_annotate' %>
-  <%= f.text_field :term, class: 'cart_context context_annotate' %>
-
+  <fieldset class="cart_context context_manage">
+    <%= f.radio_button :action, :destroy_records  %>
+    <%= f.label "action_destroy_records", 'Destroy content' %>
+  </fieldset>
+  <fieldset class="cart_context context_affiliate">
+    <%= f.radio_button :action, :affiliate_to_project %>
+    <%= f.label "action_affiliate_to_project", "Affiliate to"%>
+    <%= f.label :project_id %>
+    <%= f.collection_select :project_id, @projects, :id, :to_s %>
+  </fieldset>
+  <fieldset class="cart_context context_annotate">
+    <%= f.radio_button :action, :annotate %>
+    <%= f.label "action_annotate", "Annotate" %>
+    <%= f.label :context %>
+    <%= f.text_field :context %>
+    <%= f.label :term %>
+    <%= f.text_field :term %>
+  </fieldset>
   <%= f.submit 'Apply' %>
 <% end %>
