@@ -25,7 +25,7 @@
               <%= link_to 'Show Record', annotation.annotated_record %>
           <% end %>
           <% if can? :destroy, annotation %>
-              <%= link_to 'Destroy', annotation, method: :delete, data: { confirm: 'Are you sure?' } %>
+              <%= link_to 'Destroy', annotation, method: :delete, data: { confirm: 'Are you sure?' }, class: "destroy_annotation" %>
           <% end %>
         </td>
       </tr>
