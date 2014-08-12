@@ -48,6 +48,20 @@ onLoad ->
     if selected_project
       dropzone_params['record[project_affiliated_records_attributes][][project_id]'] = selected_project
 
+    $(".annotation_creator").each ->
+      elem_id = $(this).attr('id')
+      elem_num = parseInt(elem_id.replace(/record_filter_annotation_filter_terms_attributes_(\d+).*/m, '$1'))
+      chosen_creator = $(this).val()
+      if chosen_creator
+        delete dropzone_params['record[annotations_attributes]['+elem_num+'][context]']
+        delete dropzone_params['record[annotations_attributes]['+elem_num+'][term]']
+      else
+        chosen_context = $("#"+elem_id.replace(/created_by$/,'context')).val()
+        chosen_term = $("#"+elem_id.replace(/created_by$/,'term')).val()
+        console.log("setting context "+chosen_context+" term "+chosen_term)
+        dropzone_params['record[annotations_attributes]['+elem_num+'][context]'] = chosen_context
+        dropzone_params['record[annotations_attributes]['+elem_num+'][term]'] = chosen_term
+
     $('.annotation_term').change ->
       elem_id = $(this).attr('id')
       elem_num = parseInt(elem_id.replace(/record_filter_annotation_filter_terms_attributes_(\d+).*/m, '$1')) 
@@ -82,8 +96,8 @@ onLoad ->
         delete dropzone_params['record[annotations_attributes]['+elem_num+'][context]']
         delete dropzone_params['record[annotations_attributes]['+elem_num+'][term]']
       else
-        chosen_context = $("#"+elem_id.replace(/created_by$/,'context')+' option:selected').val()
-        chosen_term = $("#"+elem_id.replace(/context$/,'term')).val()
+        chosen_context = $("#"+elem_id.replace(/created_by$/,'context')).val()
+        chosen_term = $("#"+elem_id.replace(/created_by$/,'term')).val()
         dropzone_params['record[annotations_attributes]['+elem_num+'][context]'] = chosen_context
         dropzone_params['record[annotations_attributes]['+elem_num+'][term]'] = chosen_term
      
