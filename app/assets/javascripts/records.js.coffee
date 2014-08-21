@@ -1,15 +1,34 @@
 # Place all the behaviors and hooks related to the matching controller here.
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
+
+$.toggle_records_context = (context) ->
+  if context == 'filter'
+    $('span#annotation_creator_filter').show()
+    $('fieldset.record_attribute_filters').show()
+    $('fieldset.save_and_submit').show()
+    $('div.dropzone').hide()
+  else if context == 'upload'
+    $('span#annotation_creator_filter').hide()
+    $('fieldset.record_attribute_filters').hide()
+    $('fieldset.save_and_submit').hide()
+    $('div.dropzone').show()
+  else
+    $('span#annotation_creator_filter').show()
+    $('fieldset.record_attribute_filters').show()
+    $('div.dropzone').hide()
+  true
+
 $.toggle_dropzone_for_project = (project_id) ->
   if project_id
     $.get "projects/"+project_id+"/can_affiliate_to", (can_affiliate) ->
       if can_affiliate == 'true'
-        $('div.dropzone').show()
+        $('div#records_context').show()
       else
-        $('div.dropzone').hide()
+        $.toggle_records_context 'filter'
+        $('div#records_context').hide()
   else
-    $('div.dropzone').show()
+    $('div#records_context').show()
 
 onLoad ->
   $("a.remove_stored_query").click (event) ->
@@ -40,6 +59,10 @@ onLoad ->
     , "json"
     false
 
+  $("a.switch_records_context").click ->
+    $.toggle_records_context $(this).attr('id')
+    false
+
   $('div.dropzone:first').each ->
     dropzone_params = {}
     dropzone_params[$('meta[name=csrf-param]').attr("content")] = $('meta[name=csrf-token]').attr("content")
@@ -58,7 +81,6 @@ onLoad ->
       else
         chosen_context = $("#"+elem_id.replace(/created_by$/,'context')).val()
         chosen_term = $("#"+elem_id.replace(/created_by$/,'term')).val()
-        console.log("setting context "+chosen_context+" term "+chosen_term)
         dropzone_params['record[annotations_attributes]['+elem_num+'][context]'] = chosen_context
         dropzone_params['record[annotations_attributes]['+elem_num+'][term]'] = chosen_term
 
