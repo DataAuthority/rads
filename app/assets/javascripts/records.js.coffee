@@ -162,4 +162,5 @@ onLoad ->
       forceFallback: false,
       uploadMultiple: false
     true
+  $.toggle_records_context 'filter'
   true
