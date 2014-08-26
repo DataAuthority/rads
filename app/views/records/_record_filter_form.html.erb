@@ -29,6 +29,10 @@
           </span>
         </span>
     <% end -%>
+       <%= link_to '[+]', url_for(params.merge({ add_annotation_filter: 1, remove_annotation_filters: nil} )), class: 'add_annotation_filter' %>
+        <% unless @record_filter.annotation_filter_terms.empty? -%>
+          <%= link_to 'start over', url_for(params.merge({ add_annotation_filter: nil, remove_annotation_filters: 1} )), class: 'remove_annotation_filters' %>
+        <% end -%>
       </div>
     </fieldset>
     <fieldset class="record_attribute_filters">
@@ -65,10 +69,6 @@
               f.text_field(:name, id: 'record_filter_name')
             end
       %>
-  <% end -%>
-  <%= link_to 'add annotation filter', url_for(params.merge({ add_annotation_filter: 1, remove_annotation_filters: nil} )), class: 'add_annotation_filter' %>
-  <% unless @record_filter.annotation_filter_terms.empty? -%>
-  <%= link_to 'remove annotation filters', url_for(params.merge({ add_annotation_filter: nil, remove_annotation_filters: 1} )), class: 'remove_annotation_filters' %>
   <% end -%>
 </div>
 <div id='stored_queries'>
