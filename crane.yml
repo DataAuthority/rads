@@ -1,0 +1,24 @@
+containers:
+  radsdev:
+    dockerfile: config/docker/development
+    image: rads
+    run:
+      env: ["RAILS_ENV=development"]
+      publish: ["8443:443"]
+      expose: [443]
+      volume: [".:/var/www/app","/Users/londo003/frds/files:/rads"]
+      cmd: /usr/local/bin/run.sh
+      detach: true
+    rm:
+      volumes: true
+  radstest:
+    dockerfile: config/docker/development
+    image: rads
+    run:
+      env: ["RAILS_ENV=test"]
+      volume: [".:/var/www/app","/Users/londo003/frds/files:/rads"]
+      cmd: /bin/bash
+      interactive: true
+      tty: true
+    rm:
+      volumes: true
