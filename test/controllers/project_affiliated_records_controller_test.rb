@@ -5,6 +5,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
     should "not get :index" do
       assert_not_nil @project
       get :index, project_id: @project
+      assert_access_controlled_action
       assert_redirected_to root_path
     end
 
@@ -12,6 +13,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
       assert_not_nil @project
       assert_not_nil @project_affiliated_record
       get :show, project_id: @project, id: @project_affiliated_record
+      assert_access_controlled_action
       assert_redirected_to root_path
     end
   end
@@ -20,6 +22,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
     should "get :index" do
       assert_not_nil @project
       get :index, project_id: @project
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:project_affiliated_records)
       assert assigns(:project_affiliated_records).include? @project_affiliated_record
@@ -29,6 +32,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
       assert_not_nil @project
       assert_not_nil @project_affiliated_record
       get :show, project_id: @project, id: @project_affiliated_record
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:project_affiliated_record)
       assert_equal @project_affiliated_record.id, assigns(:project_affiliated_record).id
@@ -45,6 +49,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
 
       assert_difference('ProjectAffiliatedRecord.count') do
         post :create, {project_id: @project.id, project_affiliated_record: { record_id: @unaffiliated_record.id }}
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:project_affiliated_record)
       assert_redirected_to project_url(@project)
@@ -59,6 +64,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
 
       assert_no_difference('ProjectAffiliatedRecord.count') do
         post :create, {project_id: @project.id, project_affiliated_record: { record_id: @unowned_record.id }}
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:project_affiliated_record)
       assert_redirected_to root_url
@@ -73,6 +79,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
       assert_not_nil existing_affiliated_record.id
       assert_difference('ProjectAffiliatedRecord.count', -1) do
         delete :destroy, project_id: @project, id: existing_affiliated_record.id
+        assert_access_controlled_action
       end
       assert_redirected_to project_url(@project)
     end
@@ -87,6 +94,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
 
       assert_no_difference('ProjectAffiliatedRecord.count') do
         post :create, {project_id: @project.id, project_affiliated_record: { record_id: @unaffiliated_record.id }}
+        assert_access_controlled_action
       end
       assert_redirected_to root_path
     end
@@ -99,6 +107,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
       assert @user.id != @project_affiliated_record.affiliated_record.creator_id, 'user should not own the project_affiliated record'
       assert_difference('ProjectAffiliatedRecord.count', -1) do
         delete :destroy, project_id: @project, id: @project_affiliated_record
+        assert_access_controlled_action
       end
       assert_redirected_to project_url(@project)
     end
@@ -111,6 +120,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
       assert @user.id != @project_affiliated_record.affiliated_record.creator_id, 'user should not own the project_affiliated_record'
       assert_no_difference('ProjectAffiliatedRecord.count') do
         delete :destroy, project_id: @project, id: @project_affiliated_record
+        assert_access_controlled_action
       end
       assert_redirected_to root_url
     end
@@ -121,46 +131,10 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
     @unowned_record = records(:admin)
   end
 
-  context 'Not Authenticated' do
-    setup do
-      @project_affiliated_record = @project.project_affiliated_records.first
-    end
-
-    should "not get :index" do
-      get :index, project_id: @project
-      assert_redirected_to sessions_new_url(:target => project_project_affiliated_records_url(@project))
-    end
-
-    should "not get :new" do
-      get :new, project_id: @project
-      assert_redirected_to sessions_new_url(:target => new_project_project_affiliated_record_url(@project))
-    end
-
-    should "not show project_affiliated_record" do
-      get :show, project_id: @project, id: @project_affiliated_record
-      assert_redirected_to sessions_new_url(:target => project_project_affiliated_record_url(@project, @project_affiliated_record))
-    end
-
-    should "not create project_affiliated_record" do
-      create_params = { project_id: @project.id, project_affiliated_record: { record_id: records(:user) } }
-      assert_no_difference('ProjectAffiliatedRecord.count') do
-        post :create, create_params
-      end
-      assert_redirected_to sessions_new_url(:target => project_project_affiliated_records_url(create_params))
-    end
-
-    should "not destroy project_affiliated_record" do
-      assert_no_difference('ProjectAffiliatedRecord.count') do
-        delete :destroy, project_id: @project, id: @project_affiliated_record
-      end
-      assert_redirected_to sessions_new_url(:target => project_project_affiliated_record_url(@project, @project_affiliated_record))
-    end
-  end #Not Authenticated
-
   context 'CoreUser with no membership in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -175,7 +149,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'CoreUser with membership in the project but no roles' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @project.project_memberships.create(user_id: @user.id)
@@ -192,7 +166,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'CoreUser with the data_consumer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
@@ -209,7 +183,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'CoreUser with the data_producer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:p_m_cu_producer)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -225,7 +199,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'ProjectUser with no membership in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -241,7 +215,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'ProjectUser with membership in the project but no roles' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @project.project_memberships.create(user_id: @user.id)
@@ -258,7 +232,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'ProjectUser with the data_consumer rolein the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -275,7 +249,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'ProjectUser with the data_producer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:p_m_pu_producer)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -291,7 +265,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with no membership in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
       @unaffiliated_record = records(:admin)
     end
@@ -305,7 +279,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with membership in the project but no roles' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
       @unaffiliated_record = records(:admin)
@@ -320,7 +294,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with the data_consumer rolein the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
       @unaffiliated_record = records(:admin)
@@ -335,7 +309,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with the data_producer role in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_data_producer: true)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
       @unaffiliated_record = records(:admin)
@@ -351,7 +325,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with the administrator role in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_administrator: true)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
       @unaffiliated_record = records(:admin)
@@ -366,7 +340,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with no membership in the project' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
       @unaffiliated_record = records(:user)
     end
@@ -380,7 +354,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with membership in the project but no roles' do
     setup do
       @user = users(:p_m_member)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
       @unaffiliated_record = records(:pm_member)
     end
@@ -394,7 +368,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with the data_consumer rolein the project' do
     setup do
       @user = users(:p_m_consumer)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
       @unaffiliated_record = records(:pm_consumer_record)
     end
@@ -408,7 +382,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with the data_producer role in the project' do
     setup do
       @user = users(:p_m_producer)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_pu_producer_affiliated)
       @unaffiliated_record = records(:pm_producer_unaffiliated_record)
     end
@@ -422,7 +396,7 @@ class ProjectAffiliatedRecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with the administrator role in the project' do
     setup do
       @user = users(:p_m_administrator)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
       @unaffiliated_record = records(:pm_administrator_record)
     end

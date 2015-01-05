@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
 
-  helper_method :current_user, :shib_user, :puppet, :switch_to_users
+  helper_method :current_user, :shib_user, :puppet, :switch_to_users, :session_empty
 
   before_action :check_session
   before_action :redirect_disabled_users
@@ -46,56 +46,52 @@ private
 
   def check_session
     authenticated &&
-      session_created &&
-      session_valid(url_for(params.merge(:only_path => false)))
+    user_exists &&
+    session_valid(url_for(params.merge(:only_path => false)))
   end
 
   def authenticated
-    if request.env['HTTP_SHIB_SESSION_ID'].nil? || request.env['HTTP_SHIB_SESSION_ID'].empty?
-      unless session_empty?
-        flash[:alert] = 'You have been logged out'
-      end
-      redirect_to sessions_new_url(:target => url_for(params.merge(:only_path => false)))
+    if session_empty?
+      redirect_to sessions_new_path(target: url_for(params.merge(:only_path => false)))
       return
     end
-    true
+    @user_authenticated = true
+    return true
   end
 
-  def session_created
-    if session_empty?
-      redirect_to sessions_create_url(:target => url_for(params.merge(:only_path => false)))
+  def user_exists
+    load_shib_user
+    if @shib_user.nil?
+      session[:redirect_on_create] = url_for(params.merge(:only_path => false))
+      redirect_to new_repository_user_path
       return
     end
-    true
+    @user_exists = true
+    return true
   end
 
   def session_valid(redirect_if_fail)
-    load_shib_user
-    if (request.env['HTTP_SHIB_SESSION_ID'] != session[:shib_session_id]) ||
-        (request.env['HTTP_SHIB_SESSION_INDEX'] != session[:shib_session_index])
-      reset_session
-      @shib_user = nil
-      redirect_url = (url_for("") + Rails.application.config.shibboleth_login_url + '?target=%s') % ERB::Util::url_encode( request = redirect_if_fail )
-      redirect_to redirect_url
-      return
+    if session[:provider] == 'shibboleth'
+      if (request.env['HTTP_SHIB_SESSION_ID'] != session[:shib_session_id]) ||
+          (request.env['HTTP_SHIB_SESSION_INDEX'] != session[:shib_session_index])
+        reset_session
+        session[:redirect_on_return] = redirect_if_fail
+        @shib_user = nil
+        redirect_to shibboleth_login_path
+        return
+      end
     end
+    @session_valid = true
     return true
   end
 
   def load_shib_user
-    user_netid = request.env['HTTP_UID']
+    user_netid = session[:uid]
     @shib_user = RepositoryUser.find_by(:netid => user_netid)
   end
 
   def shib_user
     @shib_user
-  end
-
-  def reset_shib_session
-    reset_session
-    session[:shib_session_id] = request.env['HTTP_SHIB_SESSION_ID']
-    session[:shib_session_index] = request.env['HTTP_SHIB_SESSION_INDEX']
-    session[:created_at] = Time.now
   end
 
   def puppet
@@ -118,10 +114,11 @@ private
   end
 
   def session_empty?
-    session[:shib_session_id].nil? || session[:shib_session_id].empty?
+    session[:uid].nil? || session[:uid].empty?
   end
 
   def action_denied
+    logger.debug "ACTION DENIED!"
     flash[:alert] = 'You do not have access to the page you requested!.'
     redirect_to root_path()
   end

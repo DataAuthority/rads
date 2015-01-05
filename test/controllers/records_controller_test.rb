@@ -5,6 +5,7 @@ class RecordsControllerTest < ActionController::TestCase
     should "get index" do
       assert_not_nil @user
       get :index
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
     end
@@ -14,12 +15,14 @@ class RecordsControllerTest < ActionController::TestCase
       assert_not_nil @other_user_record
       assert @user.id != @other_user_record.creator_id, 'user should not own other_user_record'
       get :show, id: @other_user_record
+      assert_access_controlled_action
       assert_redirected_to root_path()
     end
 
     should 'get new' do
       assert_not_nil @user
       get :new
+      assert_access_controlled_action
       assert_response :success
     end
 
@@ -31,6 +34,7 @@ class RecordsControllerTest < ActionController::TestCase
           post :create, record: {
             content: fixture_file_upload('attachments/content.txt', 'text/plain')
           }
+          assert_access_controlled_action
           assert_not_nil assigns(:record)
         end
       end
@@ -59,6 +63,7 @@ class RecordsControllerTest < ActionController::TestCase
                 {term: 'context_term', context: 'context_context'}
               ]
             }
+            assert_access_controlled_action
             assert_not_nil assigns(:record)
           end
         end
@@ -86,6 +91,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert_not_nil @user_record
       assert_equal @user.id, @user_record.creator_id
       get :show, id: @user_record
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:record)
       assert_equal @user_record.id, assigns(:record).id
@@ -104,6 +110,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert_audited_activity(@user, @user, 'delete', 'destroy', 'records') do
         assert_no_difference('Record.count') do
           delete :destroy, id: @user_record
+          assert_access_controlled_action
         end
       end
       assert_equal @user_record.id, assigns(:audited_activity).record_id
@@ -125,6 +132,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert_no_difference('AuditedActivity.count') do
         assert_no_difference('Record.count') do
           delete :destroy, id: @other_user_record
+          assert_access_controlled_action
         end
       end
       assert_redirected_to root_path()
@@ -139,6 +147,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert_not_nil @user_record
       assert_equal @user.id, @user_record.creator_id
       get :show, id: @user_record, download_content: true
+      assert_access_controlled_action
       assert_response :success
       assert_equal "attachment; filename=\"#{ @user_record.content_file_name }\"", @response.header["Content-Disposition"]
       assert_equal @user_record.content_content_type, @response.header["Content-Type"]
@@ -152,6 +161,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert !@project_affiliated_record.project.project_memberships.where(user_id: @user.id).exists?, 'user should not be a member in the project'
       assert_not_nil @project_affiliated_record.affiliated_record
       get :index, record_filter: {project_affiliation_filter_term_attributes: {project_id: @project.id} }
+      assert_access_controlled_action
       assert_response :success
       assert assigns(:records).empty?, 'no records should have been returned'
     end
@@ -162,6 +172,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert !@project_affiliated_record.project.project_memberships.where(user_id: @user.id).exists?, 'user should not be a member in the project'
       assert_not_nil @project_affiliated_record.affiliated_record
       get :show, id: @project_affiliated_record.affiliated_record
+      assert_access_controlled_action
       assert_redirected_to root_url
     end
   end
@@ -174,6 +185,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert @project_affiliated_record.project.project_memberships.where(user_id: @user.id).exists?, 'user should be a member in the project'
       assert_not_nil @project_affiliated_record.affiliated_record
       get :index, record_filter: {project_affiliation_filter_term_attributes: { project_id: @project.id} }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert !assigns(:records).empty?, 'there were records returned'
@@ -186,6 +198,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert @project_affiliated_record.project.project_memberships.where(user_id: @user.id).exists?, 'user should be a member in the project'
       assert_not_nil @project_affiliated_record.affiliated_record
       get :show, id: @project_affiliated_record.affiliated_record
+      assert_access_controlled_action
       assert_response :success
     end
   end
@@ -197,6 +210,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert @project_affiliated_record.project.project_memberships.where(user_id: @user.id, is_data_consumer: true).exists?, 'user should be a data_consumer in the project'
       assert_not_nil @project_affiliated_record.affiliated_record
       get :show, id: @project_affiliated_record.affiliated_record, download_content: true
+      assert_access_controlled_action
       assert_response :success
    end
  end
@@ -208,6 +222,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert !@project_affiliated_record.project.project_memberships.where(user_id: @user.id, is_data_consumer: true).exists?, 'user should not be a data_consumer in the project'
       assert_not_nil @project_affiliated_record.affiliated_record
       get :show, id: @project_affiliated_record.affiliated_record, download_content: true
+      assert_access_controlled_action
       assert_redirected_to root_url
    end
   end
@@ -227,6 +242,7 @@ class RecordsControllerTest < ActionController::TestCase
             content: fixture_file_upload('attachments/content.txt', 'text/plain'),
             project_affiliated_records_attributes: [{project_id: @project.id}]
           }
+          assert_access_controlled_action
           assert_not_nil assigns(:record)
         end
       end
@@ -256,6 +272,7 @@ class RecordsControllerTest < ActionController::TestCase
               content: fixture_file_upload('attachments/content.txt', 'text/plain'),
               project_affiliated_records_attributes: [{project_id: @project.id}]
             }
+            assert_access_controlled_action
             assert_not_nil assigns(:record)
           end
         end
@@ -287,19 +304,12 @@ class RecordsControllerTest < ActionController::TestCase
     @admin_record.destroy
   end
 
-  context 'Unauthenticated User' do
-    should 'not get index' do
-      get :index
-      assert_redirected_to sessions_new_url(:target => records_url)
-    end
-  end #Unauthenticated User
-
   context 'Admin' do
     setup do
       @user = users(:admin)
       @user_record = @admin_record
       @other_user_record = @non_admin_record
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     any_user_tests
@@ -311,7 +321,7 @@ class RecordsControllerTest < ActionController::TestCase
       @user = users(:non_admin)
       @user_record = @non_admin_record
       @other_user_record = @admin_record
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     any_user_tests
@@ -320,7 +330,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'ProjectUser' do
     setup do
       @project_member = users(:p_m_member)
-      authenticate_existing_user(@project_member, true)
+      authenticate_user(@project_member)
       @puppet = users(:p_m_pu_producer)
       session[:switch_to_user_id] = @puppet.id
     end
@@ -367,17 +377,17 @@ class RecordsControllerTest < ActionController::TestCase
     end
 
     should 'render successfully when zero records have been returned' do
-      authenticate_existing_user(@user_with_no_records, true)
+      authenticate_user(@user_with_no_records)
       assert_equal 0, @user_with_no_records.records.count
       assert @user_with_no_records.records.empty?
       get :index
       assert_response :success
       assert_not_nil assigns(:records)
-      assert assigns(:records).empty?, 'records should be empty'  
+      assert assigns(:records).empty?, 'records should be empty'
     end
 
     should 'show current_user.records by default' do
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       record_count = @user.records.count
       assert record_count > 0, 'user should have records'
       get :index
@@ -394,7 +404,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'CoreUser with no membership in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -408,7 +418,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'CoreUser with membership in the project but no roles' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @project.project_memberships.create(user_id: @user.id)
@@ -423,7 +433,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'CoreUser with the data_consumer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
@@ -438,7 +448,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'CoreUser with the data_producer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:p_m_cu_producer)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -452,7 +462,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'ProjectUser with no membership in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -466,7 +476,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'ProjectUser with membership in the project but no roles' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @project.project_memberships.create(user_id: @user.id)
@@ -481,7 +491,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'ProjectUser with the data_consumer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -496,7 +506,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'ProjectUser with the data_producer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:p_m_pu_producer)
       session[:switch_to_user_id] = @user.id
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
@@ -511,7 +521,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with no membership in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
     end
 
@@ -523,7 +533,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with membership in the project but no roles' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
     end
@@ -536,7 +546,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with the data_consumer role in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
     end
@@ -549,7 +559,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with the data_producer role in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_data_producer: true)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
     end
@@ -562,7 +572,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser with the administrator role in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_administrator: true)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
     end
@@ -575,7 +585,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with no membership in the project' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
     end
 
@@ -587,7 +597,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with membership in the project but no roles' do
     setup do
       @user = users(:p_m_member)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
     end
 
@@ -599,7 +609,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with the data_consumer role in the project' do
     setup do
       @user = users(:p_m_consumer)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
     end
 
@@ -611,7 +621,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with the data_producer role in the project' do
     setup do
       @user = users(:p_m_producer)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_pu_producer_affiliated)
     end
 
@@ -623,7 +633,7 @@ class RecordsControllerTest < ActionController::TestCase
   context 'Non-Admin RepositoryUser with the administrator role in the project' do
     setup do
       @user = users(:p_m_administrator)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project_affiliated_record = project_affiliated_records(:pm_producer_affiliated)
     end
 
@@ -656,7 +666,7 @@ class RecordsControllerTest < ActionController::TestCase
       @other_user_record.save
       @project = projects(:membership_test)
       @user = users(:p_m_creator)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     teardown do
@@ -671,6 +681,7 @@ class RecordsControllerTest < ActionController::TestCase
     should 'support query by record_created_by' do
       assert_no_difference('RecordFilter.count') do
         get :index, record_filter: {record_created_by: @other_user_record.creator_id}
+        assert_access_controlled_action
       end
       assert_response :success
       assert_not_nil assigns(:records)
@@ -698,6 +709,7 @@ class RecordsControllerTest < ActionController::TestCase
 
       assert_no_difference('RecordFilter.count') do
         get :index, record_filter: {is_destroyed: 'true'}, commit: 'Filter records'
+        assert_access_controlled_action
       end
       assert_response :success
       assert_not_nil assigns(:records)
@@ -718,6 +730,7 @@ class RecordsControllerTest < ActionController::TestCase
     should 'support query by :record_created_on' do
       @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
       get :index, record_filter: {record_created_on: @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d")}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -734,6 +747,7 @@ class RecordsControllerTest < ActionController::TestCase
     should 'support query by :record_created_after' do
       @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
       get :index, record_filter: {record_created_after: @user_records[:pm_creator1].created_at.strftime("%Y-%m-%d")}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0, 'there should be some records'
@@ -750,6 +764,7 @@ class RecordsControllerTest < ActionController::TestCase
     should 'support query by :record_created_before' do
       @other_user_record.update(created_at: @user_records[:pm_creator2].created_at)
       get :index, record_filter: {record_created_before: @user_records[:pm_creator3].created_at.strftime("%Y-%m-%d")}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -773,6 +788,7 @@ class RecordsControllerTest < ActionController::TestCase
         record_created_after: @user_records[:pm_creator1].created_at.strftime("%Y-%m-%d"),
         record_created_before: @user_records[:pm_creator3].created_at.strftime("%Y-%m-%d")
       }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0, 'there should be some records returned'
@@ -793,6 +809,7 @@ class RecordsControllerTest < ActionController::TestCase
         record_created_on: @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d"),
         record_created_before: @user_records[:pm_creator3].created_at.strftime("%Y-%m-%d")
       }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -812,6 +829,7 @@ class RecordsControllerTest < ActionController::TestCase
         record_created_on: @user_records[:pm_creator2].created_at.strftime("%Y-%m-%d"),
         record_created_after: @user_records[:pm_creator1].created_at.strftime("%Y-%m-%d")
       }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -832,6 +850,7 @@ class RecordsControllerTest < ActionController::TestCase
         record_created_before: @user_records[:pm_creator3].created_at.strftime("%Y-%m-%d"),
         record_created_after: @user_records[:pm_creator1].created_at.strftime("%Y-%m-%d")
       }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -847,6 +866,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :filename' do
       get :index, record_filter: {filename: @user_records[:pm_creator1].content_file_name}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -859,6 +879,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :filename with *suffix' do
       get :index, record_filter: {filename: '*.txt'}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -873,6 +894,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :filename with prefix*' do
       get :index, record_filter: {filename: 'nice*'}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -887,6 +909,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :filename with prefix*suffix' do
       get :index, record_filter: {filename: '*p_m_creator*'}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -905,6 +928,7 @@ class RecordsControllerTest < ActionController::TestCase
         f.save
       end
       get :index, record_filter: {file_content_type: 'application/pdf'}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -920,6 +944,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :file_size' do
       get :index, record_filter: {file_size: @user_records[:pm_creator2].content_file_size}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -934,6 +959,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :file_size_less_than' do
       get :index, record_filter: {file_size_less_than: @user_records[:pm_creator3].content_file_size}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -948,6 +974,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :file_size_greater_than' do
       get :index, record_filter: {file_size_greater_than: @user_records[:pm_creator1].content_file_size}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -965,6 +992,7 @@ class RecordsControllerTest < ActionController::TestCase
         file_size_greater_than: @user_records[:pm_creator1].content_file_size,
         file_size_less_than: @user_records[:pm_creator3].content_file_size,
       }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -983,6 +1011,7 @@ class RecordsControllerTest < ActionController::TestCase
         file_size: @user_records[:pm_creator3].content_file_size,
         file_size_less_than: @user_records[:pm_creator3].content_file_size
       }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1000,6 +1029,7 @@ class RecordsControllerTest < ActionController::TestCase
         file_size: @user_records[:pm_creator1].content_file_size,
         file_size_greater_than: @user_records[:pm_creator1].content_file_size,
       }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1018,6 +1048,7 @@ class RecordsControllerTest < ActionController::TestCase
         file_size_greater_than: @user_records[:pm_creator1].content_file_size,
         file_size_less_than: @user_records[:pm_creator3].content_file_size,
       }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1033,6 +1064,7 @@ class RecordsControllerTest < ActionController::TestCase
     should 'support query by :file_md5hashsum' do
       assert_equal @user_records[:pm_creator1].content_fingerprint, @other_user_record.content_fingerprint
       get :index, record_filter: { file_md5hashsum: @user_records[:pm_creator1].content_fingerprint }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1050,6 +1082,7 @@ class RecordsControllerTest < ActionController::TestCase
       assert @project.is_affiliated_record?(@other_user_record), 'other_user_record should be affiliated with membership_project'
       assert @project.is_affiliated_record?(@user_records[:pm_creator1]), 'pm_creator1 should be affiliated with membership_project'
       get :index, record_filter: {project_affiliation_filter_term_attributes: {project_id: @project.id}}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1065,6 +1098,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :annotation_filter_term' do
       get :index, record_filter: {annotation_filter_terms_attributes: [{created_by: @user.id, context: 'bar', term: 'foo'}]}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1080,6 +1114,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :annotation_filter_term context: _ALL_ and return all contexts for given term' do
       get :index, record_filter: {annotation_filter_terms_attributes: [{context: '_ALL_', term: 'foo'}]}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1095,6 +1130,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :annotation_filter_term with context and no term and return records with that context and any term' do
       get :index, record_filter: {annotation_filter_terms_attributes: [{context: 'bar'}]}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1110,6 +1146,7 @@ class RecordsControllerTest < ActionController::TestCase
 
     should 'support query by :annotation_filter_term without a context and return only the given term and nil context' do
       get :index, record_filter: {annotation_filter_terms_attributes: [{term: 'foo'}]}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1128,6 +1165,7 @@ class RecordsControllerTest < ActionController::TestCase
           {context: 'cell_line', term: 'NHEK'},
           {context: 'technology', term: 'DNaseHS'}
       ]}
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0, 'there should be some records'
@@ -1150,6 +1188,7 @@ class RecordsControllerTest < ActionController::TestCase
         ],
         project_affiliation_filter_term_attributes: { project_id: @project.id }
       }
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0
@@ -1176,6 +1215,7 @@ class RecordsControllerTest < ActionController::TestCase
           ],
           project_affiliation_filter_term_attributes: { project_id: @project.id }
         }, commit: 'Save Query and filter'
+        assert_access_controlled_action
       end
       assert_response :success
       assert_not_nil assigns(:records)
@@ -1204,6 +1244,7 @@ class RecordsControllerTest < ActionController::TestCase
           ],
           project_affiliation_filter_term_attributes: { project_id: @project.id }
         }, commit: 'Save Query and filter'
+        assert_access_controlled_action
       end
       assert_response :success
       assert_not_nil assigns(:records)
@@ -1226,14 +1267,15 @@ class RecordsControllerTest < ActionController::TestCase
     should 'support record_filter_id for record_filter owned by user' do
       user_record_filter = RecordFilter.new(
                              name: "query_test_#{@user.id}",
-                             user_id: @user.id, 
-                             filename: '*.txt', 
-                             project_affiliation_filter_term_attributes: {project_id: @project.id}, 
+                             user_id: @user.id,
+                             filename: '*.txt',
+                             project_affiliation_filter_term_attributes: {project_id: @project.id},
                              annotation_filter_terms_attributes: [{context: 'bar', term: 'foo'}]
                            )
       assert user_record_filter.valid?, "user_record_filter not valid #{ user_record_filter.errors.inspect }"
       assert user_record_filter.save
       get :index, record_filter_id: user_record_filter.id
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:records)
       assert assigns(:records).count > 0, 'there should be some records'
@@ -1253,6 +1295,7 @@ class RecordsControllerTest < ActionController::TestCase
       other_user_record_filter = record_filters(:project_user)
       assert other_user_record_filter.user_id != @user.id
       get :index, record_filter_id: other_user_record_filter
+      assert_access_controlled_action
       assert_response 404
     end
 

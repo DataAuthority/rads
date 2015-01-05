@@ -7,12 +7,13 @@ class CartsControllerTest < ActionController::TestCase
       assert_not_nil @user_cart_records
       assert @user_cart_records.length > 0, 'there should be some cart records'
       get :show
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:cart_records)
       assigns(:cart_records).each do |cr|
         assert_equal @user.id, cr.user_id
       end
-    end    
+    end
 
     should 'delete :destroy to empty their cart' do
       assert_not_nil @user
@@ -22,6 +23,7 @@ class CartsControllerTest < ActionController::TestCase
       assert CartRecord.count > cart_records_count
       assert_difference('CartRecord.count', -cart_records_count) do
         delete :destroy
+        assert_access_controlled_action
       end
       assert_equal 0, @user.cart_records.count
       assert_redirected_to cart_url
@@ -44,6 +46,7 @@ class CartsControllerTest < ActionController::TestCase
       stored_records = @user.cart_records.collect {|r| r.stored_record}
       assert_equal stored_records.count, stored_records.uniq.count
       put :update, cart: {action: 'destroy_records'}
+      assert_access_controlled_action
       assert_not_nil assigns(:cart_records)
       assigns(:cart_records).each do |cr|
         if expected_cart_errors[cr.id]
@@ -80,6 +83,7 @@ class CartsControllerTest < ActionController::TestCase
       assert expected_cart_errors.keys.length > 0, 'there should be some cart_records that the user cannot affiliate'
       assert_difference('ProjectAffiliatedRecord.count', +expected_affiliated_records) do
         put :update, cart: {action: 'affiliate_to_project', project_id: @project.id}
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:cart_records)
       assigns(:cart_records).each do |cr|
@@ -106,6 +110,7 @@ class CartsControllerTest < ActionController::TestCase
       end
       assert_no_difference('ProjectAffiliatedRecord.count') do
         put :update, cart: {action: 'affiliate_to_project', project_id: @project.id}
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:cart_records)
       assert_not_nil assigns(:cart_errors)
@@ -128,6 +133,7 @@ class CartsControllerTest < ActionController::TestCase
       assert_equal stored_records.length, stored_records.uniq.length
       assert_difference('Annotation.count', stored_records.length) do
         put :update, cart: {action: 'annotate', term: 'Foo', context: 'Bar'}
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:cart_records)
       assigns(:cart_records).each do |cr|
@@ -141,23 +147,10 @@ class CartsControllerTest < ActionController::TestCase
     @test_content = File.new(@test_content_path)
   end
 
-  context "unauthenticated user" do
-    should 'not get :show' do
-      get :show
-      assert_redirected_to sessions_new_url(:target => cart_url)
-    end
-    should 'not delete :empty' do
-      assert_no_difference('CartRecord.count') do
-        delete :destroy
-      end
-      assert_redirected_to sessions_new_url(:target => cart_url)
-    end
-  end
-
   context "RepositoryUser" do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @user_cart_records = @user.cart_records.all
       @user_cart_records.each do |cr|
         cr.stored_record.content = @test_content
@@ -170,7 +163,7 @@ class CartsControllerTest < ActionController::TestCase
         if cr.stored_record
           cr.stored_record.content.destroy
           cr.stored_record.destroy
-        end        
+        end
       end
     end
 
@@ -182,7 +175,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Admin" do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @user_cart_records = @user.cart_records.all
       @user.cart_records.each do |cr|
         cr.stored_record.content = @test_content
@@ -207,7 +200,7 @@ class CartsControllerTest < ActionController::TestCase
   context "ProjectUser" do
     setup do
       @real_user = users(:non_admin)
-      authenticate_existing_user(@real_user, true)
+      authenticate_user(@real_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @user_cart_records = @user.cart_records.all
@@ -234,7 +227,7 @@ class CartsControllerTest < ActionController::TestCase
   context "CoreUser" do
     setup do
       @real_user = users(:non_admin)
-      authenticate_existing_user(@real_user, true)
+      authenticate_user(@real_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @user_cart_records = @user.cart_records.all
@@ -261,7 +254,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Admin RepositoryUser with no membership in a project" do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @user_cart_records = @user.cart_records.all
       @project = projects(:membership_test)
     end
@@ -272,7 +265,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Admin RepositoryUser with membership in a project but no roles" do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @user_cart_records = @user.cart_records.all
       @project.project_memberships.create(user_id: @user.id)
@@ -284,7 +277,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Admin RepositoryUser with the administrator role in the project" do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)      
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @project.project_memberships.create(user_id: @user.id, is_administrator: true)
       @user_cart_records = @user.cart_records.all
@@ -296,7 +289,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Admin RepositoryUser with data_producer role in the project" do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @user_cart_records = @user.cart_records.all
       @project.project_memberships.create(user_id: @user.id, is_data_producer: true)
@@ -309,7 +302,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Admin RepositoryUser with data_consumer role in the project" do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
       @user_cart_records = @user.cart_records.all
@@ -321,7 +314,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Admin RepositoryUser with data_manager role in the project" do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @project.project_memberships.create(user_id: @user.id, is_data_manager: true)
       @user_cart_records = @user.cart_records.all
@@ -333,7 +326,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Non-Admin RepositoryUser with no membership in a project" do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @user_cart_records = @user.cart_records.all
     end
@@ -344,7 +337,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Non-Admin RepositoryUser with membership in a project but no roles" do
     setup do
       @user = users(:p_m_member)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @user_cart_records = @user.cart_records.all
     end
@@ -355,7 +348,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Non-Admin RepositoryUser with the administrator role in the project" do
     setup do
       @user = users(:p_m_administrator)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @user_cart_records = @user.cart_records.all
     end
@@ -366,7 +359,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Non-Admin RepositoryUser with data_producer role in the project" do
     setup do
       @user = users(:p_m_producer)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @user_cart_records = @user.cart_records.all
     end
@@ -377,7 +370,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Non-Admin RepositoryUser with data_consumer role in the project" do
     setup do
       @user = users(:p_m_consumer)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @user_cart_records = @user.cart_records.all
     end
@@ -388,7 +381,7 @@ class CartsControllerTest < ActionController::TestCase
   context "Non-Admin RepositoryUser with data_manager role in the project" do
     setup do
       @user = users(:p_m_dmanager)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project = projects(:membership_test)
       @user_cart_records = @user.cart_records.all
     end
@@ -399,7 +392,7 @@ class CartsControllerTest < ActionController::TestCase
   context "CoreUser with no membership in a project" do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @project = projects(:membership_test)
@@ -412,7 +405,7 @@ class CartsControllerTest < ActionController::TestCase
   context "CoreUser with membership in a project but no roles" do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @project = projects(:membership_test)
@@ -426,7 +419,7 @@ class CartsControllerTest < ActionController::TestCase
   context "CoreUser with data_producer role in the project" do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:p_m_cu_producer)
       session[:switch_to_user_id] = @user.id
       @project = projects(:membership_test)
@@ -439,7 +432,7 @@ class CartsControllerTest < ActionController::TestCase
   context "CoreUser with data_consumer role in the project" do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @project = projects(:membership_test)
@@ -453,7 +446,7 @@ class CartsControllerTest < ActionController::TestCase
   context "ProjectUser with no membership in the project" do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @project = projects(:membership_test)
@@ -466,7 +459,7 @@ class CartsControllerTest < ActionController::TestCase
   context "ProjectUser with membership in a project but no roles" do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @project = projects(:membership_test)
@@ -480,7 +473,7 @@ class CartsControllerTest < ActionController::TestCase
   context "ProjectUser with data_producer role in the project" do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:p_m_pu_producer)
       session[:switch_to_user_id] = @user.id
       @project = projects(:membership_test)
@@ -493,7 +486,7 @@ class CartsControllerTest < ActionController::TestCase
   context "ProjectUser with data_consumer role in the project" do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @project = projects(:membership_test)

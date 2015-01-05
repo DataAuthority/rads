@@ -41,28 +41,21 @@ class AuditedActivitiesControllerTest < ActionController::TestCase
     }
   end
 
-  context 'Not Authenticated' do
-    should_not_get :index
-
-    should "not show audited_activity" do
-      get :show, id: @audited_activity
-      assert_redirected_to sessions_new_url(:target => audited_activity_url(@audited_activity))
-    end
-  end
-
   context 'Non Admin' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     should 'not get index' do
       get :index
+      assert_access_controlled_action
       assert_redirected_to root_path()
     end
 
     should 'not get show' do
       get :show, id: @audited_activity
+      assert_access_controlled_action
       assert_redirected_to root_path()
     end
   end #Non Admin
@@ -70,11 +63,12 @@ class AuditedActivitiesControllerTest < ActionController::TestCase
   context 'Admin' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     should 'get index' do
       get :index
+      assert_access_controlled_action
       assert_response :success
     end
 
@@ -82,6 +76,7 @@ class AuditedActivitiesControllerTest < ActionController::TestCase
       @audited_activity.record_id = Record.first.id
       @audited_activity.save
       get :show, id: @audited_activity
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:audited_activity)
       assert_not_nil assigns(:record)
@@ -90,6 +85,7 @@ class AuditedActivitiesControllerTest < ActionController::TestCase
 
     should 'get show without record_id' do
       get :show, id: @audited_activity
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:audited_activity)
       assert_nil assigns(:record)

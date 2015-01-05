@@ -31,11 +31,15 @@ Rads::Application.routes.draw do
   get "switch_user/switch_to", as: 'switch_to'
   get "switch_user/destroy", as: 'switch_back'
 
+  # omniauth
+  get '/auth/shibboleth', as: 'shibboleth_login'
+  get '/auth/:provider/callback', to: 'sessions#create'
+
   get "sessions/new"
   get "sessions/create"
   get "sessions/destroy"
-  get "sessions/check"
-  root 'sessions#new'
+  get "sessions/check", as: 'check'
+  root 'repository_users#index'
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
@@ -75,7 +79,7 @@ Rads::Application.routes.draw do
   #       get 'recent', on: :collection
   #     end
   #   end
-  
+
   # Example resource route with concerns:
   #   concern :toggleable do
   #     post 'toggle'

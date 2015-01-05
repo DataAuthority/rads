@@ -1,10 +1,10 @@
 class RepositoryUsersController < ApplicationController
   skip_before_action :check_session, only: [:new, :create]
-  before_action :authenticated, only: [:new, :create]
   load_and_authorize_resource
   skip_authorize_resource only: [:new, :create]
   skip_before_action :redirect_disabled_users, only: [:show]
   before_action :switch_disabled_users, only: [:show]
+  before_action :prevent_dual_creation, only: [:new, :create]
 
   def index
   end
@@ -13,23 +13,32 @@ class RepositoryUsersController < ApplicationController
   end
 
   def new
-    reset_shib_session
-    load_shib_user
-    @current_ability = nil
-    authorize! :new, @repository_user
-    @repository_user.name = request.env['HTTP_DISPLAYNAME']
-    @repository_user.email = request.env['HTTP_MAIL']
+    if authenticated && session_valid(url_for(params.merge(:only_path => false)))
+      load_shib_user
+      unless @shib_user.nil?
+        redirect_to root_path
+        return
+      end
+      @current_ability = nil
+      authorize! :new, @repository_user
+      @repository_user.name = session[:user_name]
+      @repository_user.email = session[:user_email]
+    end
   end
 
   def edit
   end
 
   def create
-    reset_shib_session
-    if session_valid(url_for(params.merge(:only_path => false)))
+    if authenticated && session_valid(url_for(params.merge(:only_path => false)))
+      load_shib_user
+      unless @shib_user.nil?
+        redirect_to root_path
+        return
+      end
       @current_ability = nil
       authorize! :create, @repository_user
-      @repository_user.netid = request.env['HTTP_UID']
+      @repository_user.netid = session[:uid]
       @repository_user.is_enabled = true
       respond_to do |format|
         if @repository_user.save
@@ -81,6 +90,13 @@ class RepositoryUsersController < ApplicationController
       unless params[:id] == current_user.id
         @repository_user = current_user
       end
+    end
+  end
+
+  def prevent_dual_creation
+    unless @shib_user.nil?
+      redirect_to root_path
+      return
     end
   end
 end

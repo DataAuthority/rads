@@ -22,7 +22,7 @@ class ActiveSupport::TestCase
   # -- they do not yet inherit this setting
   fixtures :all
 
-  # Helpers for testing abilities 
+  # Helpers for testing abilities
   def allowed_abilities(user, object, actions)
     ability = Ability.new(user)
     user_information = "#{user.inspect}"
@@ -33,7 +33,7 @@ class ActiveSupport::TestCase
       assert ability.can?(action, object), "#{user_information}\n[ CANNOT! ] #{action}\n #{ object.inspect }"
     end
   end
-  
+
   def denied_abilities(user, object, actions)
     ability = Ability.new(user)
     user_information = "#{user.inspect}"
@@ -56,25 +56,13 @@ class ActiveSupport::TestCase
     controller.unstub(:current_ability)
   end
 
-  def authenticate_existing_user(user, set_session = false)
-    authenticate_any_user(user)
-    @request.env['HTTP_UID'] = user.netid
-    if set_session
-      session[:shib_session_id] = @request.env['HTTP_SHIB_SESSION_ID']
-      session[:shib_session_index] = @request.env['HTTP_SHIB_SESSION_INDEX']
-      session[:created_at] = Time.now
-    end
+  def authenticate_user(user)
+    session[:uid] = user.netid
+    session[:provider] = 'shibboleth'
+    session[:shib_session_id] = request.env['HTTP_SHIB_SESSION_ID'] = 'asdf'
+    session[:shib_session_index] = request.env['HTTP_SHIB_SESSION_INDEX'] = 'x1yaz344@'
+    session[:created_at] = Time.now
   end
-
-  def authenticate_new_user(user)
-    authenticate_any_user(user)
-  end
-
-  def authenticate_any_user(user)
-    @request.env['HTTP_SHIB_SESSION_ID'] = 'asdf'
-    @request.env['HTTP_SHIB_SESSION_INDEX'] = 'x1yaz344@'
-    @request.env['HTTP_UID'] = user.netid
-  end    
 
   # Common controller actions
   def self.should_not_get(action, path_override = {}, action_params = {})
@@ -98,6 +86,14 @@ class ActiveSupport::TestCase
       assert_equal action, assigns(:audited_activity).action
       assert_equal method, assigns(:audited_activity).http_method
     end
+  end
+
+  # these instance varaibles are set within the 3 methods that application_controller#check_session
+  # calls to test a users authenticity, existence, and session validity before calling access controlled actions
+  def assert_access_controlled_action
+    assert assigns(:user_authenticated), 'user should have been authenticated'
+    assert assigns(:user_exists), 'user existence should have been tested'
+    assert assigns(:session_valid), 'user session validity should have been tested'
   end
 
   def self.should_respond_to(method)

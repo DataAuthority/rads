@@ -3,6 +3,8 @@ source 'https://rubygems.org'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails'
 
+gem 'omniauth-shibboleth'
+
 gem 'sqlite3'
 #gem 'pg'
 #gem 'mysql'
