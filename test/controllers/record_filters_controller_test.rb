@@ -11,6 +11,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       end
 
       get :index
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:record_filters)
       assert_equal @user_record_filters.count, assigns(:record_filters).count
@@ -28,6 +29,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       end
       user_record_filter = @user_record_filters[0]
       get :show, id: user_record_filter
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:record_filter)
       assert_equal user_record_filter.id, assigns(:record_filter).id
@@ -42,6 +44,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       end
       user_record_filter = @user_record_filters[0]
       get :edit, id: user_record_filter
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:record_filter)
       assert_equal user_record_filter.id, assigns(:record_filter).id
@@ -62,6 +65,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
         filename: "random_test_filename.tpg"
       }
       patch :update, id: user_record_filter, record_filter: change
+      assert_access_controlled_action
       assert_not_nil assigns(:record_filter)
       assert_equal user_record_filter.id, assigns(:record_filter).id
       trf = RecordFilter.find(user_record_filter.id)
@@ -73,6 +77,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
     should 'be able to get new' do
       assert_not_nil @user
       get :new
+      assert_access_controlled_action
       assert_response :success
     end
 
@@ -89,6 +94,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       }
       assert_difference('RecordFilter.count') do
         post :create, record_filter: new_record_filter
+        assert_access_controlled_action
         assert assigns(:record_filter).errors.empty?, "#{ assigns(:record_filter).errors.inspect }"
       end
       assert_redirected_to record_filters_path
@@ -111,6 +117,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       user_record_filter = @user_record_filters[0]
       assert_difference('RecordFilter.count', -1) do
         delete :destroy, id: user_record_filter.id
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:record_filter)
       assert !@user.record_filters.where(id: user_record_filter.id).exists?, 'record_filter should no longer exist'
@@ -122,6 +129,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       assert_not_nil @user
       assert_not_nil @other_user_record_filter
       get :show, id: @other_user_record_filter
+      assert_access_controlled_action
       assert_redirected_to root_path
     end
 
@@ -129,6 +137,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       assert_not_nil @user
       assert_not_nil @other_user_record_filter
       get :edit, id: @other_user_record_filter
+      assert_access_controlled_action
       assert_redirected_to root_path
     end
 
@@ -140,6 +149,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       }
       assert @other_user_record_filter.filename != change[:filename], "other_user_record_filter filename should be different from change"
       patch :update, id: @other_user_record_filter, record_filter: change
+      assert_access_controlled_action
       assert_redirected_to root_path
       trf = RecordFilter.find(@other_user_record_filter.id)
       change.keys.each do |attempted|
@@ -152,6 +162,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       assert_not_nil @other_user_record_filter
       assert_no_difference('RecordFilter.count') do
         delete :destroy, id: @other_user_record_filter
+        assert_access_controlled_action
       end
       assert_redirected_to root_path
     end
@@ -166,6 +177,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
         record_created_on: nil
       }
       patch :update, id: @user_record_filter, record_filter: change
+      assert_access_controlled_action
       assert_not_nil assigns(:record_filter)
       assert_equal @user_record_filter.id, assigns(:record_filter).id
       trf = RecordFilter.find(@user_record_filter.id)
@@ -181,6 +193,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       }
       assert_difference('ProjectAffiliationFilterTerm.count') do
         patch :update, id: @user_record_filter, record_filter: change
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:record_filter)
       assert_equal @user_record_filter.id, assigns(:record_filter).id
@@ -198,6 +211,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       }
       assert_difference('ProjectAffiliationFilterTerm.count', -1) do
         patch :update, id: @user_record_filter, record_filter: change
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:record_filter)
       assert_equal @user_record_filter.id, assigns(:record_filter).id
@@ -213,6 +227,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       }
       assert_difference('AnnotationFilterTerm.count', +change[:annotation_filter_terms_attributes].size) do
         patch :update, id: @user_record_filter, record_filter: change
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:record_filter)
       assert_equal @user_record_filter.id, assigns(:record_filter).id
@@ -241,6 +256,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       }
       assert_difference('AnnotationFilterTerm.count', -@user_record_filter.annotation_filter_terms.count) do
         patch :update, id: @user_record_filter, record_filter: change
+        assert_access_controlled_action
       end
       assert_not_nil assigns(:record_filter)
       assert_equal @user_record_filter.id, assigns(:record_filter).id
@@ -259,6 +275,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       assert_difference('RecordFilter.count') do
         assert_difference('ProjectAffiliationFilterTerm.count') do
           post :create, record_filter: new_record_filter
+          assert_access_controlled_action
           assert assigns(:record_filter).errors.empty?, "#{ assigns(:record_filter).errors.inspect }"
         end
       end
@@ -277,6 +294,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       assert_difference('RecordFilter.count') do
         assert_difference('AnnotationFilterTerm.count', +new_record_filter[:annotation_filter_terms_attributes].size) do
           post :create, record_filter: new_record_filter
+          assert_access_controlled_action
         end
       end
       assert_redirected_to record_filters_path
@@ -305,6 +323,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       assert_difference('RecordFilter.count', -1) do
         assert_difference('ProjectAffiliationFilterTerm.count',-1) do
           delete :destroy, id: @user_record_filter
+          assert_access_controlled_action
         end
       end
       assert_not_nil assigns(:record_filter)
@@ -318,6 +337,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
       assert_difference('RecordFilter.count', -1) do
         assert_difference('AnnotationFilterTerm.count',-@user_record_filter.annotation_filter_terms.count) do
           delete :destroy, id: @user_record_filter
+          assert_access_controlled_action
         end
       end
       assert_not_nil assigns(:record_filter)
@@ -325,29 +345,10 @@ class RecordFiltersControllerTest < ActionController::TestCase
     end
   end
 
-  context 'User not logged in' do
-    should_not_get :index
-    should_not_get :new
-
-    should "not show record_fiilter" do
-      @record_filter = record_filters(:model_test)
-      get :show, id: @record_filter
-      assert_redirected_to sessions_new_url(:target => record_filter_url(@record_filter))
-    end
-
-    should "not create project" do
-      assert_no_difference('Project.count') do
-        post :create, record_filter: { name: "TEST_not_logged_in_FILTER", filename: "shouldnotcreate.png"}
-      end
-      assert_redirected_to sessions_new_url(:target => record_filters_url(record_filter: {name: "TEST_not_logged_in_FILTER", filename: "shouldnotcreate.png"}))
-    end
-
-  end #User not logged in
-
   context 'Non Admin RepositoryUser' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @user_record_filters = @user.record_filters.all
       @user_record_filter = record_filters(:model_test)
       @other_user_record_filter = record_filters(:admin)
@@ -363,7 +364,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
   context 'Admin RepositoryUser' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @user_record_filters = @user.record_filters.all
       @other_user_record_filter = record_filters(:non_admin)
     end
@@ -375,7 +376,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
   context 'CoreUser' do
     setup do
       @real_user = users(:non_admin)
-      authenticate_existing_user(@real_user, true)
+      authenticate_user(@real_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @user_record_filters = @user.record_filters.all
@@ -389,7 +390,7 @@ class RecordFiltersControllerTest < ActionController::TestCase
   context 'ProjectUser' do
     setup do
       @real_user = users(:non_admin)
-      authenticate_existing_user(@real_user, true)
+      authenticate_user(@real_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @user_record_filters = @user.record_filters.all

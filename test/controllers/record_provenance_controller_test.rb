@@ -3,7 +3,7 @@ require 'test_helper'
 class RecordProvenanceControllerTest < ActionController::TestCase
   setup do
     @request.env['HTTP_ACCEPT'] = 'application/xml'
-    @test_content_path = Rails.root.to_s + '/test/fixtures/attachments/content.txt'
+    @test_content_path = Rails.root.join('test','fixtures','attachments','content.txt')
     @test_content = File.new(@test_content_path)
     @expected_md5 = `/usr/bin/md5sum #{ @test_content.path }`.split.first.chomp
     @record = records(:user)
@@ -35,7 +35,7 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     end
 
     should "get show with authentication" do
-      authenticate_existing_user(users(:non_admin), true)
+      authenticate_user(users(:non_admin))
       get :show, record_id: @record.id
       assert_response :success
       assert_not_nil assigns(:records)
@@ -44,7 +44,7 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     end
 
     should "get show with switch_user" do
-      authenticate_existing_user(users(:non_admin), true)
+      authenticate_user(users(:non_admin))
       @puppet = users(:project_user)
       session[:switch_to_user_id] = @puppet.id
       get :show, record_id: @record.id
@@ -65,7 +65,7 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     end
 
     should "get show with authentication" do
-      authenticate_existing_user(users(:non_admin), true)
+      authenticate_user(users(:non_admin))
       get :show, md5: @expected_md5
       assert_response :success
       assert_not_nil assigns(:records)
@@ -74,7 +74,7 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     end
 
     should "get show with switch_user" do
-      authenticate_existing_user(users(:non_admin), true)
+      authenticate_user(users(:non_admin))
       @puppet = users(:project_user)
       session[:switch_to_user_id] = @puppet.id
       get :show, md5: @expected_md5
@@ -93,14 +93,14 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     end
 
     should "not get show with authentication" do
-      authenticate_existing_user(users(:non_admin), true)
+      authenticate_user(users(:non_admin))
       get :show, md5: @unexpected_md5
       assert_response 404
       assert (assigns(:records).count == 0), 'records should be empty'
     end
 
     should "not get show with switch_user" do
-      authenticate_existing_user(users(:non_admin), true)
+      authenticate_user(users(:non_admin))
       @puppet = users(:project_user)
       session[:switch_to_user_id] = @puppet.id
       get :show, md5: @unexpected_md5
@@ -119,7 +119,7 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     end
 
     should "get show with authentication" do
-      authenticate_existing_user(users(:non_admin), true)
+      authenticate_user(users(:non_admin))
       get :show, filename: @expected_filename
       assert_response :success
       assert_not_nil assigns(:records)
@@ -128,7 +128,7 @@ class RecordProvenanceControllerTest < ActionController::TestCase
     end
 
     should "get show with switch_user" do
-      authenticate_existing_user(users(:non_admin), true)
+      authenticate_user(users(:non_admin))
       @puppet = users(:project_user)
       session[:switch_to_user_id] = @puppet.id
       get :show, filename: @expected_filename

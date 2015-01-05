@@ -8,41 +8,16 @@ class ProjectUsersControllerTest < ActionController::TestCase
     @other_project_user = @other_project.project_user
   end
 
-  context 'nil user' do
-    should 'not get index' do
-      get :index
-      assert_redirected_to sessions_new_url(:target => project_users_url)
-    end
-
-    should 'not update ProjectUser' do
-      @project_user.is_enabled = false
-      @project_user.save
-      assert !@project_user.is_enabled?, 'project_user should not be enabled'
-      patch :update, id: @project_user, project_user: {is_enabled: true}
-      assert_redirected_to sessions_new_url(target: project_user_url(@project_user, {project_user: {is_enabled: true}}))
-      t_u = ProjectUser.find(@project_user.id)
-      assert !t_u.is_enabled?, 'project_user should still not be enabled'
-    end
-
-    should 'not destroy any ProjectUser' do
-      ProjectUser.all.each do |cu|
-        assert_no_difference('ProjectUser.count') do
-          delete :destroy, id: cu
-          assert_redirected_to sessions_new_url(:target => project_user_url(cu))
-        end
-      end
-    end
-  end #nil user
-
   context 'ProjectUser' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       session[:switch_to_user_id] = @project_user.id
     end
 
     should 'not get index' do
       get :index
+      assert_access_controlled_action
       assert_redirected_to root_path()
     end
 
@@ -51,6 +26,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
       @other_project_user.save
       assert !@other_project_user.is_enabled?, 'project_user should not be enabled'
       patch :update, id: @other_project_user, project_user: {is_enabled: true}
+      assert_access_controlled_action
       assert_redirected_to root_path()
       t_u = ProjectUser.find(@other_project_user.id)
       assert !t_u.is_enabled?, 'project_user should still not be enabled'
@@ -61,6 +37,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
         assert cu.is_enabled?, "#{ cu.name } should be enabled"
         assert_no_difference('ProjectUser.count') do
           delete :destroy, id: cu
+          assert_access_controlled_action
           assert_redirected_to root_path()
         end
         t_u = ProjectUser.find(cu.id)
@@ -72,11 +49,12 @@ class ProjectUsersControllerTest < ActionController::TestCase
   context 'NonAdmin' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     should 'not get index' do
       get :index
+      assert_access_controlled_action
       assert_redirected_to root_path()
     end
 
@@ -85,6 +63,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
       @project_user.save
       assert !@project_user.is_enabled?, 'project_user should be enabled'
       patch :update, id: @project_user, project_user: {is_enabled: true}
+      assert_access_controlled_action
       assert_redirected_to root_path()
       t_u = ProjectUser.find(@project_user.id)
       assert !t_u.is_enabled?, 'project_user should still not be enabled'
@@ -95,6 +74,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
         assert cu.is_enabled?, "#{ cu.name } should be enabled"
         assert_no_difference('ProjectUser.count') do
           delete :destroy, id: cu
+          assert_access_controlled_action
           assert_redirected_to root_path()
         end
         t_u = ProjectUser.find(cu.id)
@@ -106,11 +86,12 @@ class ProjectUsersControllerTest < ActionController::TestCase
   context 'Admin' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     should 'get index with all ProjectUsers' do
       get :index
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:project_users)
       count = assigns(:project_users).count
@@ -123,6 +104,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
       @project_user.save
       assert !@project_user.is_enabled?, 'project_user should be enabled'
       patch :update, id: @project_user, project_user: {is_enabled: true}
+      assert_access_controlled_action
       t_u = ProjectUser.find(@project_user.id)
       assert t_u.is_enabled?, 'project_user should still now be enabled'
     end
@@ -131,6 +113,7 @@ class ProjectUsersControllerTest < ActionController::TestCase
       assert @project_user.is_enabled?, "#{ @project_user.name } should be enabled"
       assert_no_difference('ProjectUser.count') do
         delete :destroy, id: @project_user
+        assert_access_controlled_action
       end
       t_u = ProjectUser.find(@project_user.id)
       assert !t_u.is_enabled?, "#{ t_u.name } should not now be enabled"

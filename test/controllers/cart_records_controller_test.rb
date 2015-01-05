@@ -6,6 +6,7 @@ class CartRecordsControllerTest < ActionController::TestCase
     should 'create a cart_record with their own record' do
       assert_difference('CartRecord.count') do
         post :create, cart_record: { record_id: @user_record.id }
+        assert_access_controlled_action
         assert_not_nil assigns(:cart_record)
         assert assigns(:cart_record).valid?, "#{ assigns(:cart_record).errors.messages.inspect }"
       end
@@ -17,6 +18,7 @@ class CartRecordsControllerTest < ActionController::TestCase
     should 'destroy their cart_record' do
       assert_difference('CartRecord.count',-1) do
         delete :destroy, id: @user_cart_record
+        assert_access_controlled_action
       end
       assert_redirected_to cart_url
     end
@@ -24,6 +26,7 @@ class CartRecordsControllerTest < ActionController::TestCase
     should 'not destroy a cart_record belonging to another user' do
       assert_no_difference('CartRecord.count') do
         delete :destroy, id: @other_user_cart_record
+        assert_access_controlled_action
       end
       assert_redirected_to root_path
     end
@@ -38,6 +41,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       end
       assert_difference('CartRecord.count') do
         post :create, cart_record: { record_id: @readable_record.id }
+        assert_access_controlled_action
       end
       assert_redirected_to cart_url
       assert_not_nil assigns(:cart_record)
@@ -51,6 +55,7 @@ class CartRecordsControllerTest < ActionController::TestCase
       denied_abilities(@user, @unreadable_record, [:read])
       assert_no_difference('CartRecord.count') do
         post :create, cart_record: { record_id: @unreadable_record.id }
+        assert_access_controlled_action
       end
       assert_redirected_to root_path
     end
@@ -75,7 +80,7 @@ class CartRecordsControllerTest < ActionController::TestCase
   context "authenticated RepositoryUser" do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @user_record = records(:user_unaffiliated)
       @user_cart_record = cart_records(:user)
       @other_user_cart_record = cart_records(:core_user)
@@ -90,7 +95,7 @@ class CartRecordsControllerTest < ActionController::TestCase
   context "authenticated Admin" do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @user_record = records(:admin_two)
       @user_cart_record = cart_records(:admin)
       @other_user_cart_record = cart_records(:user)
@@ -103,7 +108,7 @@ class CartRecordsControllerTest < ActionController::TestCase
   context "authenticated ProjectUser" do
     setup do
       @real_user = users(:non_admin)
-      authenticate_existing_user(@real_user, true)
+      authenticate_user(@real_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
 
@@ -121,7 +126,7 @@ class CartRecordsControllerTest < ActionController::TestCase
   context "authenticated CoreUser" do
     setup do
       @real_user = users(:non_admin)
-      authenticate_existing_user(@real_user, true)
+      authenticate_user(@real_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
 

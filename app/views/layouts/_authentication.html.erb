@@ -15,10 +15,6 @@
     </div>
     <% end %>
 <% else %>
-  <% if @redirect_target.nil? %>
-  <%= link_to 'login', Rails.application.config.shibboleth_login_url, target: url_for(params.merge(only_path: false)) %>
-  <% else %>
-  <%= link_to 'login', Rails.application.config.shibboleth_login_url+'?target='+@redirect_target %>
-  <% end %>
+  <%= link_to 'login', shibboleth_login_path %>
 <% end %>
 </div>

@@ -74,6 +74,7 @@ class ProjectsControllerTest < ActionController::TestCase
     should "get index" do
       assert_not_nil @user
       get :index
+      assert_access_controlled_action
       assert_equal @user.id, @controller.current_user.id
       assert_response :success
       assert_not_nil assigns(:projects)
@@ -82,6 +83,7 @@ class ProjectsControllerTest < ActionController::TestCase
     should "get show" do
       assert_not_nil @user
       get :show, id: @project
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:project)
       assert_equal @project.id, assigns(:project).id
@@ -92,6 +94,7 @@ class ProjectsControllerTest < ActionController::TestCase
     should "get new" do
       assert_not_nil @user
       get :new
+      assert_access_controlled_action
       assert_equal @user.id, @controller.current_user.id
       assert_response :success
       assert_not_nil assigns(:project)
@@ -102,6 +105,7 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_difference('Project.count') do
         assert_difference('ProjectUser.count') do
           post :create, @create_params
+          assert_access_controlled_action
           assert_equal @user.id, @controller.current_user.id
           assert_not_nil assigns(:project)
           assert assigns(:project).valid?, "#{ assigns(:project).errors.messages.inspect }"
@@ -131,6 +135,7 @@ class ProjectsControllerTest < ActionController::TestCase
         assert_difference('ProjectUser.count') do
           assert_difference('ProjectAffiliatedRecord.count', @unaffiliated_records.count) do
             post :create, @create_params
+            assert_access_controlled_action
             assert_equal @user.id, @controller.current_user.id
             assert_not_nil assigns(:project)
             assert assigns(:project).valid?, "#{ assigns(:project).errors.messages.inspect }"
@@ -162,6 +167,7 @@ class ProjectsControllerTest < ActionController::TestCase
         assert_no_difference('ProjectUser.count') do
           assert_no_difference('ProjectAffiliatedRecord.count') do
             post :create, @create_params
+            assert_access_controlled_action
             assert_equal @user.id, @controller.current_user.id
             assert_not_nil assigns(:project)
             assert assigns(:project).valid?, "#{ assigns(:project).errors.messages.inspect }"
@@ -188,6 +194,7 @@ class ProjectsControllerTest < ActionController::TestCase
         assert_difference('ProjectUser.count') do
           assert_difference('ProjectMembership.count', @potential_members.length + 1) do
             post :create, @create_params
+            assert_access_controlled_action
             assert_equal @user.id, @controller.current_user.id
             assert_not_nil assigns(:project)
             assert assigns(:project).valid?, "#{ assigns(:project).errors.messages.inspect }"
@@ -209,6 +216,7 @@ class ProjectsControllerTest < ActionController::TestCase
     should "not get :new" do
       assert_not_nil @user
       get :new
+      assert_access_controlled_action
       assert_equal @user.id, @controller.current_user.id
       assert_redirected_to root_path()
     end
@@ -217,6 +225,7 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_not_nil @user
       assert_no_difference('Project.count') do
         post :create, @create_params
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to root_path()
@@ -229,6 +238,7 @@ class ProjectsControllerTest < ActionController::TestCase
       assert @project.is_member?(@user), 'user should be a member of the project'
       assert @project.project_memberships.where(user_id: @user.id, is_administrator: true).exists?, 'user should be an administrator in the project'
       get :edit, id: @project
+      assert_access_controlled_action
       assert_equal @user.id, @controller.current_user.id
       assert_response :success
     end
@@ -240,6 +250,7 @@ class ProjectsControllerTest < ActionController::TestCase
       new_name = "new_proj_name_foo"
       new_description = "NEW DESCRIPTION"
       patch :update, id: @project, project: {name: new_name, description: new_description }
+      assert_access_controlled_action
       assert_equal @user.id, @controller.current_user.id
       assert_redirected_to project_path(@project)
       t_p = Project.find(@project.id)
@@ -259,6 +270,7 @@ class ProjectsControllerTest < ActionController::TestCase
 
       assert_difference('ProjectMembership.count', @potential_members.length) do
         patch :update, id: @project, project: update_params
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to project_path(@project)
@@ -282,6 +294,7 @@ class ProjectsControllerTest < ActionController::TestCase
 
       assert_difference('ProjectMembership.count', -@potential_members.length) do
         patch :update, id: @project, project: update_params
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to project_path(@project)
@@ -308,6 +321,7 @@ class ProjectsControllerTest < ActionController::TestCase
             { id: r.id, _destroy: 1 }
           }
         }
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to project_path(@project)
@@ -322,6 +336,7 @@ class ProjectsControllerTest < ActionController::TestCase
     should 'not be able to edit the project' do
       assert_not_nil @user
       get :edit, id: @project
+      assert_access_controlled_action
       assert_equal @user.id, @controller.current_user.id
       assert_redirected_to root_path
     end
@@ -333,6 +348,7 @@ class ProjectsControllerTest < ActionController::TestCase
       orig_description = @project.description
       new_description = "NEW DESCRIPTION"
       patch :update, id: @project, project: {name: new_name, description: new_description }
+      assert_access_controlled_action
       assert_equal @user.id, @controller.current_user.id
       t_p = Project.find(@project.id)
       assert_equal orig_name, t_p.name
@@ -350,6 +366,7 @@ class ProjectsControllerTest < ActionController::TestCase
 
       assert_no_difference('ProjectMembership.count') do
         patch :update, id: @project, project: update_params
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to root_path
@@ -372,6 +389,7 @@ class ProjectsControllerTest < ActionController::TestCase
 
       assert_no_difference('ProjectMembership.count') do
         patch :update, id: @project, project: update_params
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to root_path
@@ -396,6 +414,7 @@ class ProjectsControllerTest < ActionController::TestCase
             { id: r.id, _destroy: 1 }
           }
         }
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to root_path
@@ -421,6 +440,7 @@ class ProjectsControllerTest < ActionController::TestCase
             { record_id: r.id }
           }
         }
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to project_path(@project)
@@ -446,6 +466,7 @@ class ProjectsControllerTest < ActionController::TestCase
             { record_id: r.id }
           }
         }
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to root_path()
@@ -470,6 +491,7 @@ class ProjectsControllerTest < ActionController::TestCase
             { id: r.id, _destroy: 1 }
           }
         }
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to project_path(@project)
@@ -484,6 +506,7 @@ class ProjectsControllerTest < ActionController::TestCase
       assert @project.project_memberships.where(user_id: @user.id, is_data_producer: true).exists?, 'user should have the data_producer role in the project'
       allowed_abilities(@user, @project, [:affiliate_record_with])
       xhr :get, :can_affiliate_to, project_id: @project.id, format: 'js'
+      assert_access_controlled_action
       assert_response :success
       assert_not_nil assigns(:project)
       assert_equal @project.id, assigns(:project).id
@@ -506,6 +529,7 @@ class ProjectsControllerTest < ActionController::TestCase
             { record_id: r.id }
           }
         }
+        assert_access_controlled_action
         assert_equal @user.id, @controller.current_user.id
       end
       assert_redirected_to root_path
@@ -519,32 +543,16 @@ class ProjectsControllerTest < ActionController::TestCase
       assert_not_nil @user
       assert @project.project_memberships.where(user_id: @user.id, is_data_producer: true).empty?, 'user should not have the data_producer role in the project'
       xhr :get, :can_affiliate_to, project_id: @project.id, format: 'js'
+      assert_access_controlled_action
       assert_response :success
       assert_equal 'false', @response.body
     end
   end
 
-  context 'Not Authenticated' do
-    should_not_get :index
-    should_not_get :new
-
-    should "not show project" do
-      get :show, id: @project
-      assert_redirected_to sessions_new_url(:target => project_url(@project))
-    end
-
-    should "not create project" do
-      assert_no_difference('Project.count') do
-        post :create, @create_params
-      end
-      assert_redirected_to sessions_new_url(:target => projects_url(@create_params))
-    end
-  end #Not Authenticated
-
   context 'CoreUser without membership in Project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       session[:switch_to_user_id] = @user.id
       @unaffiliated_records = @user.records.all.to_a
@@ -555,13 +563,13 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_not_data_producer_tests
-    
+
   end #CoreUser without membership in the project
 
   context 'CoreUser with membership in project but no roles' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       @project.project_memberships.create(user_id: @user.id)
       session[:switch_to_user_id] = @user.id
@@ -573,13 +581,13 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_not_data_producer_tests
-    
+
   end #CoreUser with membership in the project but no roles
 
   context 'CoreUser with the data_producer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:p_m_cu_producer)
       session[:switch_to_user_id] = @user.id
       @unaffiliated_records = [ records(:pm_cu_producer_unaffiliated_record), records(:pm_cu_producer_unaffiliated_record2) ]
@@ -590,13 +598,13 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_data_producer_tests
-    
+
   end #CoreUser with the data_producer role in the project
 
   context 'CoreUser with the data_consumer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
       session[:switch_to_user_id] = @user.id
@@ -608,14 +616,14 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_not_data_producer_tests
-    
+
   end #CoreUser with the data_consumer role in the project
 
   context 'CoreUser with the data_manager role in the project' do
     # this should not happen, but just in case
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       @project.project_memberships.create(user_id: @user.id, is_data_manager: true)
       session[:switch_to_user_id] = @user.id
@@ -627,14 +635,14 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_not_data_producer_tests
-    
+
   end #CoreUser with the data_manager role in the project
 
   context 'CoreUser with the admin role in Project' do
     # this should never happen, but just in case
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:core_user)
       @project.project_memberships.create(user_id: @user.id, is_administrator: true)
       session[:switch_to_user_id] = @user.id
@@ -643,13 +651,13 @@ class ProjectsControllerTest < ActionController::TestCase
 
     should_be_administrator_in_the_project
     should_pass_not_project_administrator_tests
-    
+
   end #CoreUser with the admin role in the project
 
   context 'ProjectUser without membership in Project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       session[:switch_to_user_id] = @user.id
       @unaffiliated_records = @user.records.all.to_a
@@ -660,13 +668,13 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_not_data_producer_tests
-    
+
   end #ProjectUser without membership in the project
 
   context 'ProjectUser with membership in Project but no roles' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       @project.project_memberships.create(user_id: @user.id)
       session[:switch_to_user_id] = @user.id
@@ -678,13 +686,13 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_not_data_producer_tests
-    
+
   end #ProjectUser with membership in the project but no roles
 
   context 'ProjectUser with the data_producer role in the project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:p_m_pu_producer)
       session[:switch_to_user_id] = @user.id
       @unaffiliated_records = [ records(:pm_pu_producer_unaffiliated_record), records(:pm_pu_producer_unaffiliated_record2) ]
@@ -695,13 +703,13 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_data_producer_tests
-    
+
   end #ProjectUser with the data_producer role in the project
 
   context 'ProjectUser with the data_consumer role in Project' do
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
       session[:switch_to_user_id] = @user.id
@@ -713,14 +721,14 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_not_data_producer_tests
-    
+
   end #ProjectUser with the data_consumer role in the project
 
   context 'ProjectUser with the data_manager role in the project' do
     # this should not happen, but just in case
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       @project.project_memberships.create(user_id: @user.id, is_data_manager: true)
       session[:switch_to_user_id] = @user.id
@@ -732,14 +740,14 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_not_data_producer_tests
-    
+
   end #ProjectUser with the data_manager role in the project
 
   context 'ProjectUser with the administrator role in the project' do
     # this should not happen, but just in case
     setup do
       @actual_user = users(:non_admin)
-      authenticate_existing_user(@actual_user, true)
+      authenticate_user(@actual_user)
       @user = users(:project_user)
       @project.project_memberships.create(user_id: @user.id, is_administrator: true)
       session[:switch_to_user_id] = @user.id
@@ -751,13 +759,13 @@ class ProjectsControllerTest < ActionController::TestCase
     should_pass_any_user_tests
     should_pass_not_project_administrator_tests
     should_pass_not_data_producer_tests
-    
+
   end #ProjectUser with the administrator role in the project
 
   context 'Administrator RepositoryUser without membership in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @unaffiliated_records = @user.records.all.to_a
       @unowned_record = records(:user)
     end
@@ -773,7 +781,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Administrator RepositoryUser with membership in the project but no roles' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id)
       @unaffiliated_records = @user.records.all.to_a
       @unowned_record = records(:user)
@@ -790,7 +798,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Administrator RepositoryUser with the administrator role in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_administrator: true)
       @unaffiliated_records = @user.records.all.to_a
       @unowned_record = records(:user)
@@ -807,7 +815,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Administrator RepositoryUser with the data_consumer role in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_data_consumer: true)
       @unaffiliated_records = @user.records.all.to_a
       @unowned_record = records(:user)
@@ -824,7 +832,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Administrator RepositoryUser with the data_producer role in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_data_producer: true)
       @unaffiliated_records = @user.records.all.to_a
       @unowned_record = records(:user)
@@ -841,7 +849,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Administrator RepositoryUser with the data_manager role in the project' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @project.project_memberships.create(user_id: @user.id, is_data_manager: true)
       @unaffiliated_records = @user.records.all.to_a
       @unowned_record = records(:user)
@@ -858,7 +866,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Non-Administrator RepositoryUser without membership in the project' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @unaffiliated_records = @user.records.all.to_a
     end
 
@@ -873,7 +881,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Non-Administrator RepositoryUser with membership in the project but no roles' do
     setup do
       @user = users(:p_m_member)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @unaffiliated_records = @user.records.all.to_a
     end
 
@@ -888,7 +896,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Non-Administrator RepositoryUser with the administrator role in the project' do
     setup do
       @user = users(:p_m_administrator)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @unaffiliated_records = @user.records.all.to_a
     end
 
@@ -902,7 +910,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Non-Administrator RepositoryUser with the data_consumer role in the project' do
     setup do
       @user = users(:p_m_consumer)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @unaffiliated_records = @user.records.all.to_a
     end
 
@@ -917,7 +925,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Non-Administrator RepositoryUser with the data_producer role in the project' do
     setup do
       @user = users(:p_m_producer)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @unaffiliated_records = [ records(:pm_producer_unaffiliated_record), records(:pm_producer_unaffiliated_record2) ]
     end
 
@@ -932,7 +940,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Non-Administrator RepositoryUser with the data_manager role in the project' do
     setup do
       @user = users(:p_m_dmanager)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       @unaffiliated_records = @user.records.all.to_a
     end
 
@@ -947,7 +955,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Potential Memberships' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     should "no longer be provided to RepositoryUser in get :new" do
@@ -962,7 +970,7 @@ class ProjectsControllerTest < ActionController::TestCase
   context 'Unaffiliated Records' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     should 'be no longer be provided to RepositoryUser in get :new' do

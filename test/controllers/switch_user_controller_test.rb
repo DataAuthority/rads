@@ -2,73 +2,15 @@ require 'test_helper'
 
 class SwitchUserControllerTest < ActionController::TestCase
 
-  context 'Not Authenticated' do
-    should 'not get switch_user RepositoryUser' do
-      RepositoryUser.all.each do |user|
-        get :switch_to, id: user.id, target: @controller.url_for(user)
-        assert_redirected_to sessions_new_url(:target => switch_to_url(id: user.id, target: @controller.url_for(user)))
-      end
-    end
-    should 'not get switch_user CoreUser' do
-      CoreUser.all.each do |user|
-        get :switch_to, id: user.id, target: @controller.url_for(user)
-        assert_redirected_to sessions_new_url(:target => switch_to_url(id: user.id, target: @controller.url_for(user)))
-      end
-    end
-    should 'not get switch_user ProjectUser' do
-      ProjectUser.all.each do |user|
-        get :switch_to, id: user.id, target: @controller.url_for(user)
-        assert_redirected_to sessions_new_url(:target => switch_to_url(id: user.id, target: @controller.url_for(user)))
-      end
-    end
-    should 'not get destroy' do
-      get :destroy, target: repository_users_url
-      assert_redirected_to sessions_new_url(:target => switch_back_url(target: repository_users_url))
-    end
-  end # Not Authenticated
-
-  context 'Authenticated without session' do
-    should 'not get switch_user RepositoryUser' do
-      RepositoryUser.all.each do |ruser|
-        authenticate_existing_user(ruser)
-        RepositoryUser.where.not(id: ruser.id).each do |ouser|
-          get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
-          assert_redirected_to sessions_create_url(:target => switch_to_url(id: ouser.id, target: @controller.url_for(ouser)))
-        end
-      end
-    end
-    should 'not get switch_user CoreUser' do
-      RepositoryUser.all.each do |ruser|
-        authenticate_existing_user(ruser)
-        CoreUser.all.each do |ouser|
-          get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
-          assert_redirected_to sessions_create_url(:target => switch_to_url(id: ouser.id, target: @controller.url_for(ouser)))
-        end
-      end
-    end
-    should 'not get switch_user ProjectUser' do
-      ProjectUser.all.each do |user|
-        get :switch_to, id: user.id, target: @controller.url_for(user)
-        assert_redirected_to sessions_new_url(:target => switch_to_url(id: user.id, target: @controller.url_for(user)))
-      end
-    end
-    should 'not get destroy' do
-      RepositoryUser.all.each do |ruser|
-        authenticate_existing_user(ruser)
-        get :destroy, target: repository_users_url
-        assert_redirected_to sessions_create_url(:target => switch_back_url(target: repository_users_url))
-      end
-    end
-  end #Authenticated without session
-
   context 'Disabled User' do
     should 'not get switch_user RepositoryUser' do
       RepositoryUser.all.each do |ruser|
         ruser.is_enabled = false
         ruser.save
-        authenticate_existing_user(ruser, true)
+        authenticate_user(ruser)
         RepositoryUser.where.not(id: ruser.id).each do |ouser|
           get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
+          assert_access_controlled_action
           assert_redirected_to repository_user_url(ruser)
           assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
           assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
@@ -79,9 +21,10 @@ class SwitchUserControllerTest < ActionController::TestCase
       RepositoryUser.all.each do |ruser|
         ruser.is_enabled = false
         ruser.save
-        authenticate_existing_user(ruser, true)
+        authenticate_user(ruser)
         CoreUser.all.each do |ouser|
           get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
+          assert_access_controlled_action
           assert_redirected_to repository_user_url(ruser)
           assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
           assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
@@ -89,17 +32,24 @@ class SwitchUserControllerTest < ActionController::TestCase
       end
     end
     should 'not get switch_user ProjectUser' do
-      ProjectUser.all.each do |user|
-        get :switch_to, id: user.id, target: @controller.url_for(user)
-        assert_redirected_to sessions_new_url(:target => switch_to_url(id: user.id, target: @controller.url_for(user)))
+      RepositoryUser.all.each do |ruser|
+        ruser.is_enabled = false
+        ruser.save
+        authenticate_user(ruser)
+        ProjectUser.all.each do |user|
+          get :switch_to, id: user.id, target: @controller.url_for(user)
+          assert_access_controlled_action
+          assert_redirected_to repository_user_url(ruser)
+        end
       end
     end
     should 'not get destroy' do
       RepositoryUser.all.each do |ruser|
         ruser.is_enabled = false
         ruser.save
-        authenticate_existing_user(ruser, true)
+        authenticate_user(ruser)
         get :destroy, target: repository_users_url
+        assert_access_controlled_action
         assert_redirected_to repository_user_url(ruser)
       end
     end
@@ -108,12 +58,13 @@ class SwitchUserControllerTest < ActionController::TestCase
   context 'NonAdmin RepositoryUser' do
     setup do
       @user = users(:non_admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     should 'not get switch_user to any other RepositoryUser' do
       RepositoryUser.where.not(id: @user.id).each do |ouser|
         get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
+        assert_access_controlled_action
         assert_redirected_to root_path()
         assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
         assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
@@ -125,6 +76,7 @@ class SwitchUserControllerTest < ActionController::TestCase
       other_core_user = other_core.core_user
       assert !other_core.core_memberships.where(repository_user_id: @user.id).exists?, 'user should not be a member of the core'
       get :switch_to, id: other_core_user.id, target: @controller.url_for(other_core_user)
+      assert_access_controlled_action
       assert_redirected_to root_path()
       assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
       assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
@@ -135,6 +87,7 @@ class SwitchUserControllerTest < ActionController::TestCase
       core_user = core.core_user
       assert core.core_memberships.where(repository_user_id: @user.id).exists?, 'user should be a member of the core'
       get :switch_to, id: core_user.id
+      assert_access_controlled_action
       assert_redirected_to root_url
       assert_not_nil session[:switch_to_user_id]
       assert_not_nil session[:switch_back_user_id]
@@ -153,6 +106,7 @@ class SwitchUserControllerTest < ActionController::TestCase
       other_project_user = other_project.project_user
       assert !other_project.project_memberships.where(user_id: @user.id).exists?, 'user should not be a member of the project'
       get :switch_to, id: other_project_user.id, target: @controller.url_for(other_project_user)
+      assert_access_controlled_action
       assert_redirected_to root_path()
       assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
       assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
@@ -162,11 +116,12 @@ class SwitchUserControllerTest < ActionController::TestCase
       [
         users(:p_m_member), users(:p_m_producer), users(:p_m_consumer), users(:p_m_administrator)
       ].each do |non_data_manager|
-         authenticate_existing_user(non_data_manager, true)
+         authenticate_user(non_data_manager)
          other_project = projects(:membership_test)
          other_project_user = other_project.project_user
          assert !other_project.project_memberships.where(user_id: @user.id, is_data_manager: true).exists?, 'user should not be a data_manager in the project'
          get :switch_to, id: other_project_user.id, target: @controller.url_for(other_project_user)
+         assert_access_controlled_action
          assert_redirected_to root_path()
          assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
          assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
@@ -175,11 +130,12 @@ class SwitchUserControllerTest < ActionController::TestCase
 
     should 'get switch_user ProjectUser for a Project in which the user is a data_manager' do
       @user = users(:p_m_dmanager)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
       project = projects(:membership_test)
       project_user = project.project_user
       assert project.project_memberships.where(user_id: @user.id, is_data_manager: true).exists?, 'user should be a data_manager in the project'
       get :switch_to, id: project_user.id, target: @controller.url_for(project_user)
+      assert_access_controlled_action
       assert_redirected_to @controller.url_for(project_user)
       assert_not_nil session[:switch_to_user_id]
       assert_not_nil session[:switch_back_user_id]
@@ -195,6 +151,7 @@ class SwitchUserControllerTest < ActionController::TestCase
 
     should 'get destroy' do
       get :destroy
+      assert_access_controlled_action
       assert_redirected_to root_url
       assert session[:switch_to_user_id].nil?, 'switch_to_user_id should be nil'
       assert session[:switch_back_user_id].nil?, 'switch_to_user_id should not be in the session'
@@ -205,12 +162,13 @@ class SwitchUserControllerTest < ActionController::TestCase
   context 'Admin' do
     setup do
       @user = users(:admin)
-      authenticate_existing_user(@user, true)
+      authenticate_user(@user)
     end
 
     should 'get switch_user for a RepositoryUser' do
       RepositoryUser.where.not(id: @user.id).each do |ouser|
         get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
+        assert_access_controlled_action
         assert_redirected_to @controller.url_for(ouser)
         assert_not_nil session[:switch_to_user_id]
         assert_not_nil session[:switch_back_user_id]
@@ -228,6 +186,7 @@ class SwitchUserControllerTest < ActionController::TestCase
     should 'get switch_user for a CoreUser' do
       CoreUser.all.each do |ouser|
         get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
+        assert_access_controlled_action
         assert_redirected_to @controller.url_for(ouser)
         assert_not_nil session[:switch_to_user_id]
         assert_not_nil session[:switch_back_user_id]
@@ -245,6 +204,7 @@ class SwitchUserControllerTest < ActionController::TestCase
     should 'get switch_user for a ProjectUser' do
       ProjectUser.all.each do |ouser|
         get :switch_to, id: ouser.id, target: @controller.url_for(ouser)
+        assert_access_controlled_action
         assert_redirected_to @controller.url_for(ouser)
         assert_not_nil session[:switch_to_user_id]
         assert_not_nil session[:switch_back_user_id]
@@ -262,6 +222,7 @@ class SwitchUserControllerTest < ActionController::TestCase
     should 'get destroy' do
       session[:switch_to_user_id] = users(:non_admin).id
       get :destroy, target: repository_users_url
+      assert_access_controlled_action
       assert_redirected_to repository_users_url
       assert session[:switch_to_user_id].nil?, 'switch_to_user_id should not be in the session after destroy'
       assert session[:switch_back_user_id].nil?, 'switch_back_user_id should not be in the session after destroy'
@@ -271,4 +232,3 @@ class SwitchUserControllerTest < ActionController::TestCase
   end # Admin
 
 end
-
