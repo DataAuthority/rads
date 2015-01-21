@@ -1,17 +1,14 @@
 containers:
-  radsdev:
+  server:
     dockerfile: config/docker/development
     image: rads
     run:
       env: ["RAILS_ENV=development"]
-      publish: ["8443:443"]
-      expose: [443]
       volume: [".:/var/www/app","../files:/rads"]
-      cmd: /usr/local/bin/run.sh
       detach: true
     rm:
       volumes: true
-  radstest:
+  provision:
     dockerfile: config/docker/development
     image: rads
     run:
@@ -22,3 +19,13 @@ containers:
       tty: true
     rm:
       volumes: true
+  shibconfig:
+    image: dmlond/shibconfig
+  rproxy:
+    dockerfile: ./config/docker/reverse_proxy
+    image: rads/reverse_proxy
+    run:
+      detach: true
+      publish: ["8443:443"]
+      link: ["server:proxy"]
+      volumes-from: ["shibconfig"]
