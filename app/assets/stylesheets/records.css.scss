@@ -1,3 +1,18 @@
 // Place all the styles related to the records controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+span.annotation_filter_fields, span.stacked_filters {
+  padding: 2px;
+  float: left;
+  clear: left;
+}
+
+span.add_remove_annotation_filters {
+  float: left;
+  clear: left;
+}
+
+#records_nav label {
+  margin-right: 5px;
+}

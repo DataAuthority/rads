@@ -16,9 +16,16 @@
     </div>
     <% end -%>
     <fieldset class="project_annotation_fields">
-    <%= f.fields_for :project_affiliation_filter_term do |paf| %>
-        <%= paf.label :project_id %><%= paf.collection_select :project_id, @accessible_projects, :id, :to_s, {include_blank: true}, {class: 'record_filter_input', id: 'record_filter_affiliated_with_project' } %>
-    <% end -%>
+      <span class="add_remove_annotation_filters">
+        <%= f.fields_for :project_affiliation_filter_term do |paf| %>
+            <%= paf.label :project_id %><%= paf.collection_select :project_id, @accessible_projects, :id, :to_s, {include_blank: true}, {class: 'record_filter_input', id: 'record_filter_affiliated_with_project' } %>
+        <% end -%>
+        <span>annotations</span>
+        <%= link_to '[+]', url_for(params.merge({ add_annotation_filter: 1, remove_annotation_filters: nil} )), class: 'add_annotation_filter' %>
+        <% unless @record_filter.annotation_filter_terms.empty? -%>
+            <%= link_to 'start over', url_for(params.merge({ add_annotation_filter: nil, remove_annotation_filters: 1} )), class: 'remove_annotation_filters' %>
+        <% end -%>
+      </span>
       <div id="annotation_filters">
     <%= f.fields_for :annotation_filter_terms do |aft| %>
         <span class="annotation_filter_fields">
@@ -29,39 +36,45 @@
           </span>
         </span>
     <% end -%>
-       <%= link_to '[+]', url_for(params.merge({ add_annotation_filter: 1, remove_annotation_filters: nil} )), class: 'add_annotation_filter' %>
-        <% unless @record_filter.annotation_filter_terms.empty? -%>
-          <%= link_to 'start over', url_for(params.merge({ add_annotation_filter: nil, remove_annotation_filters: 1} )), class: 'remove_annotation_filters' %>
-        <% end -%>
       </div>
     </fieldset>
     <fieldset class="record_attribute_filters">
-      <%= f.label :filename %><%= f.text_field :filename, class: 'record_filter_input' %>
-      <%= f.label 'md5' %><%= f.text_field :file_md5hashsum, class: 'record_filter_input' %>
-      <%= f.label 'content_type' %><%= f.text_field :file_content_type, class: 'record_filter_input' %>
-      <%= f.label 'created_by' %><%= f.collection_select :record_created_by, @record_creators, :id, :to_s, {include_blank: true}, {class: 'record_filter_input'} %> 
-      <%= f.label 'created_on' %> <%= f.text_field :record_created_on, class: 'record_filter_input' %>
-      <%= f.label 'created_after' %>    <%= f.text_field :record_created_after, class: 'record_filter_input' %>
-      <%= f.label 'created_before' %><%= f.text_field :record_created_before, class: 'record_filter_input' %>
-      <%= f.label 'size' %><%= f.number_field :file_size, class: 'record_filter_input' %>
-      <%= f.label 'size <' %><%= f.number_field :file_size_less_than, class: 'record_filter_input' %>
-      <%= f.label 'size >' %><%= f.number_field :file_size_greater_than, class: 'record_filter_input' %>
-      <%= f.label 'destroyed?' %>
+      <span class="stacked_filters"><%= f.label :filename %><%= f.text_field :filename, class: 'record_filter_input' %></span>
+      <span class="stacked_filters"><%= f.label 'md5' %><%= f.text_field :file_md5hashsum, class: 'record_filter_input' %></span>
+      <span class="stacked_filters"><%= f.label 'content_type' %><%= f.text_field :file_content_type, class: 'record_filter_input' %></span>
+      <span class="stacked_filters">
+        <%= f.label 'Created by' %><%= f.collection_select :record_created_by, @record_creators, :id, :to_s, {include_blank: true}, {class: 'record_filter_input'} %>
+      </span>
+      <span class="stacked_filters">
+        <span>Created</span>
+        <%= f.label 'on' %> <%= f.text_field :record_created_on, class: 'record_filter_input' %>
+        <%= f.label 'after' %>    <%= f.text_field :record_created_after, class: 'record_filter_input' %>
+        <%= f.label 'before' %><%= f.text_field :record_created_before, class: 'record_filter_input' %>
+      </span>
+      <span class="stacked_filters">
+        <span>Size</span>
+        <%= f.label 'exactly' %><%= f.number_field :file_size, class: 'record_filter_input' %>
+        <%= f.label 'below' %><%= f.number_field :file_size_less_than, class: 'record_filter_input' %>
+        <%= f.label 'above' %><%= f.number_field :file_size_greater_than, class: 'record_filter_input' %>
+      </span>
+      <span class="stacked_filters">
+        <%= f.label 'destroyed?' %>
     <% if @record_filter.is_destroyed.nil? -%>
-      <%= f.label 'no' %><%= f.radio_button :is_destroyed, 'f', class: 'record_filter_input' %>
-      <%= f.label 'yes' %><%= f.radio_button :is_destroyed, 1, class: 'record_filter_input' %>
-      <%= f.label 'dont care' %><%= f.radio_button :is_destroyed, '', checked: 'checked', class: 'record_filter_input' %>
+        <%= f.label 'no' %><%= f.radio_button :is_destroyed, 'f', class: 'record_filter_input' %>
+        <%= f.label 'yes' %><%= f.radio_button :is_destroyed, 1, class: 'record_filter_input' %>
+        <%= f.label 'dont care' %><%= f.radio_button :is_destroyed, '', checked: 'checked', class: 'record_filter_input' %>
     <% elsif @record_filter.is_destroyed -%>
-      <%= f.label 'no' %><%= f.radio_button :is_destroyed, 'f', class: 'record_filter_input' %>
-      <%= f.label 'yes' %><%= f.radio_button :is_destroyed, 1, checked: 'checked', class: 'record_filter_input' %>
-      <%= f.label 'dont care' %><%= f.radio_button :is_destroyed, '', class: 'record_filter_input' %>
+        <%= f.label 'no' %><%= f.radio_button :is_destroyed, 'f', class: 'record_filter_input' %>
+        <%= f.label 'yes' %><%= f.radio_button :is_destroyed, 1, checked: 'checked', class: 'record_filter_input' %>
+        <%= f.label 'dont care' %><%= f.radio_button :is_destroyed, '', class: 'record_filter_input' %>
     <% else -%>
-      <%= f.label 'no' %><%= f.radio_button :is_destroyed, 'f', checked: 'checked', class: 'record_filter_input' %>
-      <%= f.label 'yes' %><%= f.radio_button :is_destroyed, 1, class: 'record_filter_input' %>
-      <%= f.label 'dont care' %><%= f.radio_button :is_destroyed, '', class: 'record_filter_input' %>
+        <%= f.label 'no' %><%= f.radio_button :is_destroyed, 'f', checked: 'checked', class: 'record_filter_input' %>
+        <%= f.label 'yes' %><%= f.radio_button :is_destroyed, 1, class: 'record_filter_input' %>
+        <%= f.label 'dont care' %><%= f.radio_button :is_destroyed, '', class: 'record_filter_input' %>
     <% end -%>
+      </span>
     </fieldset>
-    <%= 
+    <%=
             content_tag :fieldset, class: 'save_and_submit' do
               f.submit( 'filter') + 'or' +
               f.submit( 'Save Query and filter') +
