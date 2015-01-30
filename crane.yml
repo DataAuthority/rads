@@ -12,6 +12,17 @@ containers:
     dockerfile: config/docker/development
     image: rads
     run:
+      env: ["RAILS_ENV=development"]
+      volume: [".:/var/www/app","../files:/rads"]
+      cmd: /bin/bash
+      interactive: true
+      tty: true
+    rm:
+      volumes: true
+  test:
+    dockerfile: config/docker/development
+    image: rads
+    run:
       env: ["RAILS_ENV=test"]
       volume: [".:/var/www/app","../files:/rads"]
       cmd: /bin/bash
