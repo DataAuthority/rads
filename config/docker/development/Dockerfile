@@ -29,7 +29,7 @@ RUN ["/root/installs/install_ruby.sh"]
 RUN ["/usr/local/bin/gem", "install", "--no-rdoc", "--no-ri", "bundler"]
 RUN ["/usr/local/bin/gem", "install", "--no-rdoc", "--no-ri", "rails"]
 
-# apache
+# apache used for mod_xsendfile
 RUN ["/usr/bin/yum", "install", "-y", "--nogpgcheck", "httpd", "httpd-devel", "apr-devel", "apr-util-devel", "mod_xsendfile", "mod_ssl"]
 ADD mod_xsendfile.conf /etc/httpd/conf.d/mod_xsendfile.conf
 ADD ssl.conf /etc/httpd/conf.d/ssl.conf
@@ -44,7 +44,7 @@ RUN ["/root/install_passenger_conf.rb"]
 RUN ["/usr/bin/yum", "install", "-y", "--nogpgcheck", "sqlite", "sqlite-devel"]
 
 #miscellaneous
-RUN ["/usr/bin/yum", "install", "-y", "--nogpgcheck", "git", "libxml2", "libxml2-devel", "libxslt", "libxslt-devel"]
+RUN ["/usr/bin/yum", "install", "-y", "--nogpgcheck", "nodejs", "git", "libxml2", "libxml2-devel", "libxslt", "libxslt-devel"]
 
 ADD httpd.conf.patch /tmp/httpd.conf.patch
 RUN ["patch", "/etc/httpd/conf/httpd.conf", "/tmp/httpd.conf.patch"]
