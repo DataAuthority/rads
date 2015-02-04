@@ -40,3 +40,9 @@ containers:
       publish: ["8443:443"]
       link: ["server:proxy"]
       volumes-from: ["shibconfig"]
+  smoketest:
+    dockerfile: config/docker/smoketest
+    image: rads/smoketest
+    run:
+      env: ["RAILS_ENV=test","GITREPO=https://github.com/DataAuthority/rads.git"]
+      interactive: true
