@@ -1,0 +1,4 @@
+Host gitorious.oit.duke.edu
+HostName gitorious.oit.duke.edu
+IdentityFile ~/.ssh/id_rsa
+StrictHostKeyChecking no

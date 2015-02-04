@@ -24,5 +24,4 @@ VERSION
 Gemfile.lock
 config/database.yml
 config/database.yml.pg
-
-
+config/docker/smoketest/*id_rsa*
