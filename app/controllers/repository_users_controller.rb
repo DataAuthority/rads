@@ -40,6 +40,7 @@ class RepositoryUsersController < ApplicationController
       authorize! :create, @repository_user
       @repository_user.netid = session[:uid]
       @repository_user.is_enabled = true
+      @repository_user.register_login_client(request.env['HTTP_USER_AGENT'])
       respond_to do |format|
         if @repository_user.save
           format.html { redirect_to @repository_user, notice: 'Repository user was successfully created.' }

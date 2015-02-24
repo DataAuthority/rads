@@ -35,6 +35,7 @@ class Ability
         can :manage, CartRecord, :user_id => user.id
         cannot :destroy, User, :id => user.id
         cannot [:edit, :update, :destroy], User, :id => user.acting_on_behalf_of
+        can [:index, :show, :edit, :update, :destroy], Agent
       else
         can :read, RepositoryUser
         can [:edit, :update, :destroy], RepositoryUser, :id => user.id
@@ -59,6 +60,8 @@ class Ability
         cannot :create, ProjectMembership, is_administrator: true, user: {type: 'ProjectUser'}
         cannot :create, ProjectMembership, is_data_manager: true, user: {type: 'CoreUser'}
         cannot :create, ProjectMembership, is_data_manager: true, user: {type: 'ProjectUser'}
+        can :manage, Agent, :creator_id => user.id
+        can [:index, :show, :new], Agent
       end
       if user.type == 'CoreUser'
         can :read, Core, id: user.core_id

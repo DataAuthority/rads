@@ -33,6 +33,8 @@ class RepositoryUsersControllerTest < ActionController::TestCase
       end
 
       @new_user = RepositoryUser.find(assigns(:repository_user).id)
+      assert !@new_user.last_login_time.nil?, 'last_login_time should be set after the account is created'
+      assert !@new_user.last_login_client.nil?, 'last_login_client should be set after the account is created'
       assert @new_user.is_enabled?, 'newly created user should be enabled'
       assert_equal @create_params[:repository_user][:name], @new_user.name
       assert_equal @create_params[:repository_user][:email], @new_user.email

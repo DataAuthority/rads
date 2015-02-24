@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+non_admin_agent:
+  name: MyString
+  description: MyString
+  api_token: MyString
+  homepage: MyString
+  docker_registry_url: MyString
+  creator: :non_admin
+
+admin_agent:
+  name: admin_agent
+  description: admin agents
+  api_token: AdminString
+  homepage: AdminHomepage
+  docker_registry_url: AdminRegURL
+  creator: :admin
