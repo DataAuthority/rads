@@ -8,6 +8,7 @@ class User < ActiveRecord::Base
   has_many :cart_records
   has_many :record_filters
   has_many :annotations, foreign_key: :creator_id
+  has_many :agents, foreign_key: :creator_id
 
   def register_login_client(client)
     self.last_login_client = client

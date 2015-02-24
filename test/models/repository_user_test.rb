@@ -3,6 +3,7 @@ require 'test_helper'
 class RepositoryUserTest < ActiveSupport::TestCase
   should have_many :core_memberships
   should have_many(:cores).through(:core_memberships)
+  should have_many :agents
   should validate_presence_of :netid
 
   should 'be a User' do
@@ -75,7 +76,7 @@ class RepositoryUserTest < ActiveSupport::TestCase
       allowed_abilities(@self, @self, [:index, :show, :edit, :update])
       denied_abilities(@self, @self, [:destroy])
       allowed_abilities(@self, @other, [:index, :show, :edit, :update, :destroy, :switch_to])
-      denied_abilities(@self, RepositoryUser.new, [:new, :create])      
+      denied_abilities(@self, RepositoryUser.new, [:new, :create])
     end
   end #admin user
 
