@@ -25,6 +25,9 @@ class SessionsController < ApplicationController
       session[:user_name] = request.env['omniauth.auth'][:info][:name]
       session[:user_email] = request.env['omniauth.auth'][:info][:email]
       session[:redirect_on_create] = redirect_on_return
+    else
+      @shib_user.register_login_client(request.env['HTTP_USER_AGENT'])
+      @shib_user.save
     end
     redirect_to redirect_on_return
   end

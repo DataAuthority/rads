@@ -9,6 +9,11 @@ class User < ActiveRecord::Base
   has_many :record_filters
   has_many :annotations, foreign_key: :creator_id
 
+  def register_login_client(client)
+    self.last_login_client = client
+    self.last_login_time = Time.now
+  end
+
   def to_s
     name
   end

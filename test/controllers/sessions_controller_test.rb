@@ -26,7 +26,7 @@ class SessionsControllerTest < ActionController::TestCase
 
   context 'create' do
 
-    should 'initialize new session and redirect to session[:redirect_on_return] for existing user' do
+    should 'initialize new session, register user client login, and redirect to session[:redirect_on_return] for existing user' do
       existing_user = users(:dl)
       @request.env['omniauth.auth'] = {
         :uid => existing_user.netid,
@@ -35,6 +35,8 @@ class SessionsControllerTest < ActionController::TestCase
       session[:should_not_be] = 'should not be'
       session[:redirect_on_return] = @requested_target
 
+      assert existing_user.last_login_client.nil?, 'last_login_client should be nil'
+      assert existing_user.last_login_time.nil?, 'last_login_time should be nil'
       get :create
       assert_redirected_to @requested_target
 
@@ -46,6 +48,12 @@ class SessionsControllerTest < ActionController::TestCase
       assert_not_nil session[:created_at]
       assert_not_nil assigns[:shib_user]
       assert_equal existing_user.netid, assigns[:shib_user].netid
+      existing_user.reload
+      assert !existing_user.last_login_client.nil?, 'last_login_client should not be nil after session created'
+      assert !existing_user.last_login_time.nil?, 'last_login_time should not be nil after session is created'
+      existing_user.last_login_time = nil
+      existing_user.last_login_client = nil
+      existing_user.save
     end
 
     should 'initialize new session, set session[:redirect_on_create] to session[:redirect_on_return] session[:user_name] and session[:user_email], and redirect_to session[:redirect_on_return] for new user' do

@@ -53,4 +53,16 @@ class UserTest < ActiveSupport::TestCase
     @user.acting_on_behalf_of = responsible_user_id
     assert_equal responsible_user_id, @user.acting_on_behalf_of
   end
+
+  should 'support last_login_time last_login_client, and register_login_client which sets these simultaneously' do
+    @user = users(:non_admin)
+    assert_respond_to @user, 'last_login_client'
+    assert_respond_to @user, 'last_login_time'
+    assert_respond_to @user, 'register_login_client'
+    assert @user.last_login_time.nil?, 'should be nil'
+    assert @user.last_login_client.nil?, 'should be nil'
+    @user.register_login_client 'browser'
+    assert_equal 'browser', @user.last_login_client
+    assert !@user.last_login_time.nil?, 'this should not be nil'
+  end
 end
